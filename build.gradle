@@ -64,3 +64,12 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// Ensure we only produce one executable JAR and with a predictable name for Docker
+tasks.named('jar') {
+    enabled = false
+}
+
+bootJar {
+    archiveFileName = 'app.jar'
+}
