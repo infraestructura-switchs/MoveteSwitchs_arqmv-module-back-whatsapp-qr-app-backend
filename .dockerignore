@@ -1,0 +1,12 @@
+.gradle
+build/
+target/
+jdk-17.0.10+7/
+gradle/
+test_output.txt
+.env
+.git
+.idea
+.vscode
+*.jar
+*.war
