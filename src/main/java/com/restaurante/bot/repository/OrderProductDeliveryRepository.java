@@ -1,0 +1,38 @@
+package com.restaurante.bot.repository;
+
+
+import com.restaurante.bot.model.OrderProductDelivery;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+
+public interface OrderProductDeliveryRepository extends JpaRepository<OrderProductDelivery, Long> {
+
+    List<OrderProductDelivery> findByOrderTransactionDeliveryId(Long orderTransactionDeliveryId);
+
+    @Query(value = """
+            SELECT
+                c.phone,
+                otd.ORDER_TRANSACTION_DELIVERY_ID ,
+                opd.product_id,
+                p.name AS product_name,
+                opd.quantity,
+                p.PRICE AS price,
+                (opd.quantity * p.PRICE) AS total_price,
+                 opd.COMMENT_PRODUCT
+            FROM
+                order_product_delivery opd
+            JOIN
+                order_transaction_delivery otd ON opd.order_transaction_delivery_id = otd.order_transaction_delivery_id
+            JOIN
+                customer c ON otd.customer_id = c.customer_id
+            JOIN
+                PRODUCT p  ON opd.product_id = p.PRODUCT_ID            
+            WHERE
+                c.phone = :phoneNumber AND otd.STATUS_ORDER = 'SIN CONFIRMAR'
+            """, nativeQuery = true)
+    List<Object[]> getOrderProductDeliveryList(String phoneNumber);
+
+}
