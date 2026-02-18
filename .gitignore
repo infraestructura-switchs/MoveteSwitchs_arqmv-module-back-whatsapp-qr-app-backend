@@ -1,8 +1,8 @@
 HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+.gradle
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
 ### STS ###
 .apt_generated
@@ -25,9 +25,16 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
+
+### Java ###
+*.jar
+*.ear
+
+.env
+target/
+jdk-17.0.10+7/
+gradle/
+test_output.txt

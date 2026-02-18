@@ -1,15 +1,15 @@
 # Build stage
-FROM maven:3.9-amazoncorretto-17 AS build
+FROM gradle:8.7-jdk17 AS build
 WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+COPY --chown=gradle:gradle . .
+RUN gradle build -x test --no-daemon
 
 # Package stage
 FROM amazoncorretto:17-al2-jdk
 WORKDIR /apl/
 
-# Copiar el jar desde la etapa de compilación
-COPY --from=build /app/target/*.jar app.jar
+# Copiar el jar desde la etapa de compilación (Gradle lo pone en build/libs)
+COPY --from=build /app/build/libs/*.jar app.jar
 
 # Crear directorios necesarios
 RUN mkdir -p /apl/files/
