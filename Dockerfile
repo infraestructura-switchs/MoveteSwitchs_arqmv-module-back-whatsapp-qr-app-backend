@@ -2,7 +2,7 @@
 FROM gradle:8.7-jdk17 AS build
 WORKDIR /app
 COPY --chown=gradle:gradle . .
-RUN gradle build -x test --no-daemon
+RUN gradle build -x test --no-daemon --info --console=plain
 
 # Package stage
 FROM amazoncorretto:17-al2-jdk
