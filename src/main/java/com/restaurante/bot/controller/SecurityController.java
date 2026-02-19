@@ -87,9 +87,14 @@ public class SecurityController {
                 if (url.charAt(url.length() - 1) != '?') {
                     url.append("&");
                 }
-                url.append(URLEncoder.encode(key, StandardCharsets.UTF_8));
+                url.append(key);
                 url.append("=");
-                url.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                // Si es el token, no lo encodees
+                if (key.equals("token")) {
+                    url.append(value);
+                } else {
+                    url.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                }
             });
         }
 
