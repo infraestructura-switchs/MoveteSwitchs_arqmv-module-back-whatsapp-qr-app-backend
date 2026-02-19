@@ -4,7 +4,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -15,7 +14,14 @@ public class FirebaseConfig {
 
     @PostConstruct
     public void initialize() throws IOException {
-        InputStream serviceAccount = new ClassPathResource("serviceAccountKey.json").getInputStream();
+        String serviceAccountJson = System.getenv("FIREBASE_SERVICE_ACCOUNT");
+
+        if (serviceAccountJson == null || serviceAccountJson.isEmpty()) {
+            throw new IllegalStateException("Environment variable FIREBASE_SERVICE_ACCOUNT is not set");
+        }
+
+        InputStream serviceAccount = new java.io.ByteArrayInputStream(
+                serviceAccountJson.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -26,5 +32,5 @@ public class FirebaseConfig {
             FirebaseApp.initializeApp(options);
         }
     }
-    
+
 }

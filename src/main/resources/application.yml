@@ -6,9 +6,9 @@ spring:
     name: bot
 
   datasource:
-    url: jdbc:mysql://72.60.173.101:33307/movetedatabase
-    username: mysql
-    password: ltm8d5vwazdvrsbt
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://72.60.173.101:33307/movetedatabase}
+    username: ${SPRING_DATASOURCE_USERNAME:mysql}
+    password: ${SPRING_DATASOURCE_PASSWORD:ltm8d5vwazdvrsbt}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
     hikari:
@@ -23,37 +23,29 @@ spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
-
 app:
   request:
     mapping: api/back-whatsapp-qr-app
-
   version: '@project.version@'
-
   url:
     services:
-      products-service: https://gfvsgktksbutb3pdokevf6vhbi.apigateway.us-phoenix-1.oci.customer-oci.com/arq-prd-v3/
-
+      products-service: ${PRODUCTS_SERVICE_URL:https://gfvsgktksbutb3pdokevf6vhbi.apigateway.us-phoenix-1.oci.customer-oci.com/arq-prd-v3/}
   default-product-image: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAIAAACx0UUt...
-
 
 cloudinary:
   cloud:
-    name: dfotyo6jc
+    name: ${CLOUDINARY_CLOUD_NAME:dfotyo6jc}
   api:
-    key: 341545146697844
-    secret: PvB8b7BMSd0lihsjuMeLImEsbz4
-
+    key: ${CLOUDINARY_API_KEY:341545146697844}
+    secret: ${CLOUDINARY_API_SECRET:PvB8b7BMSd0lihsjuMeLImEsbz4}
 
 landing:
   page:
-    url: https://qr-movete.is.arqbs.com
-
+    url: ${LANDING_PAGE_URL:https://qr-movete.is.arqbs.com}
 
 security:
   jwt:
-    secret-key: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b
-
+    secret-key: ${JWT_SECRET_KEY:3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
 
 logging:
   level:
@@ -61,13 +53,11 @@ logging:
       springframework:
         security: DEBUG
         web: DEBUG
-
     io:
       jsonwebtoken: DEBUG
-
     com:
       fasterxml:
         jackson: DEBUG
-
       restaurante:
         bot: DEBUG
+
