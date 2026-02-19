@@ -86,13 +86,12 @@ public class ProductService implements ProductInterface {
     public CategorizedProductsDTO getProductsSfotRestaurantByCompanyId(Long companyId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal(); // companyId del token
 
-        if (!tokenCompanyId.equals(companyId)) {
-            throw  new GenericException("No coincide el token", HttpStatus.FORBIDDEN); // No coincide
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
         }
 
-        // Verifica si la compañía existe (agrega esto como medida extra)
         if (!companyRepository.existsByExternalCompanyId(companyId)) { // Asume companyRepository inyectado
             throw  new GenericException("La compañia no existe", HttpStatus.NOT_FOUND);
         }

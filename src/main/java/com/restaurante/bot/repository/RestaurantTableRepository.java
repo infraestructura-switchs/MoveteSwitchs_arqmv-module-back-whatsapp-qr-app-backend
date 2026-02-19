@@ -28,9 +28,9 @@ public interface RestaurantTableRepository extends JpaRepository<RestaurantTable
 
 
     @Query(value = "SELECT * " +
-            "FROM RESTAURANT_TABLE rt " +
-            "WHERE rt.COMPANY_ID =:companyId " +
-            "ORDER BY rt.TABLE_NUMBER asc "
+            "FROM restaurant_table rt " +
+            "WHERE rt.company_id =:companyId " +
+            "ORDER BY rt.table_number asc "
             , nativeQuery = true)
     List<RestaurantTable> findAllTablesAsc(Long companyId);
 }

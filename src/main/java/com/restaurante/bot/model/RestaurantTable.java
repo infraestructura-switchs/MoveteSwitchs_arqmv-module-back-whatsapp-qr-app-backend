@@ -12,8 +12,7 @@ import lombok.*;
 public class RestaurantTable {
 
     @Id
-    @SequenceGenerator(name = "RESTAURANT-TABLE-SEQ", sequenceName = "RESTAURANT_TABLE_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RESTAURANT-TABLE-SEQ")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "table_id")
     private Integer tableId;
 
