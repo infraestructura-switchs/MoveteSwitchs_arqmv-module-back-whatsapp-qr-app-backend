@@ -28,7 +28,7 @@ spring:
 app:
   request:
     mapping: api/back-whatsapp-qr-app
-  version: '@project.version@'
+  version: '@version@'
   url:
     services:
       products-service: ${PRODUCTS_SERVICE_URL:https://gfvsgktksbutb3pdokevf6vhbi.apigateway.us-phoenix-1.oci.customer-oci.com/arq-prd-v3/}
