@@ -7,23 +7,13 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:prod}
 
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://72.60.173.101:33307/movetedatabase}
-    username: ${SPRING_DATASOURCE_USERNAME:mysql}
-    password: ${SPRING_DATASOURCE_PASSWORD:ltm8d5vwazdvrsbt}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-    hikari:
-      auto-commit: true
-
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-    show-sql: true
+  r2dbc:
+    url: ${SPRING_R2DBC_URL:r2dbc:mysql://72.60.173.101:33307/movetedatabase}
+    username: ${SPRING_R2DBC_USERNAME:mysql}
+    password: ${SPRING_R2DBC_PASSWORD:ltm8d5vwazdvrsbt}
 
   autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+    exclude: org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
 
 app:
   request:
@@ -55,11 +45,12 @@ logging:
       springframework:
         security: DEBUG
         web: DEBUG
+        r2dbc: DEBUG
     io:
       jsonwebtoken: DEBUG
+      r2dbc: DEBUG
     com:
       fasterxml:
         jackson: DEBUG
       restaurante:
         bot: DEBUG
-
