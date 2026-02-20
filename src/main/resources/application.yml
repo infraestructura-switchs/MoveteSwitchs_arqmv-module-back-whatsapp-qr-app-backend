@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: bot
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:prod}
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://72.60.173.101:33307/movetedatabase}
