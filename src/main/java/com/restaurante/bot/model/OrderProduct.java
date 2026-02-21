@@ -6,13 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "order_product")
 public class OrderProduct {
-
 
     @Id
     @SequenceGenerator(name = "ORDER-PRODUCT-SEQ", sequenceName = "ORDER_PRODUCT_SEQ", allocationSize = 1)
@@ -29,7 +29,7 @@ public class OrderProduct {
     @Column(name = "quantity")
     private Integer quantity;
 
-    @Column(name = "COMMENT_PRODUCT")
+    @Column(name = "comment_product")
     private String commentProduct;
 
     @Column(name = "company_id")

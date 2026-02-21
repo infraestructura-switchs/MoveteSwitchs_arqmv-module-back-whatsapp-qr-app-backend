@@ -21,7 +21,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/${app.request.mapping}/security")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @Slf4j
 public class SecurityController {
 
@@ -37,20 +38,20 @@ public class SecurityController {
     @Value("${app.request.mapping}")
     private String mappingPageUrl;
 
-
     @PostMapping("/generateToken")
     public ResponseEntity<String> generateToken(@RequestBody GenerateTokenRequestDTO generateTokenRequestDTO) {
         log.info("Se inicia el endpoint que genera un token");
         if (!companyRepository.existsByExternalCompanyId(generateTokenRequestDTO.getCompanyId())) {
             return new ResponseEntity<>("Compañía no existe", HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(jwtUtil.generateToken(generateTokenRequestDTO.getCompanyId(), generateTokenRequestDTO.getCompanyId() ), HttpStatus.OK);
+        return new ResponseEntity<>(
+                jwtUtil.generateToken(generateTokenRequestDTO.getCompanyId(), generateTokenRequestDTO.getCompanyId()),
+                HttpStatus.OK);
 
     }
 
     @PostMapping("/generateLink")
-    public ResponseEntity<String> generateLink(@RequestBody GenerateLinkIn generateLinkIn
-    ) {
+    public ResponseEntity<String> generateLink(@RequestBody GenerateLinkIn generateLinkIn) {
         Map<String, String> queryParams = new HashMap<>();
 
         if (!companyRepository.existsByExternalCompanyId(generateLinkIn.getCompanyId())) {
