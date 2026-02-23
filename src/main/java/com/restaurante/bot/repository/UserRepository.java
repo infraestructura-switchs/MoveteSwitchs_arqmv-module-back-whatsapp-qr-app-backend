@@ -32,10 +32,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
                         +
                         "FROM User u " +
                         "INNER JOIN u.rol r " +
-                        "WHERE u.status = 'ACTIVO'", countQuery = "SELECT COUNT(u) " +
+                        "WHERE u.status = 'ACTIVE'", countQuery = "SELECT COUNT(u) " +
                                         "FROM User u " +
                                         "INNER JOIN u.rol r " +
-                                        "WHERE u.status = 'ACTIVO'")
+                                        "WHERE u.status = 'ACTIVE'")
         Page<GgpUserGetAllDto> getStatus(Pageable pageable);
 
         Page<User> findByStatus(String status, Pageable pageable);
