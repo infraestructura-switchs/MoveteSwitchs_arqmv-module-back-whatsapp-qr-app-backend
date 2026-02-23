@@ -388,9 +388,9 @@ public class UserServiceImpl implements UserService {
                 ObjectMapperUtils.mapAll(entityPage.getContent(),
                         GgpUserGetAllDto.class),
                 pagingSort, totalElements).map(ggpUserGetAllDto -> {
-                    log.info("Mapping User to GgpUserGetAllDto: {}", ggpUserGetAllDto);
+                    //log.info("Mapping User to GgpUserGetAllDto: {}", ggpUserGetAllDto);
             ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getRolId());
-            ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getRolId());
+            ggpUserGetAllDto.setRolName(ggpUserGetAllDto.getRol().getName());
             return ggpUserGetAllDto;
         });
     }
