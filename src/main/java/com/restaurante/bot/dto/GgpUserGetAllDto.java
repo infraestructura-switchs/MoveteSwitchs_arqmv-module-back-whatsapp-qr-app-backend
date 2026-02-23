@@ -31,5 +31,16 @@ public class GgpUserGetAllDto {
     private String token;
     private String status;
 
+    public GgpUserGetAllDto(long userId, String name, String login, String password, String email, long rolId,
+            String rolName, String status) {
+        this.userId = userId;
+        this.name = name;
+        this.login = login;
+        this.password = password;
+        this.email = email;
+        this.rolId = rolId;
+        this.rolName = rolName;
+        this.status = status;
+    }
 
 }
