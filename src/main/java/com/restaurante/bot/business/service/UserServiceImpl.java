@@ -189,7 +189,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<GgpUserGetAllDto> getAll(Map<String, String> customQuery) {
         String orders = "ASC";
-        String sortBy = "id";
+        String sortBy = "user_id";
         int page = 0;
         int size = 5;
         String status = Constants.ACTIVE_STATUS;
@@ -259,7 +259,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<GgpUserGetAllDto> searchCustom(Map<String, String> customQuery) {
         String orders = "ASC";
-        String sortBy = "id";
+        String sortBy = "user_id";
         int page = 0;
         int size = 5;
         String status = Constants.ACTIVE_STATUS;
@@ -289,9 +289,9 @@ public class UserServiceImpl implements UserService {
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
         }
-        if (customQuery.containsKey("id")) {
+        if (customQuery.containsKey("user_id")) {
             //name = "%" + customQuery.get("name") + "%";
-            id = Long.valueOf(customQuery.get("id"));
+            id = Long.valueOf(customQuery.get("user_id"));
         }
         if (customQuery.containsKey("name")) {
             //name = "%" + customQuery.get("name") + "%";
