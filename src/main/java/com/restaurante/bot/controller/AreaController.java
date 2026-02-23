@@ -21,7 +21,8 @@ import java.util.Map;
 @Tag(name = "Area", description = "APIs para la gestión de áreas")
 @RestController
 @RequestMapping("/${app.request.mapping}/area")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class AreaController {
@@ -39,7 +40,8 @@ public class AreaController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<AreaDto> update(@PathVariable("id") Long areaId, @RequestBody @Valid AreaSaveAndUpdateDto areaDto) {
+    public ResponseEntity<AreaDto> update(@PathVariable("id") Long areaId,
+            @RequestBody @Valid AreaSaveAndUpdateDto areaDto) {
         return ResponseEntity.ok(iAreaService.update(areaId, areaDto));
     }
 
@@ -60,9 +62,9 @@ public class AreaController {
 
     @GetMapping
     public ResponseEntity<Page<AreaGetAllDto>> getAll(@RequestParam(defaultValue = "0") int page,
-                                                      @RequestParam(defaultValue = "5") int size,
-                                                      @RequestParam(defaultValue = "ASC") String orders,
-                                                      @RequestParam(defaultValue = "id") String sortBy) {
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = "areaId") String sortBy) {
         return ResponseEntity.ok(iAreaService.getAll(page, size, orders, sortBy));
     }
 

@@ -132,7 +132,7 @@ public class AreaServiceImpl implements IAreaService {
 
         return areaRepository.findByStatus(status).stream()
                 .map(area -> AreaGetAllDto.builder()
-                        .id(area.getAreaId())
+                        .areaId(area.getAreaId())
                         .description(area.getDescription())
                         .status(area.getStatus())
                         .build())
@@ -149,8 +149,8 @@ public class AreaServiceImpl implements IAreaService {
         String description = null;
         String status = Constants.ACTIVE_STATUS;
 
-        if (customQuery.containsKey("id")) {
-            id = Long.valueOf(customQuery.get("id"));
+        if (customQuery.containsKey("areaId")) {
+            id = Long.valueOf(customQuery.get("areaId"));
         }
         if (customQuery.containsKey("description")) {
             description = customQuery.get("description");
@@ -190,7 +190,7 @@ public class AreaServiceImpl implements IAreaService {
         return new PageImpl<>(
                 entityPage.getContent().stream()
                         .map(area -> AreaGetAllDto.builder()
-                                .id(area.getAreaId())
+                                .areaId(area.getAreaId())
                                 .description(area.getDescription())
                                 .status(area.getStatus())
                                 .build())

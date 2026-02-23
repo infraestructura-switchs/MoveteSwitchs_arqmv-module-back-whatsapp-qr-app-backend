@@ -19,7 +19,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/rol")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class RolController {
@@ -37,7 +38,8 @@ public class RolController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<RolDto> update(@PathVariable("id") Long rolId, @RequestBody @Valid RolSaveAndUpdateDto rolDto) {
+    public ResponseEntity<RolDto> update(@PathVariable("id") Long rolId,
+            @RequestBody @Valid RolSaveAndUpdateDto rolDto) {
         return ResponseEntity.ok(iRolService.update(rolId, rolDto));
     }
 
@@ -58,9 +60,9 @@ public class RolController {
 
     @GetMapping("/get-all")
     public ResponseEntity<Page<RolGetAllDto>> getAll(@RequestParam(defaultValue = "0") int page,
-                                                     @RequestParam(defaultValue = "5") int size,
-                                                     @RequestParam(defaultValue = "ASC") String orders,
-                                                     @RequestParam(defaultValue = "id") String sortBy) {
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = "rolId") String sortBy) {
         return ResponseEntity.ok(iRolService.getAll(page, size, orders, sortBy));
     }
 

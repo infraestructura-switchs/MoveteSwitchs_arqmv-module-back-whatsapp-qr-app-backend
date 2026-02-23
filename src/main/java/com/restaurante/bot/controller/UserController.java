@@ -1,6 +1,5 @@
 package com.restaurante.bot.controller;
 
-
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.restaurante.bot.business.interfaces.LoginService;
 import com.restaurante.bot.business.interfaces.UserService;
@@ -19,7 +18,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/user")
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class UserController {
@@ -38,7 +38,8 @@ public class UserController {
     }
 
     @PostMapping("/forget")
-    public ResponseEntity<ForgotPasswordUserDto> forgotPassword(@RequestBody GgpForgotPasswordDto ggpForgotPasswordDto) throws UnirestException {
+    public ResponseEntity<ForgotPasswordUserDto> forgotPassword(@RequestBody GgpForgotPasswordDto ggpForgotPasswordDto)
+            throws UnirestException {
         return ResponseEntity.ok(iUserService.forgotPassword(ggpForgotPasswordDto));
     }
 
@@ -54,10 +55,10 @@ public class UserController {
 
     @GetMapping("/v1/")
     public ResponseEntity<Page<GgpUserGetAllDto>> getAll(@RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "5") int size,
-                                                         @RequestParam(defaultValue = "ASC") String orders,
-                                                         @RequestParam(defaultValue = "id" ) String sortBy) {
-        return ResponseEntity.ok(iUserService.getAll(page , size, orders ,sortBy));
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = "userId") String sortBy) {
+        return ResponseEntity.ok(iUserService.getAll(page, size, orders, sortBy));
     }
 
     @GetMapping("/get-all")
@@ -71,7 +72,8 @@ public class UserController {
     }
 
     @PutMapping("/update/{userId}")
-    public ResponseEntity<UserDto> update(@PathVariable("userId")Long userId, @RequestBody GgpUserSaveAndUpdateDto user) {
+    public ResponseEntity<UserDto> update(@PathVariable("userId") Long userId,
+            @RequestBody GgpUserSaveAndUpdateDto user) {
         return ResponseEntity.ok(iUserService.update(userId, user));
     }
 
