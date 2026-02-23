@@ -10,6 +10,7 @@ import com.restaurante.bot.util.Constants;
 import com.restaurante.bot.util.ObjectMapperUtils;
 import com.restaurante.bot.util.Utils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository iRepository;
@@ -189,7 +191,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<GgpUserGetAllDto> getAll(Map<String, String> customQuery) {
         String orders = "ASC";
-        String sortBy = "user_id";
+        String sortBy = "userId";
         int page = 0;
         int size = 5;
         String status = Constants.ACTIVE_STATUS;
@@ -238,13 +240,13 @@ public class UserServiceImpl implements UserService {
 
         return iRepository.findByStatus(status).stream()
                 .map(objects -> GgpUserGetAllDto.builder()
-                        .id(objects.getUserId())
+                        .userId(objects.getUserId())
                         .name(objects.getName())
                         .login(objects.getLogin())
                         .password(objects.getPassword())
                         .email(objects.getEmail())
                         .rol(RolDto.builder()
-                                .id(objects.getRol().getRolId())
+                                .rolId(objects.getRol().getRolId())
                                 .name(objects.getRol().getName())
                                 .build())
                         .rolId(objects.getRol().getRolId())
@@ -259,7 +261,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<GgpUserGetAllDto> searchCustom(Map<String, String> customQuery) {
         String orders = "ASC";
-        String sortBy = "user_id";
+        String sortBy = "userId";
         int page = 0;
         int size = 5;
         String status = Constants.ACTIVE_STATUS;
@@ -289,9 +291,9 @@ public class UserServiceImpl implements UserService {
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
         }
-        if (customQuery.containsKey("user_id")) {
+        if (customQuery.containsKey("userId")) {
             //name = "%" + customQuery.get("name") + "%";
-            id = Long.valueOf(customQuery.get("user_id"));
+            id = Long.valueOf(customQuery.get("userId"));
         }
         if (customQuery.containsKey("name")) {
             //name = "%" + customQuery.get("name") + "%";
@@ -386,8 +388,9 @@ public class UserServiceImpl implements UserService {
                 ObjectMapperUtils.mapAll(entityPage.getContent(),
                         GgpUserGetAllDto.class),
                 pagingSort, totalElements).map(ggpUserGetAllDto -> {
-            ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getId());
-            ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getId());
+                    log.info("Mapping User to GgpUserGetAllDto: {}", ggpUserGetAllDto);
+            ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getRolId());
+            ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getRolId());
             return ggpUserGetAllDto;
         });
     }

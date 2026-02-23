@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 public class GgpUserGetAllDto {
 
-    private long id;
+    private long userId;
     private String name;
     private String login;
     private String password;

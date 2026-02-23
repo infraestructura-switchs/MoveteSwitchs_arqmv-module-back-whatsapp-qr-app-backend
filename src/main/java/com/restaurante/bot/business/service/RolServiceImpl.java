@@ -85,7 +85,7 @@ public class RolServiceImpl implements RolInterface {
     @Override
     public Page<RolGetAllDto> getAll(Map<String, String> customQuery) {
         String orders = "ASC";
-        String sortBy = "rol_id";
+        String sortBy = "rolId";
         int page = 0;
         int size = 5;
         String status = Constants.ACTIVE_STATUS;
@@ -141,8 +141,8 @@ public class RolServiceImpl implements RolInterface {
         Long id = null;
         String name = null;
 
-        if (customQuery.containsKey("rol_id")) {
-            id = Long.valueOf(customQuery.get("rol_id"));
+        if (customQuery.containsKey("rolId")) {
+            id = Long.valueOf(customQuery.get("rolId"));
         }
         if (customQuery.containsKey("name")) {
             name = customQuery.get("name");
