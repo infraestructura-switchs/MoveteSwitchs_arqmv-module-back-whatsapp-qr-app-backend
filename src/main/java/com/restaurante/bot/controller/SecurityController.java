@@ -35,6 +35,9 @@ public class SecurityController {
     @Value("${landing.page.url}")
     private String landingPageUrl;
 
+    @Value("${backend.url}")
+    private String backendUrl;
+
     @Value("${app.request.mapping}")
     private String mappingPageUrl;
 
@@ -75,7 +78,7 @@ public class SecurityController {
 
         String fullLink = buildUrl(landingPageUrl, queryParams);
         var shortLink = shortLinkservice.createShortLink(fullLink);
-        String shortUrl = landingPageUrl + "/" + mappingPageUrl + "/h/" + shortLink.getShortCode();
+        String shortUrl = backendUrl + "/" + mappingPageUrl + "/h/" + shortLink.getShortCode();
         return new ResponseEntity<>(shortUrl, HttpStatus.OK);
     }
 
