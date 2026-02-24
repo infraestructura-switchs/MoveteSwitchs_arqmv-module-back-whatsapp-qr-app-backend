@@ -17,6 +17,9 @@ public class ShortLinkController {
     @Value("${landing.page.url}")
     private String landingPageUrl;
 
+    @Value("${backend.url}")
+    private String backendUrl;
+
     @Value("${app.request.mapping}")
     private String mappingPageUrl;
 
@@ -28,7 +31,7 @@ public class ShortLinkController {
     @PostMapping("/create")
     public ResponseEntity<String> createShortLink(@RequestParam String url) {
         var shortLink = service.createShortLink(url);
-        String shortUrl = landingPageUrl+"/"+mappingPageUrl +"/h/"+ shortLink.getShortCode();
+        String shortUrl = backendUrl+"/"+mappingPageUrl +"/h/"+ shortLink.getShortCode();
         return ResponseEntity.ok(shortUrl);
     }
 

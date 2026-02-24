@@ -45,6 +45,9 @@ landing:
   page:
     url: ${LANDING_PAGE_URL:https://qr-movete.is.arqbs.com}
 
+backend:
+  url: ${BACKEND_URL:https://qr-movete.is.arqbs.com}
+
 security:
   jwt:
     secret-key: ${JWT_SECRET_KEY:3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
