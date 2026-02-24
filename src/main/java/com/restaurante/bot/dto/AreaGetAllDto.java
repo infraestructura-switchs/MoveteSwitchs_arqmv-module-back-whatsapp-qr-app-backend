@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 public class AreaGetAllDto {
 
-    private long areaId;
+    private long id;
     private String description;
     private String status;
 

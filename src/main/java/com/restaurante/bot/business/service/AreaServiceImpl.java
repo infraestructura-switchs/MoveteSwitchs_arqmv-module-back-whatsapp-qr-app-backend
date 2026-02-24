@@ -132,7 +132,7 @@ public class AreaServiceImpl implements IAreaService {
 
         return areaRepository.findByStatus(status).stream()
                 .map(area -> AreaGetAllDto.builder()
-                        .areaId(area.getAreaId())
+                        .id(area.getAreaId())
                         .description(area.getDescription())
                         .status(area.getStatus())
                         .build())
@@ -190,7 +190,7 @@ public class AreaServiceImpl implements IAreaService {
         return new PageImpl<>(
                 entityPage.getContent().stream()
                         .map(area -> AreaGetAllDto.builder()
-                                .areaId(area.getAreaId())
+                                .id(area.getAreaId())
                                 .description(area.getDescription())
                                 .status(area.getStatus())
                                 .build())
