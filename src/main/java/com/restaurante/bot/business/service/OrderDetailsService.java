@@ -460,25 +460,16 @@ public class OrderDetailsService implements OrderInterface {
 
         for (Object[] result : resultList) {
             // Manejo de posibles nulos
-            Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null; // Se realiza el cast a Long
-                                                                                         // antes de convertirlo a
-                                                                                         // Integer
-            String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown"; // "Unknown" si el estado es nulo
-            Double totalGeneral = (result[2] != null) ? ((BigDecimal) result[2]).doubleValue() : 0.0; // BigDecimal a
-                                                                                                      // Double
-            Long orderId = (result[3] != null) ? ((Long) result[3]) : null; // Aseguramos que orderId es Integer
-            Integer productId = (result[4] != null) ? ((BigDecimal) result[4]).intValue() : null; // Convertir el tipo
-                                                                                                  // Long a Integer
-            String productName = (result[5] != null) ? (String) result[5] : "Unknown Product"; // Nombre del producto
-            Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0; // Convertir Long a Integer para la
-                                                                                   // cantidad
-            Double unitePrice = (result[7] != null) ? ((BigDecimal) result[7]).doubleValue() : 0.0; // Convertir
-                                                                                                    // BigDecimal a
-                                                                                                    // Double
-            Double totalPrice = (result[8] != null) ? ((BigDecimal) result[8]).doubleValue() : 0.0; // Convertir
-                                                                                                    // BigDecimal a
-                                                                                                    // Double
-            Double transactionId = (result[9] != null) ? ((BigDecimal) result[9]).doubleValue() : 0.0;
+            Integer mesaId = (result[0] != null) ? ((Number) result[0]).intValue() : null;
+            String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown";
+            Double totalGeneral = (result[2] != null) ? ((Number) result[2]).doubleValue() : 0.0;
+            Long orderId = (result[3] != null) ? ((Long) result[3]) : null;
+            Integer productId = (result[4] != null) ? ((Number) result[4]).intValue() : null;
+            String productName = (result[5] != null) ? (String) result[5] : "Unknown Product";
+            Integer qty = (result[6] != null) ? ((Number) result[6]).intValue() : 0;
+            Double unitePrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
+            Double totalPrice = (result[8] != null) ? ((Number) result[8]).doubleValue() : 0.0;
+            Double transactionId = (result[9] != null) ? ((Number) result[9]).doubleValue() : 0.0;
             String date = (result[10] != null) ? result[10].toString() : null;
 
             Long transactionIdL = transactionId.longValue();
@@ -518,25 +509,16 @@ public class OrderDetailsService implements OrderInterface {
 
         for (Object[] result : resultList) {
             // Manejo de posibles nulos
-            Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null; // Se realiza el cast a Long
-                                                                                         // antes de convertirlo a
-                                                                                         // Integer
-            String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown"; // "Unknown" si el estado es nulo
-            Double totalGeneral = (result[2] != null) ? ((BigDecimal) result[2]).doubleValue() : 0.0; // BigDecimal a
-                                                                                                      // Double
-            Long orderId = (result[3] != null) ? ((Long) result[3]) : null; // Aseguramos que orderId es Integer
-            Integer productId = (result[4] != null) ? ((BigDecimal) result[4]).intValue() : null; // Convertir el tipo
-                                                                                                  // Long a Integer
-            String productName = (result[5] != null) ? (String) result[5] : "Unknown Product"; // Nombre del producto
-            Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0; // Convertir Long a Integer para la
-                                                                                   // cantidad
-            Double unitePrice = (result[7] != null) ? ((BigDecimal) result[7]).doubleValue() : 0.0; // Convertir
-                                                                                                    // BigDecimal a
-                                                                                                    // Double
-            Double totalPrice = (result[8] != null) ? ((BigDecimal) result[8]).doubleValue() : 0.0; // Convertir
-                                                                                                    // BigDecimal a
-                                                                                                    // Double
-            Double transactionId = (result[9] != null) ? ((BigDecimal) result[9]).doubleValue() : 0.0;
+            Integer mesaId = (result[0] != null) ? ((Number) result[0]).intValue() : null;
+            String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown";
+            Double totalGeneral = (result[2] != null) ? ((Number) result[2]).doubleValue() : 0.0;
+            Long orderId = (result[3] != null) ? ((Long) result[3]) : null;
+            Integer productId = (result[4] != null) ? ((Number) result[4]).intValue() : null;
+            String productName = (result[5] != null) ? (String) result[5] : "Unknown Product";
+            Integer qty = (result[6] != null) ? ((Number) result[6]).intValue() : 0;
+            Double unitePrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
+            Double totalPrice = (result[8] != null) ? ((Number) result[8]).doubleValue() : 0.0;
+            Double transactionId = (result[9] != null) ? ((Number) result[9]).doubleValue() : 0.0;
             String date = (result[10] != null) ? result[10].toString() : null;
 
             Long transactionIdL = transactionId.longValue();
