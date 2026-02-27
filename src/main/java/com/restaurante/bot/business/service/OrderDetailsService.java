@@ -6,6 +6,7 @@ import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class OrderDetailsService implements OrderInterface {
@@ -428,6 +430,9 @@ public class OrderDetailsService implements OrderInterface {
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        log.info("tableNumber: " + tableNumber);
+        log.info("company id: " + company.getId());
+        log.info("phoneNumber: " + phoneNumber);
 
         List<Object[]> resultList = orderTransactionRepository.findAllOrdersNotConfirm(tableNumber, company.getId(), phoneNumber);
 
