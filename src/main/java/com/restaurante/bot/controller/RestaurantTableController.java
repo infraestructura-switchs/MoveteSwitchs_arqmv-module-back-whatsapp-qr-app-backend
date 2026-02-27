@@ -1,6 +1,7 @@
 package com.restaurante.bot.controller;
 
 import com.restaurante.bot.business.interfaces.RestaurantTableInterface;
+import com.restaurante.bot.dto.ChangeStatusTableDTO;
 import com.restaurante.bot.dto.NumberDTO;
 import com.restaurante.bot.model.GenericResponse;
 import com.restaurante.bot.model.RestaurantTable;
@@ -39,8 +40,8 @@ public class RestaurantTableController {
     }
 
     @PostMapping("/change/status-ocuped")
-    public ResponseEntity<RestaurantTable> changeStatusOcuped(@RequestBody NumberDTO tableNumber) {
-        return new ResponseEntity<>(restaurantTableInterface.changeStatusOcuped(tableNumber), HttpStatus.OK);
+    public ResponseEntity<RestaurantTable> changeStatusOcuped(@RequestBody ChangeStatusTableDTO changeStatusTableDTO) {
+        return new ResponseEntity<>(restaurantTableInterface.changeStatusOcuped(changeStatusTableDTO), HttpStatus.OK);
     }
 
     @PostMapping("/change/status-free")

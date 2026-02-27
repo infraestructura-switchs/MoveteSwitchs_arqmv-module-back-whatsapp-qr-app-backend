@@ -1,5 +1,6 @@
 package com.restaurante.bot.business.interfaces;
 
+import com.restaurante.bot.dto.ChangeStatusTableDTO;
 import com.restaurante.bot.dto.NumberDTO;
 import com.restaurante.bot.model.GenericResponse;
 import com.restaurante.bot.model.RestaurantTable;
@@ -8,7 +9,7 @@ import java.util.List;
 
 public interface RestaurantTableInterface {
 
-    RestaurantTable changeStatusOcuped(NumberDTO tableNumber);
+    RestaurantTable changeStatusOcuped(ChangeStatusTableDTO changeStatusTableDTO);
 
     RestaurantTable changeStatusFree(Long tableNumber);
 

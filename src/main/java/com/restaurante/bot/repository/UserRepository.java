@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,9 +45,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         @Query(value = """
                         SELECT *
-                        FROM user_app ua WHERE ua.company_id = :company
+                        FROM user_app ua WHERE ua.company_id = :companyId
                         """, nativeQuery = true)
-        User findUserByCompany(Long company);
+        User findUserByCompany(@Param("companyId")  Long companyId);
 
         @Query("SELECT u FROM User u " +
                         "LEFT JOIN u.company c " +
@@ -58,7 +59,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
                         "OR a.description LIKE %:areaDescription%) " +
                         "AND u.status LIKE %:status%")
         Page<User> findByUserIdOrNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrLoginContainingIgnoreCaseOrCompany_CompanyNameContainingIgnoreCaseOrPosition_DescriptionContainingIgnoreCaseOrArea_DescriptionContainingIgnoreCaseOrAndStatus(
-                        Long userId, String name, String email, String login, String companyName,
-                        String positionDescription, String areaDescription, String status, Pageable pageable);
+                @Param("userId") Long userId,  @Param("name") String name,  @Param("email") String email,
+                @Param("login") String login,  @Param("companyName") String companyName,
+                @Param("positionDescription") String positionDescription,  @Param("areaDescription") String areaDescription,
+                @Param("status") String status, Pageable pageable);
 
 }

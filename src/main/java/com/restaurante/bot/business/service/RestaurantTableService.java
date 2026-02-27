@@ -1,6 +1,7 @@
 package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.business.interfaces.RestaurantTableInterface;
+import com.restaurante.bot.dto.ChangeStatusTableDTO;
 import com.restaurante.bot.dto.NumberDTO;
 import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.*;
@@ -9,6 +10,7 @@ import com.restaurante.bot.repository.RestaurantTableRepository;
 import com.restaurante.bot.repository.SubscriptionRepository;
 import com.restaurante.bot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RestaurantTableService implements RestaurantTableInterface {
@@ -81,7 +84,7 @@ public class RestaurantTableService implements RestaurantTableInterface {
     }
 
     @Override
-    public RestaurantTable changeStatusOcuped(NumberDTO tableNumber) {
+    public RestaurantTable changeStatusOcuped(ChangeStatusTableDTO changeStatusTableDTO) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long tokenCompanyId = (Long) authentication.getPrincipal();
@@ -89,18 +92,19 @@ public class RestaurantTableService implements RestaurantTableInterface {
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
         }
-
-        Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        log.info("external company id: " + changeStatusTableDTO.getCompanyId());
+        Company company = companyRepository.findByExternalCompanyId(changeStatusTableDTO.getCompanyId());
+        log.info("company id: " + company.getId());
 
         User user = userRepository.findUserByCompany(company.getId());
 
         Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
 
 
-        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber.getTableNumber(), company.getId());
+        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(changeStatusTableDTO.getTableNumber(), company.getId());
         table.setStatus(2L);
 
-        notificationService.sendNotificationToClient(subscription.getToken(), "se actualizo la mesa " + tableNumber, "actualizar las mesas para ver el cambio");
+        notificationService.sendNotificationToClient(subscription.getToken(), "se actualizo la mesa " + changeStatusTableDTO.getTableNumber(), "actualizar las mesas para ver el cambio");
 
         return restaurantTableRepository.save(table);
     }
