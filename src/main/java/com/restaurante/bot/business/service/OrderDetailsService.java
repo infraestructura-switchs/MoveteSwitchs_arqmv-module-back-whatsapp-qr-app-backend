@@ -37,8 +37,6 @@ public class OrderDetailsService implements OrderInterface {
     private final SubscriptionRepository subscriptionRepository;
     private final NotificationService notificationService;
 
-
-
     @Transactional
     public CustomerOrder saveCustomerOrder(Double total, String phone, Long companyId) {
         Customer customer = findOrCreateCustomer(phone);
@@ -52,9 +50,9 @@ public class OrderDetailsService implements OrderInterface {
     }
 
     @Transactional
-    public RestaurantTable findTableByNumber(Long tableNumber , Long companyId) {
+    public RestaurantTable findTableByNumber(Long tableNumber, Long companyId) {
 
-        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber,companyId);
+        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber, companyId);
         if (table == null) {
             throw new GenericException("Mesa no encontrada", HttpStatus.BAD_REQUEST);
         }
@@ -77,11 +75,12 @@ public class OrderDetailsService implements OrderInterface {
 
     @Transactional
     public Transaction createTransaction(OrderDetailsDTO orderDetailsDTO, RestaurantTable table, Long companyId) {
-        Transaction transaction = transactionRepository.findTransactionByTableId(orderDetailsDTO.getRestaurantTable(),companyId);
+        Transaction transaction = transactionRepository.findTransactionByTableId(orderDetailsDTO.getRestaurantTable(),
+                companyId);
         if (transaction == null) {
 
             transaction = new Transaction();
-            //transaction.setCustomerId(customer.getCustomer_id());
+            // transaction.setCustomerId(customer.getCustomer_id());
             transaction.setTableId(table.getTableId());
             transaction.setStatus(1L);
             transaction.setCompanyId(companyId);
@@ -116,7 +115,8 @@ public class OrderDetailsService implements OrderInterface {
 
     @Transactional
     public void updateTransactionTotal(Transaction transaction, Long companyId) {
-        transaction.setTransactionTotal(orderTransactionRepository.getTotalOrderAmount(transaction.getTransactionId(), companyId));
+        transaction.setTransactionTotal(
+                orderTransactionRepository.getTotalOrderAmount(transaction.getTransactionId(), companyId));
         transactionRepository.save(transaction);
     }
 
@@ -147,7 +147,8 @@ public class OrderDetailsService implements OrderInterface {
         if (table.getStatus() != null && table.getStatus() == 2) {
 
             // Guarda la orden
-            CustomerOrder setOrder = saveCustomerOrder(orderDetailsDTO.getTotal(), orderDetailsDTO.getPhone(), company.getId());
+            CustomerOrder setOrder = saveCustomerOrder(orderDetailsDTO.getTotal(), orderDetailsDTO.getPhone(),
+                    company.getId());
 
             // Guarda los productos de la orden
             saveOrderProducts(orderDetailsDTO.getItems(), setOrder.getOrderId(), company.getId());
@@ -156,7 +157,8 @@ public class OrderDetailsService implements OrderInterface {
             Transaction transaction = createTransaction(orderDetailsDTO, table, company.getId());
 
             // Crea la relación entre orden y transacción
-            OrderTransaction orderTransaction = createOrderTransaction(setOrder.getOrderId(), transaction.getTransactionId(), company.getId());
+            OrderTransaction orderTransaction = createOrderTransaction(setOrder.getOrderId(),
+                    transaction.getTransactionId(), company.getId());
 
             // Actualiza el total de la transacción
             updateTransactionTotal(transaction, company.getId());
@@ -169,7 +171,6 @@ public class OrderDetailsService implements OrderInterface {
 
         throw new GenericException("Mesa en estado inválido", HttpStatus.BAD_REQUEST);
     }
-
 
     @Override
     public List<OrderResponseAdminDTO> getOrders() {
@@ -185,7 +186,8 @@ public class OrderDetailsService implements OrderInterface {
         // Obtener todas las mesas
         List<RestaurantTable> allTables = restaurantTableRepository.findAllTablesAsc(company.getId());
 
-        //List<Integer> allTableNumbers = orderTransactionRepository.findAllTableNumbers();
+        // List<Integer> allTableNumbers =
+        // orderTransactionRepository.findAllTableNumbers();
 
         // Obtener todas las órdenes
         List<Object[]> orderResults = orderTransactionRepository.findAllOrdersWithTableNative();
@@ -195,24 +197,26 @@ public class OrderDetailsService implements OrderInterface {
 
         for (RestaurantTable table : allTables) {
             Integer tableNumber = table.getTableNumber().intValue();
-            Integer tableStatus = (table.getStatus() != null) ? table.getStatus().intValue() : 1; // Estado por defecto 1 si es null
-            mesaMap.put(tableNumber, new OrderResponseAdminDTO(tableNumber, tableStatus, new ArrayList<>(), new ArrayList<>(), 0.0, null));
+            Integer tableStatus = (table.getStatus() != null) ? table.getStatus().intValue() : 1; // Estado por defecto
+                                                                                                  // 1 si es null
+            mesaMap.put(tableNumber, new OrderResponseAdminDTO(tableNumber, tableStatus, new ArrayList<>(),
+                    new ArrayList<>(), 0.0, null));
         }
 
         // Procesar las órdenes
         for (Object[] result : orderResults) {
-            Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null;
+            Integer mesaId = (result[0] != null) ? ((Number) result[0]).intValue() : null;
             String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown";
-            Double totalGeneral = (result[2] != null) ? ((BigDecimal) result[2]).doubleValue() : 0.0;
+            Double totalGeneral = (result[2] != null) ? ((Number) result[2]).doubleValue() : 0.0;
             Long orderId = (result[3] != null) ? ((Long) result[3]) : null;
-            Integer productId = (result[4] != null) ? ((BigDecimal) result[4]).intValue() : null;
+            Integer productId = (result[4] != null) ? ((Number) result[4]).intValue() : null;
             String productName = (result[5] != null) ? (String) result[5] : "Unknown Product";
-            Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0;
-            Double unitePrice = (result[7] != null) ? ((BigDecimal) result[7]).doubleValue() : 0.0;
-            Double totalPrice = (result[8] != null) ? ((BigDecimal) result[8]).doubleValue() : 0.0;
-            Double transactionId = (result[9] != null) ? ((BigDecimal) result[9]).doubleValue() : 0.0;
+            Integer qty = (result[6] != null) ? ((Number) result[6]).intValue() : 0;
+            Double unitePrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
+            Double totalPrice = (result[8] != null) ? ((Number) result[8]).doubleValue() : 0.0;
+            Double transactionId = (result[9] != null) ? ((Number) result[9]).doubleValue() : 0.0;
             String date = (result[10] != null) ? result[10].toString() : null;
-            Integer orderStatus = (result[11] != null) ? ((Long) result[11]).intValue() : null;
+            Integer orderStatus = (result[11] != null) ? ((Number) result[11]).intValue() : null;
 
             Long transactionIdL = transactionId.longValue();
 
@@ -242,90 +246,101 @@ public class OrderDetailsService implements OrderInterface {
         return new ArrayList<>(mesaMap.values());
     }
 
-
-    public void updateTotalTransaction(Long orderId){
+    public void updateTotalTransaction(Long orderId) {
         /*
-
-        OrderTransaction orderTransaction = orderTransactionRepository
-                .findByOrderId(Long
-                        .parseLong(orderId
-                                .toString()));
-
-        Transaction transaction = transactionRepository
-                .findByTransactionId(orderTransaction
-                        .getTransactionId());
-
-        transaction
-                .setTransactionTotal(orderTransactionRepository
-                        .getTotalOrderAmount(transaction
-                                .getTransactionId()));
-
-        transactionRepository.save(transaction);
-
+         * 
+         * OrderTransaction orderTransaction = orderTransactionRepository
+         * .findByOrderId(Long
+         * .parseLong(orderId
+         * .toString()));
+         * 
+         * Transaction transaction = transactionRepository
+         * .findByTransactionId(orderTransaction
+         * .getTransactionId());
+         * 
+         * transaction
+         * .setTransactionTotal(orderTransactionRepository
+         * .getTotalOrderAmount(transaction
+         * .getTransactionId()));
+         * 
+         * transactionRepository.save(transaction);
+         * 
          */
     }
 
     @Override
     public GenericResponse sendOrderStatus(OrdersIdsDTO orderIds) {
 
-
-        for (Long orderId : orderIds.getOrdersIds()){
-            CustomerOrder order = customerOrderRepository.findById(orderId).orElseThrow(() -> new GenericException("Orden no encontrada", HttpStatus.BAD_REQUEST));
+        for (Long orderId : orderIds.getOrdersIds()) {
+            CustomerOrder order = customerOrderRepository.findById(orderId)
+                    .orElseThrow(() -> new GenericException("Orden no encontrada", HttpStatus.BAD_REQUEST));
             order.setStatus(2);
             customerOrderRepository.save(order);
         }
 
         return new GenericResponse("Ordenes cambiadas a estado enviada con exito", 200L);
     }
-/*
-    @Override
-    public List<OrderResponseDTO> getSendOrder(Long tableNumber) {
-        List<Object[]> resultList = orderTransactionRepository.findAllOrdersEnviadas(tableNumber);
-
-        Map<Integer, OrderResponseDTO> mesaMap = new HashMap<>();
-
-        for (Object[] result : resultList) {
-            // Manejo de posibles nulos
-            Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null; // Se realiza el cast a Long antes de convertirlo a Integer
-            String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown"; // "Unknown" si el estado es nulo
-            Double totalGeneral = (result[2] != null) ? ((BigDecimal) result[2]).doubleValue() : 0.0; // BigDecimal a Double
-            Long orderId = (result[3] != null) ? ((Long) result[3]).longValue() : null; // Aseguramos que orderId es Integer
-            Long productId = (result[4] != null) ? ((BigDecimal) result[4]).longValue() : null; // Convertir el tipo Long a Integer
-            String productName = (result[5] != null) ? (String) result[5] : "Unknown Product"; // Nombre del producto
-            Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0; // Convertir Long a Integer para la cantidad
-            Double unitePrice = (result[7] != null) ? ((BigDecimal) result[7]).doubleValue() : 0.0; // Convertir BigDecimal a Double
-            Double totalPrice = (result[8] != null) ? ((BigDecimal) result[8]).doubleValue() : 0.0; // Convertir BigDecimal a Double
-            Double transactionId = (result[9] != null) ? ((BigDecimal) result[9]).doubleValue() : 0.0;
-            String date = (result[10] != null) ? result[10].toString() : null;
-
-            Long transactionIdL = transactionId.longValue();
-
-            // Verificar si la mesa ya existe en el mapa
-            OrderResponseDTO dto = mesaMap.get(mesaId);
-            if (dto == null) {
-                dto = new OrderResponseDTO(mesaId, statusMesa.equals("2") ? 2 : 1, new ArrayList<>(), totalGeneral, transactionIdL);
-                mesaMap.put(mesaId, dto);
-            }
-
-            // Agregar la orden a la mesa
-            dto.getOrders().add(new OrderDTO(orderId, productId.toString(), productName, qty, unitePrice, totalPrice, date));
-        }
-
-        // Devolver el resultado
-        return new ArrayList<>(mesaMap.values());
-
-    }
-
- */
+    /*
+     * @Override
+     * public List<OrderResponseDTO> getSendOrder(Long tableNumber) {
+     * List<Object[]> resultList =
+     * orderTransactionRepository.findAllOrdersEnviadas(tableNumber);
+     * 
+     * Map<Integer, OrderResponseDTO> mesaMap = new HashMap<>();
+     * 
+     * for (Object[] result : resultList) {
+     * // Manejo de posibles nulos
+     * Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null;
+     * // Se realiza el cast a Long antes de convertirlo a Integer
+     * String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown"; //
+     * "Unknown" si el estado es nulo
+     * Double totalGeneral = (result[2] != null) ? ((BigDecimal)
+     * result[2]).doubleValue() : 0.0; // BigDecimal a Double
+     * Long orderId = (result[3] != null) ? ((Long) result[3]).longValue() : null;
+     * // Aseguramos que orderId es Integer
+     * Long productId = (result[4] != null) ? ((BigDecimal) result[4]).longValue() :
+     * null; // Convertir el tipo Long a Integer
+     * String productName = (result[5] != null) ? (String) result[5] :
+     * "Unknown Product"; // Nombre del producto
+     * Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0; //
+     * Convertir Long a Integer para la cantidad
+     * Double unitePrice = (result[7] != null) ? ((BigDecimal)
+     * result[7]).doubleValue() : 0.0; // Convertir BigDecimal a Double
+     * Double totalPrice = (result[8] != null) ? ((BigDecimal)
+     * result[8]).doubleValue() : 0.0; // Convertir BigDecimal a Double
+     * Double transactionId = (result[9] != null) ? ((BigDecimal)
+     * result[9]).doubleValue() : 0.0;
+     * String date = (result[10] != null) ? result[10].toString() : null;
+     * 
+     * Long transactionIdL = transactionId.longValue();
+     * 
+     * // Verificar si la mesa ya existe en el mapa
+     * OrderResponseDTO dto = mesaMap.get(mesaId);
+     * if (dto == null) {
+     * dto = new OrderResponseDTO(mesaId, statusMesa.equals("2") ? 2 : 1, new
+     * ArrayList<>(), totalGeneral, transactionIdL);
+     * mesaMap.put(mesaId, dto);
+     * }
+     * 
+     * // Agregar la orden a la mesa
+     * dto.getOrders().add(new OrderDTO(orderId, productId.toString(), productName,
+     * qty, unitePrice, totalPrice, date));
+     * }
+     * 
+     * // Devolver el resultado
+     * return new ArrayList<>(mesaMap.values());
+     * 
+     * }
+     * 
+     */
 
     @Override
     public CustomerOrderResponseDTO getOrederByPhoneNumber(String phoneNumber) {
 
         List<Object[]> rows = orderTransactionRepository.getOrderByPhoneNumber(phoneNumber);
 
-
-
-        if (rows.isEmpty()) return null;
+        if (rows.isEmpty())
+            return null;
 
         List<OrderItemDTO> items = new ArrayList<>();
         String customerPhone = null;
@@ -355,7 +370,8 @@ public class OrderDetailsService implements OrderInterface {
     public CustomerOrderResponseDTO getOrederByTableNumber(Integer tableNumber) {
         List<Object[]> rows = orderTransactionRepository.getOrderByTableNumber(tableNumber);
 
-        if (rows.isEmpty()) return null;
+        if (rows.isEmpty())
+            return null;
 
         List<OrderItemDTO> items = new ArrayList<>();
         String customerPhone = null;
@@ -397,9 +413,11 @@ public class OrderDetailsService implements OrderInterface {
 
         Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
 
-        Long transactionId = transactionRepository.getTransactionIdByPhoneNumber(phoneNumber, tableNumber, company.getId());
+        Long transactionId = transactionRepository.getTransactionIdByPhoneNumber(phoneNumber, tableNumber,
+                company.getId());
 
-        List<CustomerOrder> customerOrders = customerOrderRepository.findByTransactionIdAndStatusNoConfirm(transactionId);
+        List<CustomerOrder> customerOrders = customerOrderRepository
+                .findByTransactionIdAndStatusNoConfirm(transactionId);
 
         if (customerOrders.isEmpty()) {
             return new GenericResponse("No se encontraron órdenes para esta transacción", 404L);
@@ -414,7 +432,8 @@ public class OrderDetailsService implements OrderInterface {
 
             customerOrderRepository.save(order);
         }
-        notificationService.sendNotificationToClient(subscription.getToken(), "Orden confirmada", "Actualizar las ordenes");
+        notificationService.sendNotificationToClient(subscription.getToken(), "Orden confirmada",
+                "Actualizar las ordenes");
         String message = isConfirmed ? "Orden confirmada" : "Orden cancelada";
         return new GenericResponse(message, 200L);
     }
@@ -434,21 +453,31 @@ public class OrderDetailsService implements OrderInterface {
         log.info("company id: " + company.getId());
         log.info("phoneNumber: " + phoneNumber);
 
-        List<Object[]> resultList = orderTransactionRepository.findAllOrdersNotConfirm(tableNumber, company.getId(), phoneNumber);
+        List<Object[]> resultList = orderTransactionRepository.findAllOrdersNotConfirm(tableNumber, company.getId(),
+                phoneNumber);
 
         Map<Integer, OrderResponseDTO> mesaMap = new HashMap<>();
 
         for (Object[] result : resultList) {
             // Manejo de posibles nulos
-            Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null; // Se realiza el cast a Long antes de convertirlo a Integer
+            Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null; // Se realiza el cast a Long
+                                                                                         // antes de convertirlo a
+                                                                                         // Integer
             String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown"; // "Unknown" si el estado es nulo
-            Double totalGeneral = (result[2] != null) ? ((BigDecimal) result[2]).doubleValue() : 0.0; // BigDecimal a Double
+            Double totalGeneral = (result[2] != null) ? ((BigDecimal) result[2]).doubleValue() : 0.0; // BigDecimal a
+                                                                                                      // Double
             Long orderId = (result[3] != null) ? ((Long) result[3]) : null; // Aseguramos que orderId es Integer
-            Integer productId = (result[4] != null) ? ((BigDecimal) result[4]).intValue() : null; // Convertir el tipo Long a Integer
+            Integer productId = (result[4] != null) ? ((BigDecimal) result[4]).intValue() : null; // Convertir el tipo
+                                                                                                  // Long a Integer
             String productName = (result[5] != null) ? (String) result[5] : "Unknown Product"; // Nombre del producto
-            Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0; // Convertir Long a Integer para la cantidad
-            Double unitePrice = (result[7] != null) ? ((BigDecimal) result[7]).doubleValue() : 0.0; // Convertir BigDecimal a Double
-            Double totalPrice = (result[8] != null) ? ((BigDecimal) result[8]).doubleValue() : 0.0; // Convertir BigDecimal a Double
+            Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0; // Convertir Long a Integer para la
+                                                                                   // cantidad
+            Double unitePrice = (result[7] != null) ? ((BigDecimal) result[7]).doubleValue() : 0.0; // Convertir
+                                                                                                    // BigDecimal a
+                                                                                                    // Double
+            Double totalPrice = (result[8] != null) ? ((BigDecimal) result[8]).doubleValue() : 0.0; // Convertir
+                                                                                                    // BigDecimal a
+                                                                                                    // Double
             Double transactionId = (result[9] != null) ? ((BigDecimal) result[9]).doubleValue() : 0.0;
             String date = (result[10] != null) ? result[10].toString() : null;
 
@@ -457,12 +486,14 @@ public class OrderDetailsService implements OrderInterface {
             // Verificar si la mesa ya existe en el mapa
             OrderResponseDTO dto = mesaMap.get(mesaId);
             if (dto == null) {
-                dto = new OrderResponseDTO(mesaId, statusMesa.equals("2") ? 2 : 1, new ArrayList<>(), totalGeneral, transactionIdL);
+                dto = new OrderResponseDTO(mesaId, statusMesa.equals("2") ? 2 : 1, new ArrayList<>(), totalGeneral,
+                        transactionIdL);
                 mesaMap.put(mesaId, dto);
             }
 
             // Agregar la orden a la mesa
-            dto.getOrders().add(new OrderDTO(orderId, productId.toString(), productName, qty, unitePrice, totalPrice, date));
+            dto.getOrders()
+                    .add(new OrderDTO(orderId, productId.toString(), productName, qty, unitePrice, totalPrice, date));
         }
 
         // Devolver el resultado
@@ -480,21 +511,31 @@ public class OrderDetailsService implements OrderInterface {
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
 
-        List<Object[]> resultList = orderTransactionRepository.findAllOrdersConfirm(tableNumber, phoneNumber, company.getId());
+        List<Object[]> resultList = orderTransactionRepository.findAllOrdersConfirm(tableNumber, phoneNumber,
+                company.getId());
 
         Map<Integer, OrderResponseDTO> mesaMap = new HashMap<>();
 
         for (Object[] result : resultList) {
             // Manejo de posibles nulos
-            Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null; // Se realiza el cast a Long antes de convertirlo a Integer
+            Integer mesaId = (result[0] != null) ? ((Long) result[0]).intValue() : null; // Se realiza el cast a Long
+                                                                                         // antes de convertirlo a
+                                                                                         // Integer
             String statusMesa = (result[1] != null) ? (String) result[1] : "Unknown"; // "Unknown" si el estado es nulo
-            Double totalGeneral = (result[2] != null) ? ((BigDecimal) result[2]).doubleValue() : 0.0; // BigDecimal a Double
+            Double totalGeneral = (result[2] != null) ? ((BigDecimal) result[2]).doubleValue() : 0.0; // BigDecimal a
+                                                                                                      // Double
             Long orderId = (result[3] != null) ? ((Long) result[3]) : null; // Aseguramos que orderId es Integer
-            Integer productId = (result[4] != null) ? ((BigDecimal) result[4]).intValue() : null; // Convertir el tipo Long a Integer
+            Integer productId = (result[4] != null) ? ((BigDecimal) result[4]).intValue() : null; // Convertir el tipo
+                                                                                                  // Long a Integer
             String productName = (result[5] != null) ? (String) result[5] : "Unknown Product"; // Nombre del producto
-            Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0; // Convertir Long a Integer para la cantidad
-            Double unitePrice = (result[7] != null) ? ((BigDecimal) result[7]).doubleValue() : 0.0; // Convertir BigDecimal a Double
-            Double totalPrice = (result[8] != null) ? ((BigDecimal) result[8]).doubleValue() : 0.0; // Convertir BigDecimal a Double
+            Integer qty = (result[6] != null) ? ((Long) result[6]).intValue() : 0; // Convertir Long a Integer para la
+                                                                                   // cantidad
+            Double unitePrice = (result[7] != null) ? ((BigDecimal) result[7]).doubleValue() : 0.0; // Convertir
+                                                                                                    // BigDecimal a
+                                                                                                    // Double
+            Double totalPrice = (result[8] != null) ? ((BigDecimal) result[8]).doubleValue() : 0.0; // Convertir
+                                                                                                    // BigDecimal a
+                                                                                                    // Double
             Double transactionId = (result[9] != null) ? ((BigDecimal) result[9]).doubleValue() : 0.0;
             String date = (result[10] != null) ? result[10].toString() : null;
 
@@ -503,12 +544,14 @@ public class OrderDetailsService implements OrderInterface {
             // Verificar si la mesa ya existe en el mapa
             OrderResponseDTO dto = mesaMap.get(mesaId);
             if (dto == null) {
-                dto = new OrderResponseDTO(mesaId, statusMesa.equals("2") ? 2 : 1, new ArrayList<>(), totalGeneral, transactionIdL);
+                dto = new OrderResponseDTO(mesaId, statusMesa.equals("2") ? 2 : 1, new ArrayList<>(), totalGeneral,
+                        transactionIdL);
                 mesaMap.put(mesaId, dto);
             }
 
             // Agregar la orden a la mesa
-            dto.getOrders().add(new OrderDTO(orderId, productId.toString(), productName, qty, unitePrice, totalPrice, date));
+            dto.getOrders()
+                    .add(new OrderDTO(orderId, productId.toString(), productName, qty, unitePrice, totalPrice, date));
         }
 
         // Devolver el resultado
