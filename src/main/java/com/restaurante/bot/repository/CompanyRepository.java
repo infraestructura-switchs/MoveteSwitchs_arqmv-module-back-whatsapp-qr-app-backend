@@ -13,7 +13,7 @@ import java.util.List;
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
         @Query(value = "SELECT new com.restaurante.bot.dto.CompanyRequest(c.id, c.name, c.logo, c.numberWhatsapp," +
-                        " c.longitude, c.latitude, c.baseValue, c.additionalValue, c.externalCompanyId, c.cityId, c.apiKey, c.rpIntegrationId,c.numberId, c.tokenMeta, c.numberBotMesa, c.numberBotDelivery) "
+                        " c.longitude, c.latitude, c.baseValue, c.additionalValue, c.externalCompanyId, c.cityId, c.apiKey, c.rpIntegrationId,c.numberId, c.tokenMeta, c.tokenMetaDelivery, c.numberBotMesa, c.numberBotDelivery) "
                         +
                         "FROM Company c " +
                         "WHERE c.status = 'ACTIVE'", countQuery = "SELECT COUNT(*) " +
