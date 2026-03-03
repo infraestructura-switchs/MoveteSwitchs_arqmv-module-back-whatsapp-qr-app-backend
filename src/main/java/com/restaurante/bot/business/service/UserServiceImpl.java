@@ -1,6 +1,5 @@
 package com.restaurante.bot.business.service;
 
-
 import com.restaurante.bot.business.interfaces.UserService;
 import com.restaurante.bot.dto.*;
 import com.restaurante.bot.exception.CustomErrorException;
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 @Transactional(readOnly = true)
@@ -65,7 +63,6 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-
         Rol ggpRolRepo = iRolRepository.findById(userDto.getRol())
                 .orElseThrow(() -> new CustomErrorException(HttpStatus.BAD_REQUEST, "Rol no encontrado"));
 
@@ -77,7 +74,6 @@ public class UserServiceImpl implements UserService {
 
         Area ggpAreaRepo = iAreaRepository.findById(userDto.getArea())
                 .orElseThrow(() -> new CustomErrorException(HttpStatus.BAD_REQUEST, "Area no encontrada"));
-
 
         User entityUserRepo = new User();
         entityUserRepo.setName(userDto.getName());
@@ -100,8 +96,6 @@ public class UserServiceImpl implements UserService {
         return mapUserDto(newEntityUserRepo);
     }
 
-
-
     @Override
     @Transactional
     public UserDto update(long userId, GgpUserSaveAndUpdateDto userDto) {
@@ -115,7 +109,6 @@ public class UserServiceImpl implements UserService {
 
         if (objectExists && objectUserOptional.getTotalElements() == 0) {
 
-
             Rol ggpRolRepo = iRolRepository.findById(userDto.getRol())
                     .orElseThrow(() -> new CustomErrorException(HttpStatus.BAD_REQUEST, "Rol no encontrado"));
 
@@ -127,7 +120,6 @@ public class UserServiceImpl implements UserService {
 
             Area ggpAreaRepo = iAreaRepository.findById(userDto.getArea())
                     .orElseThrow(() -> new CustomErrorException(HttpStatus.BAD_REQUEST, "Area no encontrada"));
-
 
             User entityUserRepo = iRepository.findById(userId).orElse(new User());
             entityUserRepo.setName(userDto.getName());
@@ -155,7 +147,6 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-
 
     @Override
     @Transactional
@@ -230,7 +221,6 @@ public class UserServiceImpl implements UserService {
         return iRepository.getStatus(pagingSort);
     }
 
-
     @Override
     public List<GgpUserGetAllDto> getAllWithOutPage(Map<String, String> customQuery) {
         String status = Constants.ACTIVE_STATUS;
@@ -253,8 +243,7 @@ public class UserServiceImpl implements UserService {
                         .position(objects.getPosition())
                         .company(objects.getCompany())
                         .status(objects.getStatus())
-                        .build()
-                )
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -292,40 +281,38 @@ public class UserServiceImpl implements UserService {
             status = customQuery.get("status");
         }
         if (customQuery.containsKey("userId")) {
-            //name = "%" + customQuery.get("name") + "%";
+            // name = "%" + customQuery.get("name") + "%";
             id = Long.valueOf(customQuery.get("userId"));
         }
         if (customQuery.containsKey("name")) {
-            //name = "%" + customQuery.get("name") + "%";
+            // name = "%" + customQuery.get("name") + "%";
             name = customQuery.get("name");
         }
 
         if (customQuery.containsKey("email")) {
-            //email = "%" + customQuery.get("email") + "%";
+            // email = "%" + customQuery.get("email") + "%";
             email = customQuery.get("email");
         }
 
         if (customQuery.containsKey("login")) {
-            //login = "%" + customQuery.get("login") + "%";
+            // login = "%" + customQuery.get("login") + "%";
             login = customQuery.get("login");
         }
 
         if (customQuery.containsKey("companyName")) {
-            //login = "%" + customQuery.get("companyName") + "%";
+            // login = "%" + customQuery.get("companyName") + "%";
             companyName = customQuery.get("companyName");
         }
 
         if (customQuery.containsKey("description")) {
-            //login = "%" + customQuery.get("positionDescription") + "%";
+            // login = "%" + customQuery.get("positionDescription") + "%";
             positionDescription = customQuery.get("description");
         }
 
         if (customQuery.containsKey("areaDescription")) {
-            //login = "%" + customQuery.get("positionDescription") + "%";
+            // login = "%" + customQuery.get("positionDescription") + "%";
             areaDescription = customQuery.get("areaDescription");
         }
-
-
 
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Sort sort = Sort.by(direction, sortBy);
@@ -333,8 +320,8 @@ public class UserServiceImpl implements UserService {
         Pageable pagingSort = PageRequest.of(page, size, sort);
         return mapPageUserDto(iRepository
                 .findByUserIdOrNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrLoginContainingIgnoreCaseOrCompany_CompanyNameContainingIgnoreCaseOrPosition_DescriptionContainingIgnoreCaseOrArea_DescriptionContainingIgnoreCaseOrAndStatus(
-                       id, name, email, login,companyName,positionDescription,areaDescription, status,pagingSort), pagingSort
-                );
+                        id, name, email, login, companyName, positionDescription, areaDescription, status, pagingSort),
+                pagingSort);
     }
 
     @Override
@@ -354,16 +341,17 @@ public class UserServiceImpl implements UserService {
         entityUser.setPassword(encodedPassword);
 
         iRepository.save(entityUser);
-/*
-        try {
-            //iMailService.forgotPassword(ggpForgotPasswordDto.getEmail(), password);
-
-            return ForgotPasswordUserDto.builder()
-                    .email(ggpForgotPasswordDto.getEmail())
-                    .build();
-        } catch (UnirestException e) {
-            throw new RuntimeException(e);
-        }*/
+        /*
+         * try {
+         * //iMailService.forgotPassword(ggpForgotPasswordDto.getEmail(), password);
+         * 
+         * return ForgotPasswordUserDto.builder()
+         * .email(ggpForgotPasswordDto.getEmail())
+         * .build();
+         * } catch (UnirestException e) {
+         * throw new RuntimeException(e);
+         * }
+         */
         return ForgotPasswordUserDto.builder()
                 .email(ggpForgotPasswordDto.getEmail())
                 .build();
@@ -375,12 +363,11 @@ public class UserServiceImpl implements UserService {
 
         objectDtoVo.setRolId(objectUser.getRol().getRolId());
         objectDtoVo.setCompanyId(objectUser.getCompany().getId());
-        objectDtoVo.setPositionId(objectUser.getPosition().getPositionId());
+        objectDtoVo.setPositionId(objectUser.getPosition().getId());
         objectDtoVo.setAreaId(objectUser.getArea().getAreaId());
 
         return objectDtoVo;
     }
-
 
     private Page<GgpUserGetAllDto> mapPageUserDto(Page<User> entityPage, Pageable pagingSort) {
         int totalElements = (int) entityPage.getTotalElements();
@@ -388,10 +375,10 @@ public class UserServiceImpl implements UserService {
                 ObjectMapperUtils.mapAll(entityPage.getContent(),
                         GgpUserGetAllDto.class),
                 pagingSort, totalElements).map(ggpUserGetAllDto -> {
-                    //log.info("Mapping User to GgpUserGetAllDto: {}", ggpUserGetAllDto);
-            ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getRolId());
-            ggpUserGetAllDto.setRolName(ggpUserGetAllDto.getRol().getName());
-            return ggpUserGetAllDto;
-        });
+                    // log.info("Mapping User to GgpUserGetAllDto: {}", ggpUserGetAllDto);
+                    ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getRolId());
+                    ggpUserGetAllDto.setRolName(ggpUserGetAllDto.getRol().getName());
+                    return ggpUserGetAllDto;
+                });
     }
 }

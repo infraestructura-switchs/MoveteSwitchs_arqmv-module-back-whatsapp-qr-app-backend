@@ -121,7 +121,7 @@ public class PositionServiceImpl implements IPositionService {
         }
         return positionRepository.findByStatus(status).stream()
                 .map(position -> PositionGetAllDto.builder()
-                        .id(position.getPositionId())
+                        .id(position.getId())
                         .description(position.getDescription())
                         .status(position.getStatus())
                         .build())
@@ -162,7 +162,8 @@ public class PositionServiceImpl implements IPositionService {
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
         return mapPagePositionDto(
                 positionRepository.findByIdOrDescriptionContainingIgnoreCaseAndStatus(
-                        id, description, status, pagingSort), pagingSort);
+                        id, description, status, pagingSort),
+                pagingSort);
     }
 
     private PositionDto mapPositionDto(Position entityPosition) {
@@ -176,10 +177,11 @@ public class PositionServiceImpl implements IPositionService {
         return new PageImpl<>(
                 entityPage.getContent().stream()
                         .map(position -> PositionGetAllDto.builder()
-                                .id(position.getPositionId())
+                                .id(position.getId())
                                 .description(position.getDescription())
                                 .status(position.getStatus())
                                 .build())
-                        .collect(Collectors.toList()), pagingSort, totalElements);
+                        .collect(Collectors.toList()),
+                pagingSort, totalElements);
     }
 }

@@ -18,7 +18,7 @@ public class Position {
     @SequenceGenerator(name = "POSITION_SEQ", sequenceName = "SEQ_POSITION", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "POSITION_SEQ")
     @Column(name = "position_id")
-    private Long positionId;
+    private Long id;
 
     @Column(name = "description")
     private String description;
