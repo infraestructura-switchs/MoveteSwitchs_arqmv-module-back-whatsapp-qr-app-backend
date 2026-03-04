@@ -29,7 +29,8 @@ public class CorsConfigurationSourceImpl implements CorsConfigurationSource {
                 "https://panel-movete.is.arqbs.com",
                 "https://panel-movete.saas.arqbs.com",
                 "https://qr-movete.is.arqbs.com",
-                "https://qr-landing.dokploy.movete.cloud"
+                "https://qr-landing.dokploy.movete.cloud",
+                "https://admin-qr.dokploy.movete.cloud"
         );
         corsConfiguration.setAllowedOriginPatterns(allowedOrigins);
 
