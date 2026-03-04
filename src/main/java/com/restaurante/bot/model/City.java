@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 public class City {
 
     @Id
-    @SequenceGenerator(name = "CITY-SEQ", sequenceName = "CITY_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CITY-SEQ")
     @Column(name = "CITY_ID")
     private Long id;
 

@@ -15,8 +15,6 @@ import java.math.BigDecimal;
 public class OrderProduct {
 
     @Id
-    @SequenceGenerator(name = "ORDER-PRODUCT-SEQ", sequenceName = "ORDER_PRODUCT_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ORDER-PRODUCT-SEQ")
     @Column(name = "order_product_id")
     private Integer orderProductId;
 

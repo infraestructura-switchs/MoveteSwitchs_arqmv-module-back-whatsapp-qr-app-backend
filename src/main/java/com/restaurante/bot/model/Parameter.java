@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 public class Parameter {
 
     @Id
-    @SequenceGenerator(name = "PARAMETER-SEQ", sequenceName = "PARAMETER_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PARAMETER-SEQ")
     @Column(name = "parameter_id")
     private Long parameterId;
 

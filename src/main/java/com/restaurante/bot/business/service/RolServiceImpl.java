@@ -135,7 +135,7 @@ public class RolServiceImpl implements RolInterface {
     @Override
     public Page<RolGetAllDto> searchCustom(Map<String, String> customQuery) {
         String orders = "ASC";
-        String sortBy = "id";
+        String sortBy = "rolId";
         int page = 0;
         int size = 5;
         Long id = null;
@@ -166,7 +166,8 @@ public class RolServiceImpl implements RolInterface {
 
         return mapPageRolDto(
                 rolRepository.findByIdOrNameContainingIgnoreCaseAndStatus(
-                        id, name, pagingSort), pagingSort);
+                        id, name, pagingSort),
+                pagingSort);
     }
 
     private RolDto mapRolDto(Rol Rol) {
@@ -184,6 +185,7 @@ public class RolServiceImpl implements RolInterface {
                                 .name(rol.getName())
                                 .status(rol.getStatus())
                                 .build())
-                        .collect(Collectors.toList()), pagingSort, totalElements);
+                        .collect(Collectors.toList()),
+                pagingSort, totalElements);
     }
 }

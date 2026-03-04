@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class PositionDto {
-    private Long id;
+    private Long positionId;
     private String description;
     private String status;
 }

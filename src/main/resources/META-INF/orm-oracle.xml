@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm
+                                     https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+                 version="3.0">
+
+    <entity class="com.restaurante.bot.model.Area">
+        <attributes>
+            <id name="areaId">
+                <generated-value strategy="SEQUENCE" generator="AREA_SEQ"/>
+                <sequence-generator name="AREA_SEQ" sequence-name="SEQ_AREA" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Category">
+        <attributes>
+            <id name="categoryId">
+                <generated-value strategy="SEQUENCE" generator="CATEGORY_SEQ"/>
+                <sequence-generator name="CATEGORY_SEQ" sequence-name="CATEGORY_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.CategoryMapping">
+        <attributes>
+            <id name="mappingId">
+                <generated-value strategy="SEQUENCE" generator="CATEGORY_MAPPING_SEQ"/>
+                <sequence-generator name="CATEGORY_MAPPING_SEQ" sequence-name="category_mapping_seq" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.City">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="SEQUENCE" generator="CITY_SEQ"/>
+                <sequence-generator name="CITY_SEQ" sequence-name="CITY_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Company">
+        <attributes>
+            <id name="id">
+                <column name="company_id"/>
+                <generated-value strategy="SEQUENCE" generator="COMPANY_SEQ"/>
+                <sequence-generator name="COMPANY_SEQ" sequence-name="COMPANY_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Customer">
+        <attributes>
+            <id name="customer_id">
+                <generated-value strategy="SEQUENCE" generator="CUSTOMER_SEQ"/>
+                <sequence-generator name="CUSTOMER_SEQ" sequence-name="CUSTOMER_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.CustomerOrder">
+        <attributes>
+            <id name="orderId">
+                <generated-value strategy="SEQUENCE" generator="CUSTOMER_ORDER_SEQ"/>
+                <sequence-generator name="CUSTOMER_ORDER_SEQ" sequence-name="CUSTOMER_ORDER_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.History">
+        <attributes>
+            <id name="historyId">
+                <generated-value strategy="SEQUENCE" generator="HISTORY_SEQ"/>
+                <sequence-generator name="HISTORY_SEQ" sequence-name="HISTORY_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.OrderDetailDelivery">
+        <attributes>
+            <id name="orderTransactionDeliveryId">
+                <generated-value strategy="SEQUENCE" generator="ORDER_TRANSACTION_DELIVERY_SEQ"/>
+                <sequence-generator name="ORDER_TRANSACTION_DELIVERY_SEQ" sequence-name="ORDER_TRANSACTION_DELIVERY_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.OrderProduct">
+        <attributes>
+            <id name="orderProductId">
+                <generated-value strategy="SEQUENCE" generator="ORDER_PRODUCT_SEQ"/>
+                <sequence-generator name="ORDER_PRODUCT_SEQ" sequence-name="ORDER_PRODUCT_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.OrderProductDelivery">
+        <attributes>
+            <id name="orderProductId">
+                <generated-value strategy="SEQUENCE" generator="ORDER_PRODUCT_DELIVERY_SEQ"/>
+                <sequence-generator name="ORDER_PRODUCT_DELIVERY_SEQ" sequence-name="ORDER_PRODUCT_DELIVERY_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.OrderTransaction">
+        <attributes>
+            <id name="orderTransactionId">
+                <generated-value strategy="SEQUENCE" generator="ORDER_TRANSACTION_SEQ"/>
+                <sequence-generator name="ORDER_TRANSACTION_SEQ" sequence-name="ORDER_TRANSACTION_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Parameter">
+        <attributes>
+            <id name="parameterId">
+                <generated-value strategy="SEQUENCE" generator="PARAMETER_SEQ"/>
+                <sequence-generator name="PARAMETER_SEQ" sequence-name="PARAMETER_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Payment">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="SEQUENCE" generator="PAYMENT_SEQ"/>
+                <sequence-generator name="PAYMENT_SEQ" sequence-name="PAYMENT_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Position">
+        <attributes>
+            <id name="positionId">
+                <generated-value strategy="SEQUENCE" generator="POSITION_SEQ"/>
+                <sequence-generator name="POSITION_SEQ" sequence-name="SEQ_POSITION" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Product">
+        <attributes>
+            <id name="productId">
+                <generated-value strategy="SEQUENCE" generator="PRODUCT_SEQ"/>
+                <sequence-generator name="PRODUCT_SEQ" sequence-name="PRODUCT_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Rating">
+        <attributes>
+            <id name="ratingId">
+                <generated-value strategy="SEQUENCE" generator="RATING_SEQ"/>
+                <sequence-generator name="RATING_SEQ" sequence-name="RATING_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Rol">
+        <attributes>
+            <id name="rolId">
+                <generated-value strategy="SEQUENCE" generator="ROL_SEQ"/>
+                <sequence-generator name="ROL_SEQ" sequence-name="SEQ_ROL" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.ShortLink">
+        <attributes>
+            <id name="shortLinksId">
+                <generated-value strategy="SEQUENCE" generator="SHORT_LINKS_SEQ"/>
+                <sequence-generator name="SHORT_LINKS_SEQ" sequence-name="SHORT_LINKS_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Subscription">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="SEQUENCE" generator="SUBSCRIPTION_SEQ"/>
+                <sequence-generator name="SUBSCRIPTION_SEQ" sequence-name="suscriptions_seq" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Transaction">
+        <attributes>
+            <id name="transactionId">
+                <generated-value strategy="SEQUENCE" generator="TRANSACTION_SEQ"/>
+                <sequence-generator name="TRANSACTION_SEQ" sequence-name="TRANSACTION_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.TransactionClient">
+        <attributes>
+            <id name="transactionClientId">
+                <generated-value strategy="SEQUENCE" generator="TRANSACTION_CLIENT_SEQ"/>
+                <sequence-generator name="TRANSACTION_CLIENT_SEQ" sequence-name="transaction_customer_seq" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.TypeIdentification">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="SEQUENCE" generator="TYPE_IDENTIFICATION_SEQ"/>
+                <sequence-generator name="TYPE_IDENTIFICATION_SEQ" sequence-name="TYPE_IDENTIFICATION_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.User">
+        <attributes>
+            <id name="userId">
+                <generated-value strategy="SEQUENCE" generator="USER_SEQ"/>
+                <sequence-generator name="USER_SEQ" sequence-name="SEQ_USER" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.WaiterCall">
+        <attributes>
+            <id name="callId">
+                <generated-value strategy="SEQUENCE" generator="WAITERCALL_SEQ"/>
+                <sequence-generator name="WAITERCALL_SEQ" sequence-name="WAITERCALL_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.RestaurantTable">
+        <attributes>
+            <id name="tableId">
+                <generated-value strategy="SEQUENCE" generator="TABLE_SEQ"/>
+                <sequence-generator name="TABLE_SEQ" sequence-name="SEQ_TABLE" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+</entity-mappings>

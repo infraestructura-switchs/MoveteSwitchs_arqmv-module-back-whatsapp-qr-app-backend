@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 @Table(name = "rating")
 public class Rating {
     @Id
-    @SequenceGenerator(name = "RATING_SEQ", sequenceName = "RATING_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RATING_SEQ")
     @Column(name = "rating_id")
     private Integer ratingId;
 
@@ -18,10 +16,11 @@ public class Rating {
     private String Qualification;
 
     @ManyToOne
-    @JoinColumn(name = "table_id", referencedColumnName = "table_id", insertable = false, updatable = false)
+    @JoinColumn(name = "table_id", referencedColumnName = "tableId", insertable = false, updatable = false)
     private RestaurantTable restaurantTable;
 
-    public Rating() {}
+    public Rating() {
+    }
 
     public Rating(Integer ratingId, Integer tableId, String qualification, RestaurantTable restaurantTable) {
         this.ratingId = ratingId;
@@ -33,26 +32,32 @@ public class Rating {
     public Integer getRatingId() {
         return ratingId;
     }
+
     public void setRatingId(Integer ratingId) {
         this.ratingId = ratingId;
     }
+
     public Integer getTableId() {
         return tableId;
     }
+
     public void setTableId(Integer tableId) {
         this.tableId = tableId;
     }
+
     public String getQualification() {
         return Qualification;
     }
+
     public void setQualification(String qualification) {
         Qualification = qualification;
     }
+
     public RestaurantTable getRestaurantTable() {
         return restaurantTable;
     }
+
     public void setRestaurantTable(RestaurantTable restaurantTable) {
         this.restaurantTable = restaurantTable;
     }
 }
-

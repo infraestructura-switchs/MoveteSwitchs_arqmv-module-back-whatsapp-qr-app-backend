@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm
+                                     https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+                 version="3.0">
+
+    <entity class="com.restaurante.bot.model.Area">
+        <attributes>
+            <id name="areaId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Category">
+        <attributes>
+            <id name="categoryId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.CategoryMapping">
+        <attributes>
+            <id name="mappingId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.City">
+        <attributes>
+            <id name="id">
+                <column name="CITY_ID"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Company">
+        <attributes>
+            <id name="id">
+                <column name="company_id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Customer">
+        <attributes>
+            <id name="customer_id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.CustomerOrder">
+        <attributes>
+            <id name="orderId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.History">
+        <attributes>
+            <id name="historyId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.OrderDetailDelivery">
+        <attributes>
+            <id name="orderTransactionDeliveryId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.OrderProduct">
+        <attributes>
+            <id name="orderProductId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.OrderProductDelivery">
+        <attributes>
+            <id name="orderProductId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.OrderTransaction">
+        <attributes>
+            <id name="orderTransactionId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Parameter">
+        <attributes>
+            <id name="parameterId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Payment">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Position">
+        <attributes>
+            <id name="positionId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Product">
+        <attributes>
+            <id name="productId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Rating">
+        <attributes>
+            <id name="ratingId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Rol">
+        <attributes>
+            <id name="rolId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.ShortLink">
+        <attributes>
+            <id name="shortLinksId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Subscription">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.Transaction">
+        <attributes>
+            <id name="transactionId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.TransactionClient">
+        <attributes>
+            <id name="transactionClientId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.TypeIdentification">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.User">
+        <attributes>
+            <id name="userId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.WaiterCall">
+        <attributes>
+            <id name="callId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
+    <entity class="com.restaurante.bot.model.RestaurantTable">
+        <attributes>
+            <id name="tableId">
+                <generated-value strategy="SEQUENCE" generator="TABLE_SEQ"/>
+                <sequence-generator name="TABLE_SEQ" sequence-name="SEQ_TABLE" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
+</entity-mappings>

@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @Table(name = "order_transaction_delivery")
 public class OrderDetailDelivery {
     @Id
-    @SequenceGenerator(name = "ORDER-TRANSACTION-DELIVERY-SEQ", sequenceName = "ORDER_TRANSACTION_DELIVERY_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ORDER-TRANSACTION-DELIVERY-SEQ")
     @Column(name = "order_transaction_delivery_id")
     private Long orderTransactionDeliveryId;
 

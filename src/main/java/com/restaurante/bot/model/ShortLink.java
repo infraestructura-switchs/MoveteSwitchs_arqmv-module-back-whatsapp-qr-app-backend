@@ -19,8 +19,6 @@ import java.time.LocalDateTime;
 public class ShortLink {
 
     @Id
-    @SequenceGenerator(name = "SHORT_LINKS_SEQ", sequenceName = "SHORT_LINKS_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SHORT_LINKS_SEQ")
     @Column(name = "short_links_id")
     private Long shortLinksId;
 
@@ -38,8 +36,19 @@ public class ShortLink {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public String getOriginalUrl() { return originalUrl; }
-    public void setOriginalUrl(String originalUrl) { this.originalUrl = originalUrl; }
-    public String getShortCode() { return shortCode; }
-    public void setShortCode(String shortCode) { this.shortCode = shortCode; }
+    public String getOriginalUrl() {
+        return originalUrl;
+    }
+
+    public void setOriginalUrl(String originalUrl) {
+        this.originalUrl = originalUrl;
+    }
+
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
 }

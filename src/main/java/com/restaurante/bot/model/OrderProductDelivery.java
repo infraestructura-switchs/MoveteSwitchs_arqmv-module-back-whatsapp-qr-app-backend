@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
 public class OrderProductDelivery {
 
     @Id
-    @SequenceGenerator(name = "ORDER-PRODUCT-DELIVERY-SEQ", sequenceName = "ORDER_PRODUCT_DELIVERY_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ORDER-PRODUCT-DELIVERY-SEQ")
     @Column(name = "order_product_delivery_id")
     private Long orderProductId;
 
@@ -37,7 +35,5 @@ public class OrderProductDelivery {
 
     @Column(name = "COMMENT_PRODUCT")
     private String commentProduct;
-
-
 
 }

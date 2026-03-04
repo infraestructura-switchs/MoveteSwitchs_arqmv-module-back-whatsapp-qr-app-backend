@@ -13,8 +13,6 @@ import lombok.NoArgsConstructor;
 public class Transaction {
 
     @Id
-    @SequenceGenerator(name = "TRANSACTION-SEQ", sequenceName = "TRANSACTION_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TRANSACTION-SEQ")
     @Column(name = "transaction_id")
     private Long transactionId;
 
@@ -35,6 +33,5 @@ public class Transaction {
 
     @Column(name = "company_id")
     private Long companyId;
-
 
 }

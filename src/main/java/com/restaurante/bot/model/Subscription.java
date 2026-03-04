@@ -1,6 +1,5 @@
 package com.restaurante.bot.model;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -9,8 +8,6 @@ import lombok.Data;
 @Data
 public class Subscription {
     @Id
-    @SequenceGenerator(name = "suscriptions-seq", sequenceName = "suscriptions_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "suscriptions-seq")
     private Long id;
 
     @Column(name = "user_id")

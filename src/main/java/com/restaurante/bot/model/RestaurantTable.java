@@ -12,7 +12,6 @@ import lombok.*;
 public class RestaurantTable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "table_id")
     private Integer tableId;
 

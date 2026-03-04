@@ -363,7 +363,7 @@ public class UserServiceImpl implements UserService {
 
         objectDtoVo.setRolId(objectUser.getRol().getRolId());
         objectDtoVo.setCompanyId(objectUser.getCompany().getId());
-        objectDtoVo.setPositionId(objectUser.getPosition().getId());
+        objectDtoVo.setPositionId(objectUser.getPosition().getPositionId());
         objectDtoVo.setAreaId(objectUser.getArea().getAreaId());
 
         return objectDtoVo;

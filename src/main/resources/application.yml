@@ -17,15 +17,18 @@ spring:
       auto-commit: true
 
   jpa:
+    mapping-resources: META-INF/orm-${app.db.type:mysql}.xml
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: ${app.db.dialect:org.hibernate.dialect.MySQL8Dialect}
     show-sql: true
 
+app:
+  db:
+    type: ${DB_TYPE:mysql}
+    dialect: ${DB_DIALECT:org.hibernate.dialect.MySQL8Dialect}
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-
-app:
   request:
     mapping: api/back-whatsapp-qr-app
   version: '@version@'

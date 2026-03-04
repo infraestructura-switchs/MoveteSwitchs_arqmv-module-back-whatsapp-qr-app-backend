@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 public class CategoryMapping {
 
     @Id
-    @SequenceGenerator(name = "CATEGORY-MAPPING-SEQ", sequenceName = "category_mapping_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CATEGORY-MAPPING-SEQ")
     @Column(name = "mapping_id")
     private Long mappingId;
 

@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
 public class User {
 
     @Id
-    @SequenceGenerator(name = "USER_SEQ", sequenceName = "SEQ_USER", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_SEQ")
     @Column(name = "user_id")
     private Long userId;
 

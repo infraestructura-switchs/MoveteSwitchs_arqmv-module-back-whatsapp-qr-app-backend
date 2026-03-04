@@ -19,8 +19,6 @@ import java.time.LocalDateTime;
 public class TypeIdentification {
 
     @Id
-    @SequenceGenerator(name = "TYPE_IDENTIFICATION_SEQ", sequenceName = "TYPE_IDENTIFICATION_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TYPE_IDENTIFICATION_SEQ")
     @Column(name = "type_identification_id")
     private Long id;
 
@@ -37,6 +35,5 @@ public class TypeIdentification {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
 
 }

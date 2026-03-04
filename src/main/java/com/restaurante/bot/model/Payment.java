@@ -16,8 +16,6 @@ import java.util.Date;
 public class Payment {
 
     @Id
-    @SequenceGenerator(name = "PAYMENT-SEQ", sequenceName = "PAYMENT_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PAYMENT-SEQ")
     @Column(name = "payment_id")
     private Long id;
 
@@ -32,7 +30,5 @@ public class Payment {
 
     @Column(name = "date")
     private Date date;
-
-
 
 }

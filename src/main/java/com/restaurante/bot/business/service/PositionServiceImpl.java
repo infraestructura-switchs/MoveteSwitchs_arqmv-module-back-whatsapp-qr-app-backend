@@ -82,7 +82,7 @@ public class PositionServiceImpl implements IPositionService {
     @Override
     public Page<PositionGetAllDto> getAll(Map<String, String> customQuery) {
         String orders = "ASC";
-        String sortBy = "id";
+        String sortBy = "positionId";
         int page = 0;
         int size = 5;
         String status = Constants.ACTIVE_STATUS;
@@ -121,7 +121,7 @@ public class PositionServiceImpl implements IPositionService {
         }
         return positionRepository.findByStatus(status).stream()
                 .map(position -> PositionGetAllDto.builder()
-                        .id(position.getId())
+                        .id(position.getPositionId())
                         .description(position.getDescription())
                         .status(position.getStatus())
                         .build())
@@ -131,7 +131,7 @@ public class PositionServiceImpl implements IPositionService {
     @Override
     public Page<PositionGetAllDto> searchCustom(Map<String, String> customQuery) {
         String orders = "ASC";
-        String sortBy = "id";
+        String sortBy = "positionId";
         int page = 0;
         int size = 5;
         String id = null;
@@ -177,7 +177,7 @@ public class PositionServiceImpl implements IPositionService {
         return new PageImpl<>(
                 entityPage.getContent().stream()
                         .map(position -> PositionGetAllDto.builder()
-                                .id(position.getId())
+                                .id(position.getPositionId())
                                 .description(position.getDescription())
                                 .status(position.getStatus())
                                 .build())

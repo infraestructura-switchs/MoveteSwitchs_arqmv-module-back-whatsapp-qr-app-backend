@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 public class History {
 
     @Id
-    @SequenceGenerator(name = "HISTORY-SEQ", sequenceName = "HISTORY_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "HISTORY-SEQ")
     @Column(name = "history_id")
     private Integer historyId;
 

@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 public class CustomerOrder {
 
     @Id
-    @SequenceGenerator(name = "CUSTOMER-ORDER-SEQ", sequenceName = "CUSTOMER_ORDER_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CUSTOMER-ORDER-SEQ")
     @Column(name = "order_id")
     private Long orderId;
 
@@ -34,8 +32,7 @@ public class CustomerOrder {
     @Column(name = "total")
     private Double total;
 
-   @Column(name = "customer_id")
+    @Column(name = "customer_id")
     private Long customerId;
-
 
 }

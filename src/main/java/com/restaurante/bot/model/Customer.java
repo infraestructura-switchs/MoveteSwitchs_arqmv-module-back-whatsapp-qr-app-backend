@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
 public class Customer {
 
     @Id
-    @SequenceGenerator(name = "CUSTOMER-SEQ", sequenceName = "CUSTOMER_SEQ", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CUSTOMER-SEQ")
     @Column(name = "customer_id")
     private Long customer_id;
 
@@ -37,6 +35,5 @@ public class Customer {
 
     @Column(name = "numer_identification")
     private Long numerIdentification;
-
 
 }

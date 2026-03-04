@@ -17,7 +17,9 @@ public class FirebaseConfig {
         String serviceAccountJson = System.getenv("FIREBASE_SERVICE_ACCOUNT");
 
         if (serviceAccountJson == null || serviceAccountJson.isEmpty()) {
-            throw new IllegalStateException("Environment variable FIREBASE_SERVICE_ACCOUNT is not set");
+            System.err.println(
+                    "WARNING: Environment variable FIREBASE_SERVICE_ACCOUNT is not set. Firebase will not be initialized.");
+            return;
         }
 
         InputStream serviceAccount = new java.io.ByteArrayInputStream(
