@@ -71,8 +71,8 @@ public class CompanyController {
     @GetMapping("/get-company")
     public ResponseEntity<List<CompanyRequest>> getAllCategories() {
         log.info("Iniciando endpoint para obtener todas las compañias");
-        List<CompanyRequest> categories = companyUseCase.getAllCompany();
-        return new ResponseEntity<>(categories, HttpStatus.OK);
+        List<CompanyRequest> companys = companyUseCase.getAllCompany();
+        return new ResponseEntity<>(companys, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")

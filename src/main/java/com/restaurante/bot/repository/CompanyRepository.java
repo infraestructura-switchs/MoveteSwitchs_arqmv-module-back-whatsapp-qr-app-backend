@@ -13,7 +13,9 @@ import java.util.List;
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
         @Query(value = "SELECT new com.restaurante.bot.dto.CompanyRequest(c.id, c.name, c.logo, c.numberWhatsapp," +
-                        " c.longitude, c.latitude, c.baseValue, c.additionalValue, c.externalCompanyId, c.cityId, c.apiKey, c.rpIntegrationId,c.numberId, c.tokenMeta, c.tokenMetaDelivery, c.numberBotMesa, c.numberBotDelivery) "
+                        " c.longitude, c.latitude, c.baseValue, c.additionalValue, c.externalCompanyId, c.cityId, "+
+                        " c.apiKey, c.rpIntegrationId,c.numberId, c.tokenMeta, c.tokenMetaDelivery, c.numberBotMesa "+
+                        ", c.numberBotDelivery, c.landingTemplate) "
                         +
                         "FROM Company c " +
                         "WHERE c.status = 'ACTIVE'", countQuery = "SELECT COUNT(*) " +
@@ -22,7 +24,9 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
         List<CompanyRequest> getAllCompany();
 
         @Query(value = "SELECT new com.restaurante.bot.dto.CompanyResponseDTO(c.id, c.name, c.logo, c.numberWhatsapp," +
-                        " c.latitude, c.longitude, c.baseValue, c.additionalValue, c.status, c.externalCompanyId, c.cityId, ci.name,c.apiKey, c.rpIntegrationId,c.numberId, c.tokenMeta,c.numberBotDelivery, c.numberBotMesa, c.statusIntegrationRp,c.tokenMetaDelivery) "
+                        " c.latitude, c.longitude, c.baseValue, c.additionalValue, c.status, c.externalCompanyId, "+
+                        "c.cityId, ci.name,c.apiKey, c.rpIntegrationId,c.numberId, c.tokenMeta,c.numberBotDelivery, "+
+                        "c.numberBotMesa, c.statusIntegrationRp,c.tokenMetaDelivery, c.landingTemplate) "
                         +
                         "FROM Company c " +
                         "JOIN City ci ON c.cityId = ci.id " +

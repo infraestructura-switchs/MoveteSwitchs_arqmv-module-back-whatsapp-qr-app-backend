@@ -26,7 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
           )
         )
         AND (:categoryId IS NULL OR p.categoryId = :categoryId)
-        AND (p.status IS NULL OR UPPER(p.status) <> 'INACTIVO')
+        AND (p.status IS NULL OR UPPER(p.status) <> 'INACTIVE')
       ORDER BY
         CASE
           WHEN :name IS NULL THEN 3
@@ -55,7 +55,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
               OR LOWER(p.description) LIKE LOWER(CONCAT('%', CONCAT(:name, '%')))
             )
           )
-          AND (p.status IS NULL OR UPPER(p.status) <> 'INACTIVO')
+          AND (p.status IS NULL OR UPPER(p.status) <> 'INACTIVE')
         ORDER BY
           CASE
             WHEN :sort = 'ASC' THEN p.price END ASC,

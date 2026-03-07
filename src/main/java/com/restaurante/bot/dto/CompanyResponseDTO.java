@@ -29,4 +29,5 @@ public class CompanyResponseDTO {
     private String numberBotMesa;
     private String statusRappy;
     private String tokenMetaDelivery;
+    private String landingTemplate;
 }

@@ -26,4 +26,5 @@ public class CompanyRequest {
     private String tokenMetaDelivery;
     private String numberBotMesa;
     private String numberBotDelivery;
+    private String landingTemplate;
 }

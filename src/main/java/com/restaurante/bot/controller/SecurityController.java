@@ -3,6 +3,7 @@ package com.restaurante.bot.controller;
 import com.restaurante.bot.application.ports.incoming.ShortLinkUseCase;
 import com.restaurante.bot.dto.GenerateLinkIn;
 import com.restaurante.bot.dto.GenerateTokenRequestDTO;
+import com.restaurante.bot.model.Company;
 import com.restaurante.bot.repository.CompanyRepository;
 import com.restaurante.bot.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +62,8 @@ public class SecurityController {
             return new ResponseEntity<>("Compañía no existe", HttpStatus.NOT_FOUND);
         }
 
+        Company company= companyRepository.findByExternalCompanyId(generateLinkIn.getCompanyId());
+
         String token = jwtUtil.generateToken(generateLinkIn.getCompanyId(), generateLinkIn.getUserId());
 
         queryParams.put("token", token);
@@ -74,6 +77,10 @@ public class SecurityController {
 
         if (generateLinkIn.getDelivery() != null && !generateLinkIn.getDelivery().isEmpty()) {
             queryParams.put("Delivery", generateLinkIn.getDelivery());
+        }
+
+        if (company.getLandingTemplate() != null && !company.getLandingTemplate().isEmpty()) {
+            queryParams.put("templateLanding", company.getLandingTemplate());
         }
 
         String fullLink = buildUrl(landingPageUrl, queryParams);

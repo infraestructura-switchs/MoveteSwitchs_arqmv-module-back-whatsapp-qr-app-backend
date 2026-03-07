@@ -75,6 +75,9 @@ public class Company {
     @Column(name = "token_meta_delivery")
     private String tokenMetaDelivery;
 
+    @Column(name = "landing_template")
+    private String landingTemplate;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

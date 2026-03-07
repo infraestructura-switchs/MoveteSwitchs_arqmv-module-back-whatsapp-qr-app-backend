@@ -50,7 +50,7 @@ class ProductRepositoryTest {
         p3.setPrice(18000.0);
         p3.setCategoryId(1L);
         p3.setCompanyId(1L);
-        p3.setStatus("INACTIVO");
+        p3.setStatus("INACTIVE");
         productRepository.save(p3);
 
         productRepository.flush();
