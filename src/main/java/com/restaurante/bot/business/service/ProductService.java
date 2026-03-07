@@ -54,11 +54,21 @@ public class ProductService implements ProductInterface, ProductUseCase {
     private final Map<Integer, String> productImageParameterIDs = Map.of(238,productImageChuzoIvan,
             273,productImageBuenNino);
 
-    private String imageOrDefault(Integer companyId, String imgProduct) {
-        String productIdImage = productImageDefault;
-        if (imgProduct == null) productIdImage = productImageParameterIDs.getOrDefault(companyId, productImageDefault);
-        String imgProductTrim = imgProduct.trim();
-        if (imgProductTrim.isEmpty() || "null".equalsIgnoreCase(imgProductTrim)) productIdImage =  productImageDefault;
+    private String imageOrDefault(String imgProduct, String productImageBycompany) {
+
+        String productImageDefault = imgProduct;
+        if (imgProduct == null) productImageDefault = productImageBycompany;
+
+        String imgProductTrim = productImageDefault.trim();
+        if (imgProductTrim.isEmpty() || "null".equalsIgnoreCase(imgProductTrim)) productImageDefault =  imgProductTrim;
+
+        return productImageDefault;
+    }
+
+    private String imageByCompanyId(Integer companyId) {
+        log.info("Obteniendo imagen para producto de la compañía {}", companyId);
+        String productIdImage = productImageParameterIDs.getOrDefault(companyId, productImageDefault);
+
 
         Optional<Parameter> parameteOptiona = parameterRepository.findByName(productIdImage);
         return parameteOptiona.map(Parameter::getValue).orElseGet(() -> {
@@ -67,7 +77,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
         });
     }
 
-    private ProductDto toDto(Product product) {
+    private ProductDto toDto(Product product, String productImageBycompany) {
         List<String> commentsList = new ArrayList<>();
         if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
             try {
@@ -82,7 +92,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
                 product.getPrice(),
                 product.getDescription(),
                 product.getStatus(),
-                imageOrDefault(product.getCompanyId().intValue(),product.getImgProduct()),
+                imageOrDefault(product.getImgProduct(), productImageBycompany),
                 product.getCategoryId(),
                 commentsList,
                 product.getInformation(),
@@ -108,8 +118,10 @@ public class ProductService implements ProductInterface, ProductUseCase {
         List<Category> categories = categoryRepository.findByCompanyId(companyId);
         List<Product> products = productRepository.findByCompanyIdOrderByNameAsc(companyId);
 
+        String imageByCompany = imageByCompanyId(companyId.intValue());
+
         Map<Long, List<ProductDto>> categorizedProductMap = products.stream()
-                .map(this::toDto)
+                .map( product -> toDto(product, imageByCompany))
                 .collect(Collectors.groupingBy(ProductDto::getCategoryId));
 
         CategorizedProductsDTO categorizedProductsDTO = new CategorizedProductsDTO();
@@ -244,14 +256,17 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
         Product updatedProduct = productRepository.save(product);
 
+        String imageByCompany = imageByCompanyId(product.getCompanyId().intValue());
+
+
+
         return new ProductDto(
                 updatedProduct.getProductId(),
                 updatedProduct.getName(),
                 updatedProduct.getPrice(),
                 updatedProduct.getDescription(),
                 updatedProduct.getStatus(),
-                imageOrDefault(updatedProduct.getCompanyId().intValue(),
-                        updatedProduct.getImgProduct()),
+                imageOrDefault(updatedProduct.getImgProduct(), imageByCompany),
                 updatedProduct.getCategoryId(),
                 commentsList,
                 updatedProduct.getInformation(),
@@ -266,7 +281,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
         product.setSoftRestaurantId(productDTO.getIdProducto());
         product.setName(productDTO.getData().getDescripcion());
         product.setPrice(productDTO.getData().getPrecio());
-        product.setStatus("ACTIVO");
+        product.setStatus("ACTIVE");
         product.setImgProduct(productDTO.getData().getImagenMenu());
         product.setCompanyId(companyId);
         product.setGroupId(Long.parseLong(productDTO.getData().getGrupo().getIdGrupo()));
@@ -308,6 +323,8 @@ public class ProductService implements ProductInterface, ProductUseCase {
     public List<ProductDto> searchProducts(Long companyId, String name, String categoryName) {
         String term = (name == null || name.isBlank()) ? null : name.trim();
 
+        String imageByCompany = imageByCompanyId(companyId.intValue());
+
         Long categoryId = null;
         if (categoryName != null && !categoryName.isBlank()) {
             categoryId = categoryRepository
@@ -322,7 +339,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
         List<Product> found = productRepository.search(companyId, term, categoryId);
 
         return found.stream()
-                .map(this::toDto)
+                .map(product -> toDto(product, imageByCompany))
                 .collect(Collectors.toList());
     }
 
@@ -347,8 +364,10 @@ public class ProductService implements ProductInterface, ProductUseCase {
         List<Product> found = productRepository
                 .findAllByCompanyAndCategoryAndNameOrderByPrice(companyId, categoryId, name, order);
 
+        String imageByCompany = imageByCompanyId(companyId.intValue());
+
         return found.stream()
-                .map(this::toDto)
+                .map(product -> toDto(product, imageByCompany))
                 .toList();
     }
 
