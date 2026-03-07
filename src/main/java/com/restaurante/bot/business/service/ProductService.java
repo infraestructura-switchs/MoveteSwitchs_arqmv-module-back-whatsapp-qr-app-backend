@@ -25,6 +25,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -49,36 +50,46 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
     private final Map<Long, Map<String, Long>> dynamicCategoryMapping = new HashMap<>();
 
-    @org.springframework.beans.factory.annotation.Value("${app.default-product-image}")
-    private String defaultProductImage;
+    @Value("${app.default-product-image.chuzo-ivan}")
+    private final String productImageDefault;
 
-    private String imageOrDefault(String img) {
-        if (img == null) return defaultProductImage;
-        String s = img.trim();
-        if (s.isEmpty() || "null".equalsIgnoreCase(s)) return defaultProductImage;
-        return s;
+    @Value("${app.default-product-image.chuzo-ivan}")
+    private final String productImageChuzoIvan;
+
+    @Value("${app.default-product-image.buen-nino}")
+    private final String productImageBuenNino;
+
+    private final Map<Integer, String> productImageList = Map.of(238,productImageChuzoIvan,
+            273,productImageBuenNino);
+
+    private String imageOrDefault(Integer companyId, String imgProduct) {
+        String productImage = productImageDefault;
+        if (imgProduct == null) productImage = productImageList.getOrDefault(companyId, productImageDefault);
+        String imgProductTrim = imgProduct.trim();
+        if (imgProductTrim.isEmpty() || "null".equalsIgnoreCase(imgProductTrim)) productImage =  productImageDefault;
+        return productImage;
     }
 
-    private ProductDto toDto(Product p) {
+    private ProductDto toDto(Product product) {
         List<String> commentsList = new ArrayList<>();
-        if (p.getComments() != null && !p.getComments().trim().isEmpty()) {
+        if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
             try {
-                commentsList = objectMapper.readValue(p.getComments(), new TypeReference<List<String>>() {});
+                commentsList = objectMapper.readValue(product.getComments(), new TypeReference<List<String>>() {});
             } catch (JsonProcessingException e) {
                 throw new GenericException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
         return new ProductDto(
-                p.getProductId(),
-                p.getName(),
-                p.getPrice(),
-                p.getDescription(),
-                p.getStatus(),
-                imageOrDefault(p.getImgProduct()),
-                p.getCategoryId(),
+                product.getProductId(),
+                product.getName(),
+                product.getPrice(),
+                product.getDescription(),
+                product.getStatus(),
+                imageOrDefault(product.getCompanyId().intValue(),product.getImgProduct()),
+                product.getCategoryId(),
                 commentsList,
-                p.getInformation(),
-                p.getPreparationTime()
+                product.getInformation(),
+                product.getPreparationTime()
 
         );
     }
@@ -242,7 +253,8 @@ public class ProductService implements ProductInterface, ProductUseCase {
                 updatedProduct.getPrice(),
                 updatedProduct.getDescription(),
                 updatedProduct.getStatus(),
-                imageOrDefault(updatedProduct.getImgProduct()),
+                imageOrDefault(updatedProduct.getCompanyId().intValue(),
+                        updatedProduct.getImgProduct()),
                 updatedProduct.getCategoryId(),
                 commentsList,
                 updatedProduct.getInformation(),
