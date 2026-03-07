@@ -13,14 +13,8 @@ import com.restaurante.bot.dto.ProductCategoryDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductUpdateDTO;
 import com.restaurante.bot.exception.GenericException;
-import com.restaurante.bot.model.Category;
-import com.restaurante.bot.model.CategoryMapping;
-import com.restaurante.bot.model.GenericResponse;
-import com.restaurante.bot.model.Product;
-import com.restaurante.bot.repository.CategoryMappingRepository;
-import com.restaurante.bot.repository.CategoryRepository;
-import com.restaurante.bot.repository.CompanyRepository;
-import com.restaurante.bot.repository.ProductRepository;
+import com.restaurante.bot.model.*;
+import com.restaurante.bot.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,28 +40,31 @@ public class ProductService implements ProductInterface, ProductUseCase {
     private final CompanyRepository companyRepository;
     private final ObjectMapper objectMapper;
     private final CategoryMappingRepository categoryMappingRepository;
+    private final ParameterRepository parameterRepository;
 
 
     private final Map<Long, Map<String, Long>> dynamicCategoryMapping = new HashMap<>();
 
-    @Value("${app.default-product-image.chuzo-ivan}")
-    private final String productImageDefault;
+    private final String productImageDefault ="PRODUCT_IMAGE_DEFAULT";
 
-    @Value("${app.default-product-image.chuzo-ivan}")
-    private final String productImageChuzoIvan;
+    private final String productImageChuzoIvan ="PRODUCT_IMAGE_CHUZO_IVAN";
 
-    @Value("${app.default-product-image.buen-nino}")
-    private final String productImageBuenNino;
+    private final String productImageBuenNino ="PRODUCT_IMAGE_BUEN_NINO";
 
-    private final Map<Integer, String> productImageList = Map.of(238,productImageChuzoIvan,
+    private final Map<Integer, String> productImageParameterIDs = Map.of(238,productImageChuzoIvan,
             273,productImageBuenNino);
 
     private String imageOrDefault(Integer companyId, String imgProduct) {
-        String productImage = productImageDefault;
-        if (imgProduct == null) productImage = productImageList.getOrDefault(companyId, productImageDefault);
+        String productIdImage = productImageDefault;
+        if (imgProduct == null) productIdImage = productImageParameterIDs.getOrDefault(companyId, productImageDefault);
         String imgProductTrim = imgProduct.trim();
-        if (imgProductTrim.isEmpty() || "null".equalsIgnoreCase(imgProductTrim)) productImage =  productImageDefault;
-        return productImage;
+        if (imgProductTrim.isEmpty() || "null".equalsIgnoreCase(imgProductTrim)) productIdImage =  productImageDefault;
+
+        Optional<Parameter> parameteOptiona = parameterRepository.findByName(productIdImage);
+        return parameteOptiona.map(Parameter::getValue).orElseGet(() -> {
+            log.warn("No se encontró el parámetro {} para la imagen del producto, se usará un valor por defecto", productImageDefault);
+            return "https://res.cloudinary.com/dzj8q4qeu/image/upload/v1701304417/restaurante-bot/product-default.png";
+        });
     }
 
     private ProductDto toDto(Product product) {

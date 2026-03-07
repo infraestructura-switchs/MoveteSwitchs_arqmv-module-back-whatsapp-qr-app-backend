@@ -35,10 +35,6 @@ app:
   url:
     services:
       products-service: ${PRODUCTS_SERVICE_URL:https://gfvsgktksbutb3pdokevf6vhbi.apigateway.us-phoenix-1.oci.customer-oci.com/arq-prd-v3/}
-  product-image:
-    default: ${PRODUCT_IMAGE_DEFAULT,""}
-    chuzo-ivan: ${PRODUCT_IMAGE_CHUZO_IVAN,""}
-    buen-nino: ${PRODUCT_IMAGE_BUEN_NINO,""}
 
 cloudinary:
   cloud:
