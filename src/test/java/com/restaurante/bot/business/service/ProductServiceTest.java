@@ -71,6 +71,7 @@ class ProductServiceTest {
         // Mockea el SecurityContextHolder para simular autenticación JWT
         Authentication authentication = mock(Authentication.class);
         when(authentication.getPrincipal()).thenReturn(1L); // Simula tokenCompanyId = 1L
+        when(authentication.isAuthenticated()).thenReturn(true); // important for service check
 
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);

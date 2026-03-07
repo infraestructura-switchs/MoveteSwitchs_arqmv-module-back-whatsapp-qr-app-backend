@@ -1,5 +1,6 @@
 package com.restaurante.bot.business.service;
 
+import com.restaurante.bot.application.ports.incoming.WaiterCallUseCase;
 import com.restaurante.bot.business.interfaces.WaiterCallInterface;
 import com.restaurante.bot.dto.WaiterCallRequest;
 import com.restaurante.bot.exception.GenericException;
@@ -18,7 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class WaiterCallService implements WaiterCallInterface {
+public class WaiterCallService implements WaiterCallInterface, WaiterCallUseCase {
 
     private  final WaiterCallRepository waiterCallRepository;
 

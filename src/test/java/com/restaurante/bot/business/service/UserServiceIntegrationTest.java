@@ -4,7 +4,7 @@ import com.restaurante.bot.dto.GgpUserSaveAndUpdateDto;
 import com.restaurante.bot.dto.UserDto;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
-import com.restaurante.bot.business.interfaces.UserService;
+import com.restaurante.bot.application.ports.incoming.UserUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UserServiceIntegrationTest {
 
     @Autowired
-    private UserService userService;
+    private UserUseCase userService;
 
     @Autowired
     private RolRepository rolRepository;

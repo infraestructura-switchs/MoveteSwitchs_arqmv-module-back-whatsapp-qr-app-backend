@@ -31,7 +31,6 @@ class CompanyServiceTest {
 
     @InjectMocks
     private CompanyService companyService;
-
     private Company mockCompany;
     private CompanyRequest mockCompanyRequest;
 

@@ -1,6 +1,7 @@
 package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.business.call.CallServiceHttp;
+import com.restaurante.bot.application.ports.incoming.OrderDetailsDeliveryUseCase;
 import com.restaurante.bot.business.interfaces.IOrderDetailBusiness;
 import com.restaurante.bot.dto.*;
 import com.restaurante.bot.exception.GenericException;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-public class OrderDetailsDeliveryService implements IOrderDetailBusiness {
+public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderDetailsDeliveryUseCase {
 
     private final OrderDeliveryDetailRepository orderRepository;
     private final CustomerRepository customerRepository;

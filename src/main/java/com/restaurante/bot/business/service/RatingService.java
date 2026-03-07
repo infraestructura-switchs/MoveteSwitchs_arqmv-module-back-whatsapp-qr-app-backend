@@ -4,11 +4,13 @@ import com.restaurante.bot.model.CustomerOrder;
 import com.restaurante.bot.model.Rating;
 import com.restaurante.bot.repository.RatingRepository;
 import org.springframework.stereotype.Service;
+import com.restaurante.bot.application.ports.incoming.RatingUseCase;
 
 import java.util.List;
 
 @Service
-public class RatingService  {
+
+public class RatingService implements RatingUseCase {
 
     private final RatingRepository ratingRepository;
 

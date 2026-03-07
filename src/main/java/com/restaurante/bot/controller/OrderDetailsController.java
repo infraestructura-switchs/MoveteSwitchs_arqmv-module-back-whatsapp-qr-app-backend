@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.OrderInterface;
+import com.restaurante.bot.application.ports.incoming.OrderUseCase;
 import com.restaurante.bot.dto.*;
 import com.restaurante.bot.model.GenericResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class OrderDetailsController {
 
-    private final OrderInterface orderInterface;
+    private final OrderUseCase orderInterface;
 
     @PostMapping
     public ResponseEntity<GenericResponse> saveOrder(@RequestBody OrderDetailsDTO order) {

@@ -1,5 +1,6 @@
 package com.restaurante.bot.business.service;
 
+import com.restaurante.bot.application.ports.incoming.CityUseCase;
 import com.restaurante.bot.business.interfaces.CityInterface;
 import com.restaurante.bot.model.City;
 import com.restaurante.bot.repository.CityRepository;
@@ -13,7 +14,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-public class CityService implements CityInterface {
+public class CityService implements CityInterface, CityUseCase {
 
     private final CityRepository cityRepository;
 

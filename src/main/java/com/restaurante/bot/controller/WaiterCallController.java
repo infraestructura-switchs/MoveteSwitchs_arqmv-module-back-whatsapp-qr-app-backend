@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.WaiterCallInterface;
+import com.restaurante.bot.application.ports.incoming.WaiterCallUseCase;
 import com.restaurante.bot.dto.WaiterCallRequest;
 import com.restaurante.bot.model.WaiterCall;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class WaiterCallController {
 
-    private final WaiterCallInterface waiterCallInterface;
+    private final WaiterCallUseCase waiterCallInterface;
 
     @GetMapping
     public ResponseEntity<List<WaiterCall>> getWaiterCall() {

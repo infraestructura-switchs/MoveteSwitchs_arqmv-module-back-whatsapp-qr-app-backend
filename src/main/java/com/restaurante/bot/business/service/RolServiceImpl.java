@@ -15,6 +15,7 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.restaurante.bot.application.ports.incoming.RolUseCase;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class RolServiceImpl implements RolInterface {
+
+public class RolServiceImpl implements RolInterface, RolUseCase {
 
     private final RolRepository rolRepository;
 

@@ -1,7 +1,7 @@
 package com.restaurante.bot.controller;
 
 import com.restaurante.bot.model.Payment;
-import com.restaurante.bot.business.service.PaymentService;
+import com.restaurante.bot.application.ports.incoming.PaymentUseCase;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,11 +11,12 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class PaymentController {
 
-    private final PaymentService paymentService;
+    private final PaymentUseCase paymentService;
 
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentUseCase paymentService) {
         this.paymentService = paymentService;
     }
+
 
     @GetMapping
     public List<Payment> ListarPayment() {

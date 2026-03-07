@@ -1,5 +1,6 @@
 package com.restaurante.bot.business.service;
 
+import com.restaurante.bot.application.ports.incoming.RestaurantTableUseCase;
 import com.restaurante.bot.business.interfaces.RestaurantTableInterface;
 import com.restaurante.bot.dto.ChangeStatusTableDTO;
 import com.restaurante.bot.dto.NumberDTO;
@@ -22,7 +23,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class RestaurantTableService implements RestaurantTableInterface {
+public class RestaurantTableService implements RestaurantTableInterface, RestaurantTableUseCase {
 
     private final RestaurantTableRepository restaurantTableRepository;
     private final CompanyRepository companyRepository;

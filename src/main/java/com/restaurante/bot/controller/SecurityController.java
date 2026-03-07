@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.ShortLinkService;
+import com.restaurante.bot.application.ports.incoming.ShortLinkUseCase;
 import com.restaurante.bot.dto.GenerateLinkIn;
 import com.restaurante.bot.dto.GenerateTokenRequestDTO;
 import com.restaurante.bot.repository.CompanyRepository;
@@ -30,7 +30,7 @@ public class SecurityController {
 
     private final CompanyRepository companyRepository;
 
-    private final ShortLinkService shortLinkservice;
+    private final ShortLinkUseCase shortLinkservice;
 
     @Value("${landing.page.url}")
     private String landingPageUrl;

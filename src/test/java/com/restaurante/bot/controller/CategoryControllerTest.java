@@ -1,7 +1,7 @@
 package com.restaurante.bot.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurante.bot.business.interfaces.CategoryService;
+import com.restaurante.bot.application.ports.incoming.CategoryUseCase;
 import com.restaurante.bot.dto.CategoryRequestDTO;
 import com.restaurante.bot.dto.CategoryResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,7 @@ class CategoryControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private CategoryService categoryService;
+    private CategoryUseCase categoryUseCase;
 
     @MockBean
     private com.restaurante.bot.util.JwtRequestFilter jwtRequestFilter;
@@ -57,7 +57,7 @@ class CategoryControllerTest {
 
     @Test
     void getAllCategories_ShouldReturnList() throws Exception {
-        when(categoryService.getAllCategories()).thenReturn(Collections.singletonList(responseDTO));
+        when(categoryUseCase.getAllCategories()).thenReturn(Collections.singletonList(responseDTO));
 
         mockMvc.perform(get("/api/back-whatsapp-qr-app/categories"))
                 .andExpect(status().isOk())
@@ -66,7 +66,7 @@ class CategoryControllerTest {
 
     @Test
     void getCategoryById_ShouldReturnCategory() throws Exception {
-        when(categoryService.getCategoryById(1L)).thenReturn(responseDTO);
+        when(categoryUseCase.getCategoryById(1L)).thenReturn(responseDTO);
 
         mockMvc.perform(get("/api/back-whatsapp-qr-app/categories/1"))
                 .andExpect(status().isOk())
@@ -80,7 +80,7 @@ class CategoryControllerTest {
         requestDTO.setStatus("ACTIVE");
         requestDTO.setCompanyId(10L);
 
-        when(categoryService.createCategory(any(CategoryRequestDTO.class))).thenReturn(responseDTO);
+        when(categoryUseCase.createCategory(any(CategoryRequestDTO.class))).thenReturn(responseDTO);
 
         mockMvc.perform(post("/api/back-whatsapp-qr-app/categories")
                 .contentType(MediaType.APPLICATION_JSON)

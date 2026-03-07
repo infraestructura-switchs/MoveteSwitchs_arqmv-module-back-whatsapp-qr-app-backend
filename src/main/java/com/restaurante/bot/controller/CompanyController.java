@@ -1,7 +1,7 @@
 package com.restaurante.bot.controller;
 
 
-import com.restaurante.bot.business.interfaces.CompanyInterface;
+import com.restaurante.bot.application.ports.incoming.CompanyUseCase;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 public class CompanyController {
 
-    private final CompanyInterface companyService;
+    private final CompanyUseCase companyUseCase;
 
     @PostMapping("/create")
     public ResponseEntity<CompanyRequest> createCompany(
@@ -62,7 +62,7 @@ public class CompanyController {
         companyRequest.setNumberBotDelivery(numberBotDelivery);
 
 
-        CompanyRequest savedCompany = companyService.save(companyRequest, logo);
+        CompanyRequest savedCompany = companyUseCase.save(companyRequest, logo);
 
         return ResponseEntity.ok(savedCompany);
     }
@@ -71,13 +71,13 @@ public class CompanyController {
     @GetMapping("/get-company")
     public ResponseEntity<List<CompanyRequest>> getAllCategories() {
         log.info("Iniciando endpoint para obtener todas las compañias");
-        List<CompanyRequest> categories = companyService.getAllCompany();
+        List<CompanyRequest> categories = companyUseCase.getAllCompany();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteCity(@PathVariable Long id) {
-        companyService.delete(id);
+        companyUseCase.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -120,7 +120,7 @@ public class CompanyController {
         companyRequest.setNumberBotMesa(numberBotMesa);
         companyRequest.setNumberBotDelivery(numberBotDelivery);
 
-        CompanyRequest updatedCompany = companyService.update(companyRequest, logo);
+        CompanyRequest updatedCompany = companyUseCase.update(companyRequest, logo);
         return ResponseEntity.ok(updatedCompany);
     }
 
@@ -129,7 +129,7 @@ public class CompanyController {
                                                                   @RequestParam(defaultValue = "10") int size,
                                                                   @RequestParam(defaultValue = "ASC") String orders,
                                                                   @RequestParam(defaultValue = "id") String sortBy){
-        return new ResponseEntity<>(companyService.getAllPageCompany(page,size,orders,sortBy), HttpStatus.OK);
+        return new ResponseEntity<>(companyUseCase.getAllPageCompany(page,size,orders,sortBy), HttpStatus.OK);
 
     }
 

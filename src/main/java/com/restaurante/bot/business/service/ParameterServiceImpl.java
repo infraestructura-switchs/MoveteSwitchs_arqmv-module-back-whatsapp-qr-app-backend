@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ParameterServiceImpl implements ParameterService {
+public class ParameterServiceImpl implements ParameterService, com.restaurante.bot.application.ports.incoming.ParameterUseCase {
 
     private final ParameterRepository parameterRepository;
 

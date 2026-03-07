@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.CustomerInterface;
+import com.restaurante.bot.application.ports.incoming.CustomerUseCase;
 import com.restaurante.bot.dto.SaveFinishDataDTO;
 import com.restaurante.bot.model.Customer;
 import com.restaurante.bot.business.service.CustomerService;
@@ -21,24 +21,23 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class CustomerController {
 
-    private final CustomerService customerService;
-    private final CustomerInterface customerInterface;
+    private final CustomerUseCase customerUseCase;
 
     @GetMapping
     public List<Customer> listarClientes() {
-        return customerService.listarClientes(); // Llama al servicio para obtener la lista de clientes
+        return customerUseCase.listarClientes(); // Llama al servicio para obtener la lista de clientes
     }
 
     @PostMapping
     public Customer guardarCliente(@RequestBody Customer customer) {
-        return customerService.guardarClientes(customer); // Llama al servicio para guardar un cliente
+        return customerUseCase.guardarClientes(customer); // Llama al servicio para guardar un cliente
     }
 
 
     @PostMapping("/update-client-qr")
     public ResponseEntity<GenericResponse> updateClientQr(@RequestBody SaveFinishDataDTO customer) {
         log.info("update-client-qr -> {}", customer);
-        return new ResponseEntity<>(customerInterface.updateClientQr(customer), HttpStatus.OK);
+        return new ResponseEntity<>(customerUseCase.updateClientQr(customer), HttpStatus.OK);
     }
 
 }

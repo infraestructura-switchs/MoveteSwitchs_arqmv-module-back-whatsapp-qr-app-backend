@@ -8,9 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.Random;
+import com.restaurante.bot.application.ports.incoming.ShortLinkUseCase;
 
 @Service
-public class ShortLinkServiceImpl implements ShortLinkService {
+
+public class ShortLinkServiceImpl implements ShortLinkService, ShortLinkUseCase {
 
     private final ShortLinkRepository repository;
     private final Random random = new Random();

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurante.bot.api.dto.GroupDTO;
 import com.restaurante.bot.api.dto.ProductDTO;
 import com.restaurante.bot.business.call.CallServiceHttp;
+import com.restaurante.bot.application.ports.incoming.ProductUseCase;
 import com.restaurante.bot.business.interfaces.ProductInterface;
 import com.restaurante.bot.dto.CategorizedProductsDTO;
 import com.restaurante.bot.dto.ProductCategoryDTO;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ProductService implements ProductInterface {
+public class ProductService implements ProductInterface, ProductUseCase {
 
     private final ProductRepository productRepository;
     private final CallServiceHttp callServiceHttp;

@@ -4,7 +4,7 @@ import com.restaurante.bot.dto.AreaDto;
 import com.restaurante.bot.dto.AreaGetAllDto;
 import com.restaurante.bot.dto.AreaSaveAndUpdateDto;
 
-import com.restaurante.bot.business.interfaces.IAreaService;
+import com.restaurante.bot.application.ports.incoming.AreaUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,27 +27,27 @@ import java.util.Map;
 @Slf4j
 public class AreaController {
 
-    private final IAreaService iAreaService;
+    private final AreaUseCase areaUseCase;
 
     @PostMapping("/create")
     public ResponseEntity<AreaDto> save(@RequestBody @Valid AreaSaveAndUpdateDto areaDto) {
-        return ResponseEntity.ok(iAreaService.save(areaDto));
+        return ResponseEntity.ok(areaUseCase.save(areaDto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AreaDto> get(@PathVariable("id") long id) {
-        return ResponseEntity.ok(iAreaService.get(id));
+        return ResponseEntity.ok(areaUseCase.get(id));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<AreaDto> update(@PathVariable("id") Long areaId,
             @RequestBody @Valid AreaSaveAndUpdateDto areaDto) {
-        return ResponseEntity.ok(iAreaService.update(areaId, areaDto));
+        return ResponseEntity.ok(areaUseCase.update(areaId, areaDto));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("id") long id) {
-        boolean result = iAreaService.delete(id);
+        boolean result = areaUseCase.delete(id);
         if (result) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
@@ -57,7 +57,7 @@ public class AreaController {
 
     @GetMapping("/get-all")
     public ResponseEntity<Page<AreaGetAllDto>> getAll(@RequestParam Map<String, String> customQuery) {
-        return ResponseEntity.ok(iAreaService.getAll(customQuery));
+        return ResponseEntity.ok(areaUseCase.getAll(customQuery));
     }
 
     @GetMapping
@@ -65,16 +65,16 @@ public class AreaController {
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "ASC") String orders,
             @RequestParam(defaultValue = "areaId") String sortBy) {
-        return ResponseEntity.ok(iAreaService.getAll(page, size, orders, sortBy));
+        return ResponseEntity.ok(areaUseCase.getAll(page, size, orders, sortBy));
     }
 
     @GetMapping("/get-all-without-page")
     public ResponseEntity<List<AreaGetAllDto>> getAllWithoutPage(@RequestParam Map<String, String> customQuery) {
-        return ResponseEntity.ok(iAreaService.getAllWithOutPage(customQuery));
+        return ResponseEntity.ok(areaUseCase.getAllWithOutPage(customQuery));
     }
 
     @GetMapping("/search")
     public ResponseEntity<Page<AreaGetAllDto>> search(@RequestParam Map<String, String> customQuery) {
-        return ResponseEntity.ok(iAreaService.searchCustom(customQuery));
+        return ResponseEntity.ok(areaUseCase.searchCustom(customQuery));
     }
 }

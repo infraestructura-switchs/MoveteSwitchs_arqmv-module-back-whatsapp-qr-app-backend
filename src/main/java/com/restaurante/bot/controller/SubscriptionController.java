@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.NotificationInterface;
+import com.restaurante.bot.application.ports.incoming.NotificationUseCase;
 import com.restaurante.bot.model.Subscription;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 public class SubscriptionController{
 
-    private final NotificationInterface notificationInterface;
+    private final NotificationUseCase notificationInterface;
 
     @PostMapping("/firebase")
     public ResponseEntity<Subscription> createSubscription(@RequestParam Long userId, @RequestParam String token) {

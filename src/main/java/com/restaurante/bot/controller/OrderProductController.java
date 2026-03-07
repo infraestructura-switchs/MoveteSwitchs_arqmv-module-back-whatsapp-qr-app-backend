@@ -1,7 +1,7 @@
 package com.restaurante.bot.controller;
 
 import com.restaurante.bot.model.OrderProduct;
-import com.restaurante.bot.business.service.OrderProductService;
+import com.restaurante.bot.application.ports.incoming.OrderProductUseCase;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,9 +11,9 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class OrderProductController {
 
-    private final OrderProductService orderProductService;
+    private final OrderProductUseCase orderProductService;
 
-    public OrderProductController(OrderProductService orderProductService) {
+    public OrderProductController(OrderProductUseCase orderProductService) {
         this.orderProductService = orderProductService;
     }
 

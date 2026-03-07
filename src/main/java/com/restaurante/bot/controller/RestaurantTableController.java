@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.RestaurantTableInterface;
+import com.restaurante.bot.application.ports.incoming.RestaurantTableUseCase;
 import com.restaurante.bot.dto.ChangeStatusTableDTO;
 import com.restaurante.bot.dto.NumberDTO;
 import com.restaurante.bot.model.GenericResponse;
@@ -21,7 +21,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class RestaurantTableController {
 
-    private final RestaurantTableInterface restaurantTableInterface;
+    private final RestaurantTableUseCase restaurantTableInterface;
 
 
     @GetMapping("/get")

@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.IPositionService;
+import com.restaurante.bot.application.ports.incoming.PositionUseCase;
 import com.restaurante.bot.dto.PositionDto;
 import com.restaurante.bot.dto.PositionGetAllDto;
 import com.restaurante.bot.dto.PositionSaveAndUpdateDto;
@@ -18,41 +18,41 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PositionController {
 
-    private final IPositionService positionService;
+    private final PositionUseCase positionUseCase;
 
     @PostMapping("/create")
     public ResponseEntity<PositionDto> create(@RequestBody PositionSaveAndUpdateDto dto) {
-        return ResponseEntity.ok(positionService.save(dto));
+        return ResponseEntity.ok(positionUseCase.save(dto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PositionDto> get(@PathVariable Long id) {
-        return ResponseEntity.ok(positionService.get(id));
+        return ResponseEntity.ok(positionUseCase.get(id));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<PositionDto> update(@PathVariable Long id, @RequestBody PositionSaveAndUpdateDto dto) {
-        return ResponseEntity.ok(positionService.update(id, dto));
+        return ResponseEntity.ok(positionUseCase.update(id, dto));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Boolean> delete(@PathVariable Long id) {
-        return ResponseEntity.ok(positionService.delete(id));
+        return ResponseEntity.ok(positionUseCase.delete(id));
     }
 
     @GetMapping("/get-all")
     public ResponseEntity<Page<PositionGetAllDto>> getAll(@RequestParam Map<String, String> params) {
-        return ResponseEntity.ok(positionService.getAll(params));
+        return ResponseEntity.ok(positionUseCase.getAll(params));
     }
 
     @GetMapping("/get-all-without-page")
     public ResponseEntity<List<PositionGetAllDto>> getAllWithoutPage(@RequestParam Map<String, String> params) {
-        return ResponseEntity.ok(positionService.getAllWithOutPage(params));
+        return ResponseEntity.ok(positionUseCase.getAllWithOutPage(params));
     }
 
     @GetMapping("/search")
     public ResponseEntity<Page<PositionGetAllDto>> search(@RequestParam Map<String, String> params) {
-        return ResponseEntity.ok(positionService.searchCustom(params));
+        return ResponseEntity.ok(positionUseCase.searchCustom(params));
     }
 
     // Endpoint para filtrar posiciones por usuario

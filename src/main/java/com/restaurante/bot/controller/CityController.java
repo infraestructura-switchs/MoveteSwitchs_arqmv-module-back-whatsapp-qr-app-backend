@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.CityInterface;
+import com.restaurante.bot.application.ports.incoming.CityUseCase;
 import com.restaurante.bot.model.City;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +18,11 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class CityController {
 
-    private  final CityInterface cityInterface;
+    private  final CityUseCase cityUseCase;
 
     @GetMapping("/getAllNoPage")
     public ResponseEntity<List<City>>  getAllNoPage() {
         log.info("getAllNoPage");
-        return new ResponseEntity<>(cityInterface.getCities(), HttpStatus.OK);
+        return new ResponseEntity<>(cityUseCase.getCities(), HttpStatus.OK);
     }
 }

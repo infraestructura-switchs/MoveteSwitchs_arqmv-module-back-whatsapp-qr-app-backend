@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.IOrderDetailBusiness;
+import com.restaurante.bot.application.ports.incoming.OrderDetailsDeliveryUseCase;
 import com.restaurante.bot.business.service.OrderDetailsDeliveryService;
 import com.restaurante.bot.dto.OrderDeliveryProducts;
 import com.restaurante.bot.dto.OrderDeliveryResponseDTO;
@@ -23,7 +23,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 @Slf4j
 public class OrderDetailsDeliveryController {
-    private final IOrderDetailBusiness orderService;
+    private final OrderDetailsDeliveryUseCase orderService;
 
     @PostMapping("/saveOrder")
     public ResponseEntity<OrderDetailDelivery> createOrder(@RequestBody OrderDetailsDeliveryDTO orderDetailsDTO) {

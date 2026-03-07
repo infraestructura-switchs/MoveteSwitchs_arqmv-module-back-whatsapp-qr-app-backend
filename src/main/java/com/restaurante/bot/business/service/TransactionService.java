@@ -1,5 +1,6 @@
 package com.restaurante.bot.business.service;
 
+import com.restaurante.bot.application.ports.incoming.TransactionUseCase;
 import com.restaurante.bot.business.interfaces.TransactionInterface;
 import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.Company;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class TransactionService implements TransactionInterface {
+public class TransactionService implements TransactionInterface, TransactionUseCase {
 
     private final RestaurantTableRepository restaurantTableRepository;
     private final TransactionRepository transactionRepository;

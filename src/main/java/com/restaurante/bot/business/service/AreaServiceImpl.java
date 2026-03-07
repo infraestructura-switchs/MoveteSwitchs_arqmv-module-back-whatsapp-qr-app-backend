@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class AreaServiceImpl implements IAreaService {
+public class AreaServiceImpl implements IAreaService, com.restaurante.bot.application.ports.incoming.AreaUseCase {
 
     private final AreaRepository areaRepository;
 

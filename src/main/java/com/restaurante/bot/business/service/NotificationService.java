@@ -4,6 +4,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import com.restaurante.bot.application.ports.incoming.NotificationUseCase;
 import com.restaurante.bot.business.interfaces.NotificationInterface;
 import com.restaurante.bot.model.Subscription;
 import com.restaurante.bot.model.User;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class NotificationService implements NotificationInterface {
+public class NotificationService implements NotificationInterface, NotificationUseCase {
 
     private final SubscriptionRepository subscriptionRepository;
 

@@ -3,11 +3,13 @@ package com.restaurante.bot.business.service;
 import com.restaurante.bot.model.CustomerOrder;
 import com.restaurante.bot.repository.CustomerOrderRepository;
 import org.springframework.stereotype.Service;
+import com.restaurante.bot.application.ports.incoming.CustomerOrderUseCase;
 
 import java.util.List;
 
 @Service
-public class CustomerOrderService {
+
+public class CustomerOrderService implements CustomerOrderUseCase {
 
     private final CustomerOrderRepository customerOrderRepository;
 

@@ -16,13 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import com.restaurante.bot.application.ports.incoming.CustomerUseCase;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-public class CustomerService implements CustomerInterface {
+
+public class CustomerService implements CustomerInterface, CustomerUseCase {
 
     private final CustomerRepository customerRepository;
     private final TransactionRepository transactionRepository;

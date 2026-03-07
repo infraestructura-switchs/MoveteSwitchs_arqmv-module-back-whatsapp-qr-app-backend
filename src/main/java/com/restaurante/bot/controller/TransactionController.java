@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.TransactionInterface;
+import com.restaurante.bot.application.ports.incoming.TransactionUseCase;
 import com.restaurante.bot.model.GenericResponse;
 import com.restaurante.bot.model.Transaction;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class TransactionController {
 
-    private final TransactionInterface transactionInterface;
+    private final TransactionUseCase transactionInterface;
 
 
     @PostMapping("/finish/{tableNumber}")

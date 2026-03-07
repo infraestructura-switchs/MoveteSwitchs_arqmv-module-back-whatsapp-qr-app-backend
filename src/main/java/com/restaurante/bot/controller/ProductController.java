@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.ProductInterface;
+import com.restaurante.bot.application.ports.incoming.ProductUseCase;
 import com.restaurante.bot.dto.CategorizedProductsDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductUpdateDTO;
@@ -21,7 +21,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class ProductController {
 
-    private final ProductInterface productInterface;
+    private final ProductUseCase productInterface;
 
     @GetMapping("/getProductByCompany/{companyId}")
     public ResponseEntity<CategorizedProductsDTO> getProductsSfotRestaurantByCompanyId(@PathVariable Long companyId) {

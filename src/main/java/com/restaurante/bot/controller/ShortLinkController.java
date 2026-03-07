@@ -1,6 +1,6 @@
 package com.restaurante.bot.controller;
 
-import com.restaurante.bot.business.interfaces.ShortLinkService;
+import com.restaurante.bot.application.ports.incoming.ShortLinkUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class ShortLinkController {
 
-    private final ShortLinkService service;
+    private final ShortLinkUseCase service;
 
     @Value("${landing.page.url}")
     private String landingPageUrl;
@@ -23,7 +23,7 @@ public class ShortLinkController {
     @Value("${app.request.mapping}")
     private String mappingPageUrl;
 
-    public ShortLinkController(ShortLinkService service) {
+    public ShortLinkController(ShortLinkUseCase service) {
         this.service = service;
     }
 
