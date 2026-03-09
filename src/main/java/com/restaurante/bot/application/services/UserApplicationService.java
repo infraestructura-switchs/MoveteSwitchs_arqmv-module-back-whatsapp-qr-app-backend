@@ -2,9 +2,9 @@ package com.restaurante.bot.application.services;
 
 import com.restaurante.bot.application.ports.incoming.UserUseCase;
 import com.restaurante.bot.application.ports.outgoing.UserRepositoryPort;
-import com.restaurante.bot.dto.GgpUserGetAllDto;
-import com.restaurante.bot.dto.GgpUserSaveAndUpdateDto;
-import com.restaurante.bot.dto.UserDto;
+import com.restaurante.bot.business.interfaces.LoginService;
+import com.restaurante.bot.business.interfaces.LoginStrategy;
+import com.restaurante.bot.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserApplicationService implements UserUseCase {
     private final UserRepositoryPort userRepo;
+    private final LoginService loginService;
     // other outgoing ports (Role, Company, etc.) can be injected here
+
+    @Override
+    public UserDto login(LoginIn loginIn) {
+        LoginOut loginOut = loginService.login(loginIn);
+        return loginOut.getData();
+    }
 
     @Override
     @Transactional

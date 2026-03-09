@@ -3,6 +3,7 @@ package com.restaurante.bot.adapters.inbound.web;
 import com.restaurante.bot.application.ports.incoming.UserUseCase;
 import com.restaurante.bot.dto.GgpUserGetAllDto;
 import com.restaurante.bot.dto.GgpUserSaveAndUpdateDto;
+import com.restaurante.bot.dto.LoginIn;
 import com.restaurante.bot.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,9 +24,8 @@ public class UserController {
     private final UserUseCase userUseCase;
 
     @PostMapping("/login")
-    public ResponseEntity<UserDto> login(@RequestBody /*...*/ Object loginIn) {
-        // redirect to login port (if defined) or another use case
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UserDto> login(@RequestBody /*...*/ LoginIn loginIn) {
+        return ResponseEntity.ok(userUseCase.login(loginIn));
     }
 
     @PostMapping("/create")
