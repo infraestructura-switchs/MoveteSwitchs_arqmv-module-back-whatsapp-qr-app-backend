@@ -79,6 +79,9 @@ public class LoginGGPServiceImpl implements LoginGGPService {
         UserDto objectDtoVo = new UserDto();
         BeanUtils.copyProperties(objectUser.get(), objectDtoVo);
         objectDtoVo.setRolId(objectUser.get().getRol().getRolId());
+        objectDtoVo.setAreaId(objectUser.get().getArea().getAreaId());
+        objectDtoVo.setCompanyId(objectUser.get().getCompany().getId());
+        objectDtoVo.setPositionId(objectUser.get().getPosition().getPositionId());
         return objectDtoVo;
     }
 
