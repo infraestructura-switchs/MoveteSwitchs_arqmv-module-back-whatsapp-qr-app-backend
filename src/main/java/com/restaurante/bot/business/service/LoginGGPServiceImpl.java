@@ -9,7 +9,6 @@ import com.restaurante.bot.dto.UserDto;
 import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.User;
 import com.restaurante.bot.repository.UserRepository;
-import com.restaurante.bot.security.JwtUtilUser;
 import com.restaurante.bot.util.JwtUtil;
 import com.restaurante.bot.util.Utils;
 import lombok.RequiredArgsConstructor;
