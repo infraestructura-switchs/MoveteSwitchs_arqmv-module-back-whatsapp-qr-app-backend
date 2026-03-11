@@ -210,8 +210,7 @@
     <entity class="com.restaurante.bot.model.RestaurantTable">
         <attributes>
             <id name="tableId">
-                <generated-value strategy="SEQUENCE" generator="TABLE_SEQ"/>
-                <sequence-generator name="TABLE_SEQ" sequence-name="SEQ_TABLE" allocation-size="1"/>
+                <generated-value strategy="IDENTITY"/>
             </id>
         </attributes>
     </entity>
