@@ -20,7 +20,7 @@ public class TypeIdentification {
 
     @Id
     @Column(name = "type_identification_id")
-    private Long id;
+    private Long typeIdentificationId;
 
     @Column(name = "name", nullable = false)
     private String name;
