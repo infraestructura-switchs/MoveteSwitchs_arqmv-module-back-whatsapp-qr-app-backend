@@ -79,11 +79,19 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
     private ProductDto toDto(Product product, String productImageBycompany) {
         List<String> commentsList = new ArrayList<>();
-        if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
+        if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {
+            commentsList = product.getProductComments().stream()
+                    .map(pc -> pc.getCommentText())
+                    .collect(Collectors.toList());
+        } else if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
             try {
                 commentsList = objectMapper.readValue(product.getComments(), new TypeReference<List<String>>() {});
             } catch (JsonProcessingException e) {
-                throw new GenericException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                // fallback: try CSV
+                commentsList = Arrays.stream(product.getComments().split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
             }
         }
         return new ProductDto(
@@ -245,11 +253,13 @@ public class ProductService implements ProductInterface, ProductUseCase {
                 .orElseThrow(() -> new GenericException("Producto no encontrado con el id: " + productUpdateDTO.getProductId(), HttpStatus.BAD_REQUEST));
 
         List<String> commentsList = new ArrayList<>();
-        if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
+        if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {
+            commentsList = product.getProductComments().stream().map(pc -> pc.getCommentText()).collect(Collectors.toList());
+        } else if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
             try {
                 commentsList = objectMapper.readValue(product.getComments(), new TypeReference<List<String>>() {});
             } catch (JsonProcessingException e) {
-                throw new GenericException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                commentsList = Arrays.stream(product.getComments().split(",")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList());
             }
         }
         product.setDescription(productUpdateDTO.getDescription());
@@ -289,6 +299,10 @@ public class ProductService implements ProductInterface, ProductUseCase {
         try {
             if (productDTO.getData().getComentarios() != null) {
                 product.setComments(objectMapper.writeValueAsString(productDTO.getData().getComentarios()));
+                // normalized comments
+                for (String c : productDTO.getData().getComentarios()) {
+                    product.getProductComments().add(new ProductComment(product, c));
+                }
             }
         } catch (JsonProcessingException e) {
             log.error("Error serializando comentarios para productId {}: {}", productDTO.getId(), e.getMessage());
@@ -311,6 +325,8 @@ public class ProductService implements ProductInterface, ProductUseCase {
             existing.setCompanyId(product.getCompanyId());
             existing.setGroupId(product.getGroupId());
             existing.setComments(product.getComments());
+            existing.getProductComments().clear();
+            existing.getProductComments().addAll(product.getProductComments());
             existing.setInformation(product.getInformation());
             existing.setPreparationTime(product.getPreparationTime());
             return existing;

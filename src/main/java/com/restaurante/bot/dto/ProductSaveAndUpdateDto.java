@@ -29,4 +29,5 @@ public class ProductSaveAndUpdateDto {
     private String information;
 
     private Integer preparationTime;
+    private java.util.List<String> comments;
 }
