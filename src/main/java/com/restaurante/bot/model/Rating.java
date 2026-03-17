@@ -15,7 +15,7 @@ public class Rating {
     @Column(name = "qualification")
     private String Qualification;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "table_id", referencedColumnName = "tableId", insertable = false, updatable = false)
     private RestaurantTable restaurantTable;
 

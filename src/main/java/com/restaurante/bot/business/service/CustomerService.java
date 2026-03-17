@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 import com.restaurante.bot.application.ports.incoming.CustomerUseCase;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -33,7 +36,17 @@ public class CustomerService implements CustomerInterface, CustomerUseCase {
 
 
     public List<Customer> listarClientes() {
+        // Cuidado: esta implementación carga todos los clientes en memoria.
+        // Use `listarClientesPaged` para evitar OOM en tablas grandes.
         return customerRepository.findAll(); //Esta lista usa el objeto Customer para obtener todos los clientes
+    }
+
+    /**
+     * Lista clientes paginados para evitar cargar toda la tabla en memoria.
+     */
+    public Page<Customer> listarClientesPaged(int page, int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size));
+        return customerRepository.findAll(pageable);
     }
 
     public Customer guardarClientes (Customer customer){

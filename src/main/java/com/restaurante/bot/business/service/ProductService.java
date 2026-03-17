@@ -27,6 +27,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import java.util.stream.Collectors;
 
 @Service
@@ -95,20 +97,20 @@ public class ProductService implements ProductInterface, ProductUseCase {
                         .collect(Collectors.toList());
             }
         }
-        return new ProductDto(
-            product.getProductId(),
-            product.getName(),
-            product.getPrice(),
-            product.getDescription(),
-            product.getStatus(),
-            imageOrDefault(product.getImgProduct(), productImageBycompany),
-            product.getCategoryId(),
-            product.getCompanyId(),
-            commentsList,
-            product.getInformation(),
-            product.getPreparationTime()
-
-        );
+        return ProductDto.builder()
+            .id(product.getProductId())
+            .productName(product.getName())
+            .price(product.getPrice())
+            .description(product.getDescription())
+            .status(product.getStatus())
+            .image(imageOrDefault(product.getImgProduct(), productImageBycompany))
+            .categoryId(product.getCategoryId())
+            .category(null)
+            .companyId(product.getCompanyId())
+            .comments(commentsList)
+            .information(product.getInformation())
+            .preparationTime(product.getPreparationTime())
+            .build();
     }
 
     @Override
@@ -275,19 +277,20 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
 
 
-        return new ProductDto(
-            updatedProduct.getProductId(),
-            updatedProduct.getName(),
-            updatedProduct.getPrice(),
-            updatedProduct.getDescription(),
-            updatedProduct.getStatus(),
-            imageOrDefault(updatedProduct.getImgProduct(), imageByCompany),
-            updatedProduct.getCategoryId(),
-            updatedProduct.getCompanyId(),
-            commentsList,
-            updatedProduct.getInformation(),
-            updatedProduct.getPreparationTime()
-        );
+        return ProductDto.builder()
+            .id(updatedProduct.getProductId())
+            .productName(updatedProduct.getName())
+            .price(updatedProduct.getPrice())
+            .description(updatedProduct.getDescription())
+            .status(updatedProduct.getStatus())
+            .image(imageOrDefault(updatedProduct.getImgProduct(), imageByCompany))
+            .categoryId(updatedProduct.getCategoryId())
+            .category(null)
+            .companyId(updatedProduct.getCompanyId())
+            .comments(commentsList)
+            .information(updatedProduct.getInformation())
+            .preparationTime(updatedProduct.getPreparationTime())
+            .build();
     }
 
     private Product mapToProduct(ProductDTO productDTO, Long companyId) {
@@ -353,11 +356,12 @@ public class ProductService implements ProductInterface, ProductUseCase {
             }
         }
 
-        List<Product> found = productRepository.search(companyId, term, categoryId);
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
+        org.springframework.data.domain.Page<com.restaurante.bot.model.Product> foundPage = productRepository.search(companyId, term, categoryId, pageable);
 
-        return found.stream()
-                .map(product -> toDto(product, imageByCompany))
-                .collect(Collectors.toList());
+        return foundPage.getContent().stream()
+            .map(product -> toDto(product, imageByCompany))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -378,14 +382,16 @@ public class ProductService implements ProductInterface, ProductUseCase {
             if (categoryId == null) return List.of();
         }
 
-        List<Product> found = productRepository
-                .findAllByCompanyAndCategoryAndNameOrderByPrice(companyId, categoryId, name, order);
+        org.springframework.data.domain.Pageable pageable = PageRequest.of(0, 1000,
+            Sort.by(Sort.Direction.fromString(order), "price"));
+        org.springframework.data.domain.Page<Product> foundPage = productRepository
+            .findAllByCompanyAndCategoryAndNameOrderByPrice(companyId, categoryId, name, pageable);
 
         String imageByCompany = imageByCompanyId(companyId.intValue());
 
-        return found.stream()
-                .map(product -> toDto(product, imageByCompany))
-                .toList();
+        return foundPage.getContent().stream()
+            .map(product -> toDto(product, imageByCompany))
+            .toList();
     }
 
     private Category mapToCategory(GroupDTO groupDTO, Long companyId) {

@@ -77,7 +77,7 @@ class ProductRepositoryTest {
 
     @Test
     void findAllByCompanyAndCategoryAndNameOrderByPrice_ShouldWork() {
-        List<Product> results = productRepository.findAllByCompanyAndCategoryAndNameOrderByPrice(1L, 1L, null, "ASC");
+        List<Product> results = productRepository.findAllByCompanyAndCategoryAndNameOrderByPrice(1L, 1L, null);
         assertFalse(results.isEmpty());
         assertEquals("Arroz con Pollo", results.get(0).getName());
     }

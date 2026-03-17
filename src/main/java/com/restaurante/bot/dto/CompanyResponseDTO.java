@@ -1,10 +1,12 @@
 package com.restaurante.bot.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompanyResponseDTO {
@@ -20,7 +22,7 @@ public class CompanyResponseDTO {
     private String status;
     private Long externalId;
     private Long cityId;
-    private String cityName;
+    private CityResponseDTO city;
     private String apiKey;
     private String rappyId;
     private String numberId;

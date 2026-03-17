@@ -25,7 +25,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
         @Query(value = "SELECT new com.restaurante.bot.dto.CompanyResponseDTO(c.id, c.name, c.logo, c.numberWhatsapp," +
                         " c.latitude, c.longitude, c.baseValue, c.additionalValue, c.status, c.externalCompanyId, "+
-                        "c.cityId, ci.name,c.apiKey, c.rpIntegrationId,c.numberId, c.tokenMeta,c.numberBotDelivery, "+
+                        "c.cityId, new com.restaurante.bot.dto.CityResponseDTO(ci.id, ci.name, ci.status, ci.createdAt, ci.updatedAt), c.apiKey, c.rpIntegrationId,c.numberId, c.tokenMeta,c.numberBotDelivery, "+
                         "c.numberBotMesa, c.statusIntegrationRp,c.tokenMetaDelivery, c.landingTemplate) "
                         +
                         "FROM Company c " +

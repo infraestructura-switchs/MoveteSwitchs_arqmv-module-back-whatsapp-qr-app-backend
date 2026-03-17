@@ -54,10 +54,28 @@ public class CompanyApplicationService implements CompanyUseCase {
 
             Company savedCompany = companyRepo.save(company);
 
-            companyRequest.setCompanyId(savedCompany.getId());
-            companyRequest.setLogoUrl(savedCompany.getLogo());
+                CompanyRequest response = CompanyRequest.builder()
+                    .companyId(savedCompany.getId())
+                    .nameCompany(companyRequest.getNameCompany())
+                    .logoUrl(savedCompany.getLogo())
+                    .numberWhatsapp(companyRequest.getNumberWhatsapp())
+                    .longitude(companyRequest.getLongitude())
+                    .latitude(companyRequest.getLatitude())
+                    .baseValue(companyRequest.getBaseValue())
+                    .additionalValue(companyRequest.getAdditionalValue())
+                    .externalCompanyId(companyRequest.getExternalCompanyId())
+                    .cityId(companyRequest.getCityId())
+                    .apiKey(companyRequest.getApiKey())
+                    .rpIntegrationId(companyRequest.getRpIntegrationId())
+                    .numberId(companyRequest.getNumberId())
+                    .tokenMeta(companyRequest.getTokenMeta())
+                    .numberBotMesa(companyRequest.getNumberBotMesa())
+                    .numberBotDelivery(companyRequest.getNumberBotDelivery())
+                    .tokenMetaDelivery(companyRequest.getTokenMetaDelivery())
+                    .landingTemplate(companyRequest.getLandingTemplate())
+                    .build();
 
-            return companyRequest;
+                return response;
         } catch (IOException e) {
             throw new RuntimeException("Error al subir la imagen del logo", e);
         }
@@ -143,10 +161,29 @@ public class CompanyApplicationService implements CompanyUseCase {
 
         company.setUpdatedAt(LocalDateTime.now());
         Company updatedCompany = companyRepo.save(company);
-        companyRequest.setCompanyId(updatedCompany.getId());
-        companyRequest.setLogoUrl(updatedCompany.getLogo());
 
-        return companyRequest;
+        CompanyRequest response = CompanyRequest.builder()
+            .companyId(updatedCompany.getId())
+            .nameCompany(companyRequest.getNameCompany())
+            .logoUrl(updatedCompany.getLogo())
+            .numberWhatsapp(companyRequest.getNumberWhatsapp())
+            .longitude(companyRequest.getLongitude())
+            .latitude(companyRequest.getLatitude())
+            .baseValue(companyRequest.getBaseValue())
+            .additionalValue(companyRequest.getAdditionalValue())
+            .externalCompanyId(companyRequest.getExternalCompanyId())
+            .cityId(companyRequest.getCityId())
+            .apiKey(companyRequest.getApiKey())
+            .rpIntegrationId(companyRequest.getRpIntegrationId())
+            .numberId(companyRequest.getNumberId())
+            .tokenMeta(companyRequest.getTokenMeta())
+            .numberBotMesa(companyRequest.getNumberBotMesa())
+            .numberBotDelivery(companyRequest.getNumberBotDelivery())
+            .tokenMetaDelivery(companyRequest.getTokenMetaDelivery())
+            .landingTemplate(companyRequest.getLandingTemplate())
+            .build();
+
+        return response;
     }
 
     @Override

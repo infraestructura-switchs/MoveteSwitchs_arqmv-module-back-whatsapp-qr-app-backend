@@ -6,6 +6,8 @@ import com.restaurante.bot.dto.ProductGetAllDto;
 import com.restaurante.bot.dto.ProductSaveAndUpdateDto;
 import com.restaurante.bot.model.Product;
 import com.restaurante.bot.model.ProductComment;
+import com.restaurante.bot.dto.CategoryResponseDTO;
+import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.ProductRepository;
 import com.restaurante.bot.repository.ProductCommentRepository;
 import com.restaurante.bot.repository.CommentRepository;
@@ -29,6 +31,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     private final ProductRepository productRepository;
     private final ProductCommentRepository productCommentRepository;
     private final CommentRepository commentRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     @Transactional
@@ -165,20 +168,22 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         else status = Constants.ACTIVE_STATUS;
 
         if (companyId != null) {
-            List<Product> found = productRepository.search(companyId, null, null);
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
+            org.springframework.data.domain.Page<Product> found = productRepository.search(companyId, null, null, pageable);
             String finalStatus = status;
-            return found.stream()
-                    .filter(p -> finalStatus == null || finalStatus.equals(p.getStatus()))
-                    .map(this::mapToGetAllDto)
-                    .collect(Collectors.toList());
-        }
-
-        List<Product> all = productRepository.findAll();
-        String finalStatus1 = status;
-        return all.stream()
-                .filter(p -> finalStatus1 == null || finalStatus1.equals(p.getStatus()))
+            return found.getContent().stream()
+                .filter(p -> finalStatus == null || finalStatus.equals(p.getStatus()))
                 .map(this::mapToGetAllDto)
                 .collect(Collectors.toList());
+        }
+
+        org.springframework.data.domain.Pageable pageableAll = org.springframework.data.domain.PageRequest.of(0, 1000);
+        org.springframework.data.domain.Page<Product> all = productRepository.findAll(pageableAll);
+        String finalStatus1 = status;
+        return all.getContent().stream()
+            .filter(p -> finalStatus1 == null || finalStatus1.equals(p.getStatus()))
+            .map(this::mapToGetAllDto)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -199,26 +204,25 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (customQuery != null && customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
 
         if (companyId != null) {
-            List<Product> found = productRepository.search(companyId, name, categoryId);
-            int from = Math.min(page * size, found.size());
-            int to = Math.min(from + size, found.size());
-            List<ProductGetAllDto> content = found.subList(from, to).stream().map(this::mapToGetAllDto).collect(Collectors.toList());
-            return new PageImpl<>(content, PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(orders), sortBy)), found.size());
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(orders), sortBy));
+            org.springframework.data.domain.Page<Product> foundPage = productRepository.search(companyId, name, categoryId, pageable);
+            java.util.List<ProductGetAllDto> content = foundPage.getContent().stream().map(this::mapToGetAllDto).collect(Collectors.toList());
+            return new PageImpl<>(content, pageable, foundPage.getTotalElements());
         }
 
         return getAll(page, size, orders, sortBy, null);
     }
 
     private ProductDto mapToDto(Product product) {
-        ProductDto dto = new ProductDto();
-        dto.setId(product.getProductId());
-        dto.setProductName(product.getName());
-        dto.setPrice(product.getPrice());
-        dto.setDescription(product.getDescription());
-        dto.setStatus(product.getStatus());
-        dto.setImage(product.getImgProduct());
-        dto.setCategoryId(product.getCategoryId());
-        dto.setCompanyId(product.getCompanyId());
+        ProductDto.ProductDtoBuilder dtoBuilder = ProductDto.builder()
+            .id(product.getProductId())
+            .productName(product.getName())
+            .price(product.getPrice())
+            .description(product.getDescription())
+            .status(product.getStatus())
+            .image(product.getImgProduct())
+            .categoryId(product.getCategoryId())
+            .companyId(product.getCompanyId());
         // First try normalized product_comments -> comments
         java.util.List<String> commentsList = new java.util.ArrayList<>();
         try {
@@ -253,22 +257,39 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
                 commentsList.addAll(list);
             }
         }
-        dto.setComments(commentsList);
-        dto.setInformation(product.getInformation());
-        dto.setPreparationTime(product.getPreparationTime());
-        return dto;
+        dtoBuilder.comments(commentsList);
+        dtoBuilder.information(product.getInformation());
+        dtoBuilder.preparationTime(product.getPreparationTime());
+        if (product.getCategoryId() != null) {
+            try {
+                categoryRepository.findById(product.getCategoryId()).ifPresent(cat -> {
+                    CategoryResponseDTO catDto = CategoryResponseDTO.builder()
+                            .categoryId(cat.getCategoryId())
+                            .name(cat.getName())
+                            .parameterId(cat.getExternalId())
+                            .parameterName(null)
+                            .status(cat.getStatus())
+                            .companyId(cat.getCompanyId())
+                            .createdAt(cat.getCreatedAt())
+                            .updatedAt(cat.getUpdatedAt())
+                            .build();
+                    dtoBuilder.category(catDto);
+                });
+            } catch (Exception ignored) {}
+        }
+        return dtoBuilder.build();
     }
 
     private ProductGetAllDto mapToGetAllDto(Product product) {
-        ProductGetAllDto dto = new ProductGetAllDto();
-        dto.setId(product.getProductId());
-        dto.setProductName(product.getName());
-        dto.setPrice(product.getPrice());
-        dto.setStatus(product.getStatus());
-        dto.setCategoryId(product.getCategoryId());
-        dto.setDescription(product.getDescription());
-        dto.setImage(product.getImgProduct());
-        dto.setCompanyId(product.getCompanyId());
+        ProductGetAllDto.ProductGetAllDtoBuilder dtoBuilder = ProductGetAllDto.builder()
+            .id(product.getProductId())
+            .productName(product.getName())
+            .price(product.getPrice())
+            .status(product.getStatus())
+            .categoryId(product.getCategoryId())
+            .description(product.getDescription())
+            .image(product.getImgProduct())
+            .companyId(product.getCompanyId());
         java.util.List<String> commentsList = new java.util.ArrayList<>();
         try {
             java.math.BigDecimal pid = java.math.BigDecimal.valueOf(product.getProductId());
@@ -301,9 +322,26 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
                 commentsList.addAll(list);
             }
         }
-        dto.setComments(commentsList);
-        dto.setInformation(product.getInformation());
-        dto.setPreparationTime(product.getPreparationTime());
-        return dto;
+        dtoBuilder.comments(commentsList);
+        dtoBuilder.information(product.getInformation());
+        dtoBuilder.preparationTime(product.getPreparationTime());
+        if (product.getCategoryId() != null) {
+            try {
+                categoryRepository.findById(product.getCategoryId()).ifPresent(cat -> {
+                    CategoryResponseDTO catDto = CategoryResponseDTO.builder()
+                            .categoryId(cat.getCategoryId())
+                            .name(cat.getName())
+                            .parameterId(cat.getExternalId())
+                            .parameterName(null)
+                            .status(cat.getStatus())
+                            .companyId(cat.getCompanyId())
+                            .createdAt(cat.getCreatedAt())
+                            .updatedAt(cat.getUpdatedAt())
+                            .build();
+                    dtoBuilder.category(catDto);
+                });
+            } catch (Exception ignored) {}
+        }
+        return dtoBuilder.build();
     }
 }

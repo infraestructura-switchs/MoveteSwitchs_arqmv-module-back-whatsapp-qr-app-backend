@@ -1,12 +1,14 @@
 package com.restaurante.bot.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProductGetAllDto {
 
     private Long id;
@@ -14,6 +16,7 @@ public class ProductGetAllDto {
     private Double price;
     private String status;
     private Long categoryId;
+    private CategoryResponseDTO category;
     private String description;
     private String image;
     private java.util.List<String> comments;
