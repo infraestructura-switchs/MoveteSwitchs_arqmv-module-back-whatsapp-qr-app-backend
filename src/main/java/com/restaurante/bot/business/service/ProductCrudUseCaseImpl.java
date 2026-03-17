@@ -43,6 +43,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         entity.setCategoryId(productDto.getCategoryId());
         entity.setInformation(productDto.getInformation());
         entity.setPreparationTime(productDto.getPreparationTime());
+        entity.setCompanyId(productDto.getCompanyId());
         if (productDto.getComments() != null) {
             // persist comments in legacy JSON column for now
             try {
@@ -78,6 +79,9 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (productDto.getCategoryId() != null) entity.setCategoryId(productDto.getCategoryId());
         if (productDto.getInformation() != null) entity.setInformation(productDto.getInformation());
         if (productDto.getPreparationTime() != null) entity.setPreparationTime(productDto.getPreparationTime());
+        // companyId is required for update
+        entity.setCompanyId(productDto.getCompanyId());
+
         if (productDto.getComments() != null) {
             try {
                 String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(productDto.getComments());
@@ -214,6 +218,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         dto.setStatus(product.getStatus());
         dto.setImage(product.getImgProduct());
         dto.setCategoryId(product.getCategoryId());
+        dto.setCompanyId(product.getCompanyId());
         // First try normalized product_comments -> comments
         java.util.List<String> commentsList = new java.util.ArrayList<>();
         try {
@@ -263,6 +268,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         dto.setCategoryId(product.getCategoryId());
         dto.setDescription(product.getDescription());
         dto.setImage(product.getImgProduct());
+        dto.setCompanyId(product.getCompanyId());
         java.util.List<String> commentsList = new java.util.ArrayList<>();
         try {
             java.math.BigDecimal pid = java.math.BigDecimal.valueOf(product.getProductId());

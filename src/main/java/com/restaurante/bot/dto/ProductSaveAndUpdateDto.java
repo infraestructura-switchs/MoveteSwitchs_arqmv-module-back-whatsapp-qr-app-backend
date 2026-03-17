@@ -29,5 +29,8 @@ public class ProductSaveAndUpdateDto {
     private String information;
 
     private Integer preparationTime;
+    @NotNull
+    private Long companyId;
+
     private java.util.List<String> comments;
 }

@@ -18,6 +18,7 @@ public class ProductDto {
     private String status;
     private String image;
     private Long categoryId;
+    private Long companyId;
     private List<String> comments;
     private String information;
     private Integer preparationTime;

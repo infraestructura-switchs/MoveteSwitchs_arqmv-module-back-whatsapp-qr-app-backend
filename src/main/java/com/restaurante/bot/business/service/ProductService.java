@@ -96,16 +96,17 @@ public class ProductService implements ProductInterface, ProductUseCase {
             }
         }
         return new ProductDto(
-                product.getProductId(),
-                product.getName(),
-                product.getPrice(),
-                product.getDescription(),
-                product.getStatus(),
-                imageOrDefault(product.getImgProduct(), productImageBycompany),
-                product.getCategoryId(),
-                commentsList,
-                product.getInformation(),
-                product.getPreparationTime()
+            product.getProductId(),
+            product.getName(),
+            product.getPrice(),
+            product.getDescription(),
+            product.getStatus(),
+            imageOrDefault(product.getImgProduct(), productImageBycompany),
+            product.getCategoryId(),
+            product.getCompanyId(),
+            commentsList,
+            product.getInformation(),
+            product.getPreparationTime()
 
         );
     }
@@ -275,16 +276,17 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
 
         return new ProductDto(
-                updatedProduct.getProductId(),
-                updatedProduct.getName(),
-                updatedProduct.getPrice(),
-                updatedProduct.getDescription(),
-                updatedProduct.getStatus(),
-                imageOrDefault(updatedProduct.getImgProduct(), imageByCompany),
-                updatedProduct.getCategoryId(),
-                commentsList,
-                updatedProduct.getInformation(),
-                updatedProduct.getPreparationTime()
+            updatedProduct.getProductId(),
+            updatedProduct.getName(),
+            updatedProduct.getPrice(),
+            updatedProduct.getDescription(),
+            updatedProduct.getStatus(),
+            imageOrDefault(updatedProduct.getImgProduct(), imageByCompany),
+            updatedProduct.getCategoryId(),
+            updatedProduct.getCompanyId(),
+            commentsList,
+            updatedProduct.getInformation(),
+            updatedProduct.getPreparationTime()
         );
     }
 

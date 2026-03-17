@@ -17,6 +17,7 @@ public class ProductGetAllDto {
     private String description;
     private String image;
     private java.util.List<String> comments;
+    private Long companyId;
     private String information;
     private Integer preparationTime;
 
