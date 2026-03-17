@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Tag(name = "Producto", description = "APIs para la gestión de productos (CRUD)")
 @RestController
-@RequestMapping("/${app.request.mapping}/admin/producto")
+@RequestMapping("/${app.request.mapping}/admin/product")
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
