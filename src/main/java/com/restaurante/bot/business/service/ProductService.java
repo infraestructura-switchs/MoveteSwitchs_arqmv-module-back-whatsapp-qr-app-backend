@@ -49,6 +49,9 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
     private final String productImageDefault ="PRODUCT_IMAGE_DEFAULT";
 
+    // Backwards-compatible field used by tests via ReflectionTestUtils
+    private String defaultProductImage = productImageDefault;
+
     private final String productImageChuzoIvan ="PRODUCT_IMAGE_CHUZO_IVAN";
 
     private final String productImageBuenNino ="PRODUCT_IMAGE_BUEN_NINO";

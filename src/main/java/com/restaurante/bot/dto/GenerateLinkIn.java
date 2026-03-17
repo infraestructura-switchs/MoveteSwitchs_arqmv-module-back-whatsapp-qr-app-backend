@@ -4,10 +4,12 @@ import com.restaurante.bot.util.LoginMode;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class GenerateLinkIn {

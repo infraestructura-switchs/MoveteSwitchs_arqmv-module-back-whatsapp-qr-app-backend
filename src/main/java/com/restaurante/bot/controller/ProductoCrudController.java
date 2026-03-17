@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Tag(name = "Producto", description = "APIs para la gestión de productos (CRUD)")
 @RestController
-@RequestMapping("/${app.request.mapping}/admin/product")
+@RequestMapping({"/${app.request.mapping}/admin/product", "/api/back-whatsapp-qr-app/producto"})
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
