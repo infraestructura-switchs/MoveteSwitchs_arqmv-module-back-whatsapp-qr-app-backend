@@ -7,8 +7,11 @@ import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.model.Category;
 import com.restaurante.bot.model.Product;
 import com.restaurante.bot.repository.CategoryRepository;
+import com.restaurante.bot.repository.CategoryMappingRepository;
 import com.restaurante.bot.repository.CompanyRepository;
+import com.restaurante.bot.repository.ParameterRepository;
 import com.restaurante.bot.repository.ProductRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +43,15 @@ class ProductServiceTest {
 
     @Mock
     private CompanyRepository companyRepository;
+
+    @Mock
+    private CategoryMappingRepository categoryMappingRepository;
+
+    @Mock
+    private ParameterRepository parameterRepository;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private ProductService productService;

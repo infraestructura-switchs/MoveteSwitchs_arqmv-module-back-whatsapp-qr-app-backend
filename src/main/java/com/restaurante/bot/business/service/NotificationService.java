@@ -6,6 +6,9 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.restaurante.bot.application.ports.incoming.NotificationUseCase;
 import com.restaurante.bot.business.interfaces.NotificationInterface;
+import com.restaurante.bot.business.service.notification.NotificationEvent;
+import com.restaurante.bot.business.service.notification.NotificationObserver;
+import com.restaurante.bot.business.service.notification.NotificationPublisher;
 import com.restaurante.bot.model.Subscription;
 import com.restaurante.bot.model.User;
 import com.restaurante.bot.repository.SubscriptionRepository;
@@ -17,9 +20,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class NotificationService implements NotificationInterface, NotificationUseCase {
+public class NotificationService implements NotificationInterface, NotificationUseCase, NotificationObserver {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final NotificationPublisher notificationPublisher;
+
+    @javax.annotation.PostConstruct
+    public void registerWithPublisher() {
+        notificationPublisher.register(this);
+    }
 
     // Crear o actualizar suscripción con token
     public Subscription createOrUpdateSubscription(Long userId, String token) {
@@ -75,6 +84,11 @@ public class NotificationService implements NotificationInterface, NotificationU
         } catch (FirebaseMessagingException e) {
             System.err.println("Error enviando notificación: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void onNotification(NotificationEvent event) {
+        sendNotificationToClient(event.getToken(), event.getTitle(), event.getBody());
     }
 
     // Lógica para obtener recordatorios (adapta a tu DB Oracle)

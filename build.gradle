@@ -61,8 +61,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mockito:mockito-core'
-    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.mockito:mockito-core:4.11.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.11.0'
     testRuntimeOnly 'com.h2database:h2'
 }
 

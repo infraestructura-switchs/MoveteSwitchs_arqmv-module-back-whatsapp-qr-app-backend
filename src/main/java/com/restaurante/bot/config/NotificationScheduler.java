@@ -1,5 +1,6 @@
 package com.restaurante.bot.config;
 
+import com.restaurante.bot.business.service.notification.NotificationPublisher;
 import com.restaurante.bot.business.service.NotificationService;
 import com.restaurante.bot.model.Subscription;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,9 @@ import java.util.List;
 @Component
 
 public class NotificationScheduler {
+
+    @Autowired
+    private NotificationPublisher notificationPublisher;
 
     @Autowired
     private NotificationService notificationService;
@@ -36,13 +40,13 @@ public class NotificationScheduler {
         // Envía notificaciones
         journalReminders.forEach(sub -> {
             if (sub.isJournalNotificationEnabled()) {
-                notificationService.sendNotificationToClient(sub.getToken(), "Recordatorio: Journal pendiente", "Tienes un journal pendiente. Revisa tu agenda para más detalles.");
+                notificationPublisher.publish(sub.getToken(), "Recordatorio: Journal pendiente", "Tienes un journal pendiente. Revisa tu agenda para más detalles.");
             }
         });
 
         appointmentReminders.forEach(sub -> {
             if (sub.isAppointmentNotificationEnabled()) {
-                notificationService.sendNotificationToClient(sub.getToken(), "Recordatorio: Cita próxima", "Tienes una cita programada pronto. Revisa los detalles en tu calendario.");
+                notificationPublisher.publish(sub.getToken(), "Recordatorio: Cita próxima", "Tienes una cita programada pronto. Revisa los detalles en tu calendario.");
             }
         });
     }
