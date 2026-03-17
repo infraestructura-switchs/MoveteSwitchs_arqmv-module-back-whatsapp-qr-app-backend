@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,12 +28,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
+public class ProductCrudUseCaseImpl* implements ProductCrudUseCase {
 
     private final ProductRepository productRepository;
     private final ProductCommentRepository productCommentRepository;
     private final CommentRepository commentRepository;
     private final CategoryRepository categoryRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -50,7 +53,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (productDto.getComments() != null) {
             // persist comments in legacy JSON column for now
             try {
-                String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(productDto.getComments());
+                String json = objectMapper.writeValueAsString(productDto.getComments());
                 entity.setComments(json);
             } catch (Exception e) {
                 entity.setComments("[]");
@@ -87,7 +90,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
         if (productDto.getComments() != null) {
             try {
-                String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(productDto.getComments());
+                String json = objectMapper.writeValueAsString(productDto.getComments());
                 entity.setComments(json);
             } catch (Exception e) {
                 entity.setComments("[]");
@@ -246,8 +249,8 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (commentsList.isEmpty() && product.getComments() != null && !product.getComments().trim().isEmpty()) {
             String raw = product.getComments();
             try {
-                java.util.List<String> list = new com.fasterxml.jackson.databind.ObjectMapper()
-                        .readValue(raw, new com.fasterxml.jackson.core.type.TypeReference<java.util.List<String>>() {});
+                java.util.List<String> list = objectMapper
+                        .readValue(raw, new TypeReference<java.util.List<String>>() {});
                 commentsList.addAll(list);
             } catch (Exception ex) {
                 java.util.List<String> list = java.util.Arrays.stream(raw.split(","))
@@ -311,8 +314,8 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (commentsList.isEmpty() && product.getComments() != null && !product.getComments().trim().isEmpty()) {
             String raw = product.getComments();
             try {
-                java.util.List<String> list = new com.fasterxml.jackson.databind.ObjectMapper()
-                        .readValue(raw, new com.fasterxml.jackson.core.type.TypeReference<java.util.List<String>>() {});
+                java.util.List<String> list = objectMapper
+                        .readValue(raw, new TypeReference<java.util.List<String>>() {});
                 commentsList.addAll(list);
             } catch (Exception ex) {
                 java.util.List<String> list = java.util.Arrays.stream(raw.split(","))
