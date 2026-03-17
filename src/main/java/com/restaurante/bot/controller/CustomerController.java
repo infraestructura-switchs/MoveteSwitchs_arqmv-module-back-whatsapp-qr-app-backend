@@ -3,7 +3,6 @@ package com.restaurante.bot.controller;
 import com.restaurante.bot.application.ports.incoming.CustomerUseCase;
 import com.restaurante.bot.dto.SaveFinishDataDTO;
 import com.restaurante.bot.model.Customer;
-import com.restaurante.bot.business.service.CustomerService;
 import com.restaurante.bot.model.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

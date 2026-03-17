@@ -1,11 +1,9 @@
 package com.restaurante.bot.config;
 
-import com.restaurante.bot.business.service.notification.NotificationPublisher;
 import com.restaurante.bot.business.service.NotificationService;
+import com.restaurante.bot.business.service.notification.NotificationPublisher;
 import com.restaurante.bot.model.Subscription;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
