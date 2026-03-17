@@ -11,7 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @Service("categoryApplicationService")
 @Transactional(readOnly = true)
@@ -94,6 +98,32 @@ public class CategoryApplicationService implements CategoryUseCase {
     @Transactional
     public void deleteCategory(Long id) {
         categoryRepo.deleteById(id);
+    }
+
+    @Override
+    public Page<CategoryResponseDTO> getAll(Map<String, String> customQuery) {
+        List<CategoryResponseDTO> all = getAllCategories();
+        return new PageImpl<>(all);
+    }
+
+    @Override
+    public Page<CategoryResponseDTO> getAll(int page, int size, String orders, String sortBy) {
+        List<CategoryResponseDTO> all = getAllCategories();
+        int start = page * size;
+        int end = Math.min(start + size, all.size());
+        List<CategoryResponseDTO> content = start >= all.size() ? List.of() : all.subList(start, end);
+        return new PageImpl<>(content, PageRequest.of(page, size), all.size());
+    }
+
+    @Override
+    public List<CategoryResponseDTO> getAllWithOutPage(Map<String, String> customQuery) {
+        return getAllCategories();
+    }
+
+    @Override
+    public Page<CategoryResponseDTO> searchCustom(Map<String, String> customQuery) {
+        List<CategoryResponseDTO> all = getAllCategories();
+        return new PageImpl<>(all);
     }
 
     @Override

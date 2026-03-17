@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/company")
@@ -75,6 +76,11 @@ public class CompanyController {
         return new ResponseEntity<>(companys, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CompanyRequest> get(@PathVariable("id") long id) {
+        return ResponseEntity.ok(companyUseCase.get(id));
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteCity(@PathVariable Long id) {
         companyUseCase.delete(id);
@@ -125,12 +131,26 @@ public class CompanyController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<Page<CompanyResponseDTO>> getAllPageCompany(@RequestParam(defaultValue = "0") int page,
-                                                                  @RequestParam(defaultValue = "10") int size,
-                                                                  @RequestParam(defaultValue = "ASC") String orders,
-                                                                  @RequestParam(defaultValue = "id") String sortBy){
-        return new ResponseEntity<>(companyUseCase.getAllPageCompany(page,size,orders,sortBy), HttpStatus.OK);
+    public ResponseEntity<Page<CompanyResponseDTO>> getAll(@RequestParam Map<String, String> customQuery) {
+        return new ResponseEntity<>(companyUseCase.getAll(customQuery), HttpStatus.OK);
+    }
 
+    @GetMapping
+    public ResponseEntity<Page<CompanyResponseDTO>> getAll(@RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size,
+                                                           @RequestParam(defaultValue = "ASC") String orders,
+                                                           @RequestParam(defaultValue = "id") String sortBy) {
+        return new ResponseEntity<>(companyUseCase.getAllPageCompany(page, size, orders, sortBy), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-all-without-page")
+    public ResponseEntity<List<CompanyResponseDTO>> getAllWithoutPage(@RequestParam Map<String, String> customQuery) {
+        return new ResponseEntity<>(companyUseCase.getAllWithoutPage(customQuery), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<CompanyResponseDTO>> search(@RequestParam Map<String, String> customQuery) {
+        return new ResponseEntity<>(companyUseCase.searchCustom(customQuery), HttpStatus.OK);
     }
 
 

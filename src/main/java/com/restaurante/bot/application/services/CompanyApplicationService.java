@@ -193,4 +193,69 @@ public class CompanyApplicationService implements CompanyUseCase {
         Pageable pagingSort = PageRequest.of(page, size, sort);
         return companyRepo.getAllPageCompany(pagingSort);
     }
+
+    @Override
+    public CompanyRequest get(Long id) {
+        Company company = companyRepo.findById(id).orElseThrow(() -> new RuntimeException("Empresa no encontrada con id " + id));
+        return CompanyRequest.builder()
+                .companyId(company.getId())
+                .nameCompany(company.getName())
+                .logoUrl(company.getLogo())
+                .numberWhatsapp(company.getNumberWhatsapp())
+                .longitude(company.getLongitude())
+                .latitude(company.getLatitude())
+                .baseValue(company.getBaseValue())
+                .additionalValue(company.getAdditionalValue())
+                .externalCompanyId(company.getExternalCompanyId())
+                .cityId(company.getCityId())
+                .apiKey(company.getApiKey())
+                .rpIntegrationId(company.getRpIntegrationId())
+                .numberId(company.getNumberId())
+                .tokenMeta(company.getTokenMeta())
+                .numberBotMesa(company.getNumberBotMesa())
+                .numberBotDelivery(company.getNumberBotDelivery())
+                .tokenMetaDelivery(company.getTokenMetaDelivery())
+                .landingTemplate(company.getLandingTemplate())
+                .build();
+    }
+
+    @Override
+    public Page<CompanyResponseDTO> getAll(Map<String, String> customQuery) {
+        int page = Integer.parseInt(customQuery.getOrDefault("page", "0"));
+        int size = Integer.parseInt(customQuery.getOrDefault("size", "10"));
+        String orders = customQuery.getOrDefault("orders", "ASC");
+        String sortBy = customQuery.getOrDefault("sortBy", "id");
+        return getAllPageCompany(page, size, orders, sortBy);
+    }
+
+    @Override
+    public List<CompanyResponseDTO> getAllWithoutPage(Map<String, String> customQuery) {
+        List<CompanyRequest> companies = companyRepo.getAllCompany();
+        return companies.stream().map(c -> CompanyResponseDTO.builder()
+                .id(c.getCompanyId())
+                .companyName(c.getNameCompany())
+                .logo(c.getLogoUrl())
+                .whatsappNumber(c.getNumberWhatsapp())
+                .latitude(c.getLatitude())
+                .longitude(c.getLongitude())
+                .baseValue(c.getBaseValue())
+                .aditionalValue(c.getAdditionalValue())
+                .externalId(c.getExternalCompanyId())
+                .cityId(c.getCityId())
+                .apiKey(c.getApiKey())
+                .rappyId(c.getRpIntegrationId())
+                .numberId(c.getNumberId())
+                .tokenMetaQr(c.getTokenMeta())
+                .numberBotDelivery(c.getNumberBotDelivery())
+                .numberBotMesa(c.getNumberBotMesa())
+                .tokenMetaDelivery(c.getTokenMetaDelivery())
+                .landingTemplate(c.getLandingTemplate())
+                .build()).toList();
+    }
+
+    @Override
+    public Page<CompanyResponseDTO> searchCustom(Map<String, String> customQuery) {
+        // Basic search behaves like getAll for now; can be extended to apply filters
+        return getAll(customQuery);
+    }
 }

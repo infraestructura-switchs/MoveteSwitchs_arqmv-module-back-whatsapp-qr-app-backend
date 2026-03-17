@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/categories")
@@ -86,5 +88,29 @@ public class CategoryController {
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryUseCase.deleteCategory(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/get-all")
+    public ResponseEntity<Page<CategoryResponseDTO>> getAll(@RequestParam Map<String, String> customQuery) {
+        return ResponseEntity.ok(categoryUseCase.getAll(customQuery));
+    }
+
+    @GetMapping(params = {"page", "size"})
+    public ResponseEntity<Page<CategoryResponseDTO>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = "categoryId") String sortBy) {
+        return ResponseEntity.ok(categoryUseCase.getAll(page, size, orders, sortBy));
+    }
+
+    @GetMapping("/get-all-without-page")
+    public ResponseEntity<List<CategoryResponseDTO>> getAllWithoutPage(@RequestParam Map<String, String> customQuery) {
+        return ResponseEntity.ok(categoryUseCase.getAllWithOutPage(customQuery));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<CategoryResponseDTO>> search(@RequestParam Map<String, String> customQuery) {
+        return ResponseEntity.ok(categoryUseCase.searchCustom(customQuery));
     }
 }
