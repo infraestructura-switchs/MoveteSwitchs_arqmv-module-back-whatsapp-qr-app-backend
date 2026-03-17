@@ -7,7 +7,6 @@ import com.restaurante.bot.application.ports.incoming.PaymentUseCase;
 import java.util.List;
 
 @Service
-
 public class PaymentService implements PaymentUseCase {
     private final PaymentRepository paymentRepository;
 
