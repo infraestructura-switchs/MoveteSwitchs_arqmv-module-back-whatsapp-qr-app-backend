@@ -48,7 +48,8 @@ public class Product {
     @Column(name = "COMMENTS")
     private String comments;
 
-    @OneToMany(mappedBy = "product", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true, fetch = jakarta.persistence.FetchType.EAGER)
+    @OneToMany(cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true, fetch = jakarta.persistence.FetchType.EAGER)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private java.util.List<ProductComment> productComments = new java.util.ArrayList<>();
 
     @Column(name = "INFORMATION")

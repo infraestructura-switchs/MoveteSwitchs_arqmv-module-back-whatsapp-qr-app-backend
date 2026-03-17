@@ -81,8 +81,9 @@ public class ProductService implements ProductInterface, ProductUseCase {
         List<String> commentsList = new ArrayList<>();
         if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {
             commentsList = product.getProductComments().stream()
-                    .map(pc -> pc.getCommentText())
-                    .collect(Collectors.toList());
+                .map(pc -> pc.getComment() != null ? pc.getComment().getText() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         } else if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
             try {
                 commentsList = objectMapper.readValue(product.getComments(), new TypeReference<List<String>>() {});
@@ -254,7 +255,10 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
         List<String> commentsList = new ArrayList<>();
         if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {
-            commentsList = product.getProductComments().stream().map(pc -> pc.getCommentText()).collect(Collectors.toList());
+            commentsList = product.getProductComments().stream()
+                    .map(pc -> pc.getComment() != null ? pc.getComment().getText() : null)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         } else if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
             try {
                 commentsList = objectMapper.readValue(product.getComments(), new TypeReference<List<String>>() {});
@@ -297,12 +301,9 @@ public class ProductService implements ProductInterface, ProductUseCase {
         product.setGroupId(Long.parseLong(productDTO.getData().getGrupo().getIdGrupo()));
 
         try {
-            if (productDTO.getData().getComentarios() != null) {
+                if (productDTO.getData().getComentarios() != null) {
                 product.setComments(objectMapper.writeValueAsString(productDTO.getData().getComentarios()));
-                // normalized comments
-                for (String c : productDTO.getData().getComentarios()) {
-                    product.getProductComments().add(new ProductComment(product, c));
-                }
+                // do not create normalized ProductComment rows here because existing table schema differs
             }
         } catch (JsonProcessingException e) {
             log.error("Error serializando comentarios para productId {}: {}", productDTO.getId(), e.getMessage());
@@ -325,8 +326,6 @@ public class ProductService implements ProductInterface, ProductUseCase {
             existing.setCompanyId(product.getCompanyId());
             existing.setGroupId(product.getGroupId());
             existing.setComments(product.getComments());
-            existing.getProductComments().clear();
-            existing.getProductComments().addAll(product.getProductComments());
             existing.setInformation(product.getInformation());
             existing.setPreparationTime(product.getPreparationTime());
             return existing;

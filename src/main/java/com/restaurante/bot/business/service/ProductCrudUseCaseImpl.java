@@ -7,6 +7,8 @@ import com.restaurante.bot.dto.ProductSaveAndUpdateDto;
 import com.restaurante.bot.model.Product;
 import com.restaurante.bot.model.ProductComment;
 import com.restaurante.bot.repository.ProductRepository;
+import com.restaurante.bot.repository.ProductCommentRepository;
+import com.restaurante.bot.repository.CommentRepository;
 import com.restaurante.bot.util.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
     private final ProductRepository productRepository;
+    private final ProductCommentRepository productCommentRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     @Transactional
@@ -40,17 +44,12 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         entity.setInformation(productDto.getInformation());
         entity.setPreparationTime(productDto.getPreparationTime());
         if (productDto.getComments() != null) {
-            // persist as JSON in legacy column for compatibility
+            // persist comments in legacy JSON column for now
             try {
                 String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(productDto.getComments());
                 entity.setComments(json);
             } catch (Exception e) {
                 entity.setComments("[]");
-            }
-            // and persist normalized comments
-            for (String c : productDto.getComments()) {
-                ProductComment pc = new ProductComment(entity, c);
-                entity.getProductComments().add(pc);
             }
         }
 
@@ -85,12 +84,6 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
                 entity.setComments(json);
             } catch (Exception e) {
                 entity.setComments("[]");
-            }
-            // replace normalized comments
-            entity.getProductComments().clear();
-            for (String c : productDto.getComments()) {
-                ProductComment pc = new ProductComment(entity, c);
-                entity.getProductComments().add(pc);
             }
         }
 
@@ -221,28 +214,41 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         dto.setStatus(product.getStatus());
         dto.setImage(product.getImgProduct());
         dto.setCategoryId(product.getCategoryId());
-        // Prefer normalized comments if present
-        if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {
-            java.util.List<String> list = product.getProductComments().stream()
-                    .map(pc -> pc.getCommentText())
-                    .collect(java.util.stream.Collectors.toList());
-            dto.setComments(list);
-        } else if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
-            // fallback to legacy JSON or CSV
+        // First try normalized product_comments -> comments
+        java.util.List<String> commentsList = new java.util.ArrayList<>();
+        try {
+            java.math.BigDecimal pid = java.math.BigDecimal.valueOf(product.getProductId());
+            java.util.List<com.restaurante.bot.model.ProductComment> pcs = productCommentRepository.findByProductId(pid);
+            if (pcs != null && !pcs.isEmpty()) {
+                for (com.restaurante.bot.model.ProductComment pc : pcs) {
+                    if (pc.getComment() != null && pc.getComment().getText() != null) {
+                        commentsList.add(pc.getComment().getText());
+                    } else if (pc.getCommentId() != null) {
+                        commentRepository.findById(pc.getCommentId()).ifPresent(c -> {
+                            if (c.getText() != null) commentsList.add(c.getText());
+                        });
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // fallback to legacy column
+        }
+
+        if (commentsList.isEmpty() && product.getComments() != null && !product.getComments().trim().isEmpty()) {
             String raw = product.getComments();
             try {
-                // try JSON
                 java.util.List<String> list = new com.fasterxml.jackson.databind.ObjectMapper()
                         .readValue(raw, new com.fasterxml.jackson.core.type.TypeReference<java.util.List<String>>() {});
-                dto.setComments(list);
+                commentsList.addAll(list);
             } catch (Exception ex) {
                 java.util.List<String> list = java.util.Arrays.stream(raw.split(","))
                         .map(String::trim)
                         .filter(s -> !s.isEmpty())
                         .collect(java.util.stream.Collectors.toList());
-                dto.setComments(list);
+                commentsList.addAll(list);
             }
         }
+        dto.setComments(commentsList);
         dto.setInformation(product.getInformation());
         dto.setPreparationTime(product.getPreparationTime());
         return dto;
@@ -257,25 +263,39 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         dto.setCategoryId(product.getCategoryId());
         dto.setDescription(product.getDescription());
         dto.setImage(product.getImgProduct());
-        if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {
-            java.util.List<String> list = product.getProductComments().stream()
-                    .map(pc -> pc.getCommentText())
-                    .collect(java.util.stream.Collectors.toList());
-            dto.setComments(list);
-        } else if (product.getComments() != null && !product.getComments().trim().isEmpty()) {
+        java.util.List<String> commentsList = new java.util.ArrayList<>();
+        try {
+            java.math.BigDecimal pid = java.math.BigDecimal.valueOf(product.getProductId());
+            java.util.List<com.restaurante.bot.model.ProductComment> pcs = productCommentRepository.findByProductId(pid);
+            if (pcs != null && !pcs.isEmpty()) {
+                for (com.restaurante.bot.model.ProductComment pc : pcs) {
+                    if (pc.getComment() != null && pc.getComment().getText() != null) {
+                        commentsList.add(pc.getComment().getText());
+                    } else if (pc.getCommentId() != null) {
+                        commentRepository.findById(pc.getCommentId()).ifPresent(c -> {
+                            if (c.getText() != null) commentsList.add(c.getText());
+                        });
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        if (commentsList.isEmpty() && product.getComments() != null && !product.getComments().trim().isEmpty()) {
             String raw = product.getComments();
             try {
                 java.util.List<String> list = new com.fasterxml.jackson.databind.ObjectMapper()
                         .readValue(raw, new com.fasterxml.jackson.core.type.TypeReference<java.util.List<String>>() {});
-                dto.setComments(list);
+                commentsList.addAll(list);
             } catch (Exception ex) {
                 java.util.List<String> list = java.util.Arrays.stream(raw.split(","))
                         .map(String::trim)
                         .filter(s -> !s.isEmpty())
                         .collect(java.util.stream.Collectors.toList());
-                dto.setComments(list);
+                commentsList.addAll(list);
             }
         }
+        dto.setComments(commentsList);
         dto.setInformation(product.getInformation());
         dto.setPreparationTime(product.getPreparationTime());
         return dto;

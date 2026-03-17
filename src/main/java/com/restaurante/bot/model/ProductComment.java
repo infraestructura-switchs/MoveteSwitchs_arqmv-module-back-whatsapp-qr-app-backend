@@ -16,22 +16,19 @@ public class ProductComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "product_comments_id")
+    private Long productCommentsId;
+
+    // original table uses DECIMAL(18,6) for product_id; map as String/BigDecimal to avoid precision issues
+    @Column(name = "product_id")
+    private java.math.BigDecimal productId;
+
+    // comment_id present in the existing table (likely referencing another comments table)
+    @Column(name = "comment_id")
+    private Long commentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @JoinColumn(name = "comment_id", insertable = false, updatable = false)
+    private Comment comment;
 
-    @Column(name = "comment_text")
-    private String commentText;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    public ProductComment(Product product, String commentText) {
-        this.product = product;
-        this.commentText = commentText;
-        this.createdAt = LocalDateTime.now();
-    }
 }
