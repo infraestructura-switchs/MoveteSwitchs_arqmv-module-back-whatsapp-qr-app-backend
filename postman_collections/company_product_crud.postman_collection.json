@@ -1,0 +1,337 @@
+{
+  "info": {
+    "name": "Company and Product CRUD",
+    "_postman_id": "b1f9e9e3-0000-4000-8000-000000000000",
+    "description": "Colección con endpoints CRUD y utilitarios para `company` y `product`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "appRequestMapping", "value": "api" },
+    { "key": "apiKey", "value": "" },
+    { "key": "companyId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Company",
+      "item": [
+        {
+          "name": "Create Company (form-data)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "companyName", "value": "Mi Empresa", "type": "text" },
+                { "key": "whatsappNumber", "value": "+573001234567", "type": "text" },
+                { "key": "longitude", "value": "-74.0", "type": "text" },
+                { "key": "latitude", "value": "4.6", "type": "text" },
+                { "key": "baseValue", "value": "0.0", "type": "text" },
+                { "key": "additionalValue", "value": "0.0", "type": "text" },
+                { "key": "logo", "type": "file", "src": "" },
+                { "key": "externalId", "value": "123", "type": "text" },
+                { "key": "cityId", "value": "1", "type": "text" },
+                { "key": "apiKey", "value": "{{apiKey}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/create",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "company", "create" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/get-company",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "company", "get-company" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Company By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/{{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "company", "{{companyId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Company",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/delete/{{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "company", "delete", "{{companyId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Company (form-data)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "companyName", "value": "Mi Empresa Modificada", "type": "text" },
+                { "key": "apiKey", "value": "{{apiKey}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/updateByCompanynId/{{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "company", "updateByCompanynId", "{{companyId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All (paged)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company?page=0&size=10",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "company" ],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Companies (custom query)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/search?name=Mi%20Empresa",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "company", "search" ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Get Products By Company",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/getProductByCompany/{{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "product", "getProductByCompany", "{{companyId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update/Create Products With Category (trigger)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/update-data?companyId={{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "product", "update-data" ],
+              "query": [ { "key": "companyId", "value": "{{companyId}}" } ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product Description",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"productId\": 1, \"description\": \"Nueva descripción\" }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/updateDescription",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "product", "updateDescription" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/search?companyId={{companyId}}&name=Pizza&category=Comidas",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "product", "search" ],
+              "query": [
+                { "key": "companyId", "value": "{{companyId}}" },
+                { "key": "name", "value": "Pizza" },
+                { "key": "category", "value": "Comidas" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Products By Price",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/by-price?companyId={{companyId}}&sort=asc",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "product", "by-price" ],
+              "query": [
+                { "key": "companyId", "value": "{{companyId}}" },
+                { "key": "sort", "value": "asc" }
+              ]
+            }
+          },
+          "response": []
+        }
+        ,
+        {
+          "name": "Product CRUD (create)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Pizza\", \"price\": 12000, \"companyId\": {{companyId}} }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/create",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product", "create" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Product CRUD (get by id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/{{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product", "{{companyId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Product CRUD (update)",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Pizza Hawaiana\", \"price\": 13000 }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/update/{{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product", "update", "{{companyId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Product CRUD (delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/delete/{{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product", "delete", "{{companyId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Product CRUD (get-all paged)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product?companyId={{companyId}}&page=0&size=5",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product" ],
+              "query": [
+                { "key": "companyId", "value": "{{companyId}}" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "5" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Product CRUD (get-all without page)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/get-all-without-page?companyId={{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product", "get-all-without-page" ],
+              "query": [ { "key": "companyId", "value": "{{companyId}}" } ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Product CRUD (search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/search?companyId={{companyId}}&name=Pizza",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product", "search" ],
+              "query": [
+                { "key": "companyId", "value": "{{companyId}}" },
+                { "key": "name", "value": "Pizza" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
