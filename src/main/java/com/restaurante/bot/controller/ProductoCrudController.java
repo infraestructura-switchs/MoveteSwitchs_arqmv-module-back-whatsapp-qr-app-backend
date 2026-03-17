@@ -1,9 +1,9 @@
 package com.restaurante.bot.controller;
 
+import com.restaurante.bot.application.ports.incoming.ProductCrudUseCase;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductGetAllDto;
 import com.restaurante.bot.dto.ProductSaveAndUpdateDto;
-import com.restaurante.bot.application.ports.incoming.ProductCrudUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -55,25 +55,29 @@ public class ProductoCrudController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<Page<ProductGetAllDto>> getAll(@RequestParam Map<String, String> customQuery) {
-        return ResponseEntity.ok(productCrudUseCase.getAll(customQuery));
+    public ResponseEntity<Page<ProductGetAllDto>> getAll(@RequestParam Map<String, String> customQuery,
+            @RequestParam("companyId") Long companyId) {
+        return ResponseEntity.ok(productCrudUseCase.getAll(customQuery, companyId));
     }
 
     @GetMapping
     public ResponseEntity<Page<ProductGetAllDto>> getAll(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "ASC") String orders,
-            @RequestParam(defaultValue = "id") String sortBy) {
-        return ResponseEntity.ok(productCrudUseCase.getAll(page, size, orders, sortBy));
+            @RequestParam(defaultValue = "productId") String sortBy,
+            @RequestParam("companyId") Long companyId) {
+        return ResponseEntity.ok(productCrudUseCase.getAll(page, size, orders, sortBy, companyId));
     }
 
     @GetMapping("/get-all-without-page")
-    public ResponseEntity<List<ProductGetAllDto>> getAllWithoutPage(@RequestParam Map<String, String> customQuery) {
-        return ResponseEntity.ok(productCrudUseCase.getAllWithOutPage(customQuery));
+    public ResponseEntity<List<ProductGetAllDto>> getAllWithoutPage(@RequestParam Map<String, String> customQuery,
+            @RequestParam("companyId") Long companyId) {
+        return ResponseEntity.ok(productCrudUseCase.getAllWithOutPage(customQuery, companyId));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ProductGetAllDto>> search(@RequestParam Map<String, String> customQuery) {
-        return ResponseEntity.ok(productCrudUseCase.searchCustom(customQuery));
+    public ResponseEntity<Page<ProductGetAllDto>> search(@RequestParam Map<String, String> customQuery,
+                                                         @RequestParam("companyId") Long companyId) {
+        return ResponseEntity.ok(productCrudUseCase.searchCustom(customQuery, companyId));
     }
 }

@@ -8,17 +8,12 @@ import com.restaurante.bot.model.Product;
 import com.restaurante.bot.repository.ProductRepository;
 import com.restaurante.bot.util.Constants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -88,17 +83,22 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public Page<ProductGetAllDto> getAll(Map<String, String> customQuery) {
+    public Page<ProductGetAllDto> getAll(Map<String, String> customQuery, Long companyId) {
         String orders = "ASC";
         String sortBy = "productId";
         int page = 0;
         int size = 5;
-
         if (customQuery.containsKey("orders")) orders = customQuery.get("orders");
         if (customQuery.containsKey("sortBy")) sortBy = customQuery.get("sortBy");
         if (customQuery.containsKey("page")) page = Integer.parseInt(customQuery.get("page"));
         if (customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
 
+        if (companyId != null) {
+            Map<String, String> copy = customQuery == null ? new HashMap<>() : new HashMap<>(customQuery);
+            copy.put("companyId", String.valueOf(companyId));
+            return searchCustom(copy, companyId);
+        }
+
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
@@ -111,7 +111,17 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public Page<ProductGetAllDto> getAll(int page, int size, String orders, String sortBy) {
+    public Page<ProductGetAllDto> getAll(int page, int size, String orders, String sortBy, Long companyId) {
+        if (companyId != null) {
+            Map<String, String> query = new HashMap<>();
+            query.put("companyId", String.valueOf(companyId));
+            query.put("page", String.valueOf(page));
+            query.put("size", String.valueOf(size));
+            query.put("orders", orders);
+            query.put("sortBy", sortBy);
+            return searchCustom(query, companyId);
+        }
+
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
         Page<Product> entityPage = productRepository.findAll(pagingSort);
@@ -123,38 +133,44 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery) {
-        String status;
-        if (customQuery.containsKey("status")) status = customQuery.get("status");
-        else {
-            status = Constants.ACTIVE_STATUS;
+    public List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyId) {
+        String status = null;
+        if (customQuery != null && customQuery.containsKey("status")) status = customQuery.get("status");
+        else status = Constants.ACTIVE_STATUS;
+
+        if (companyId != null) {
+            List<Product> found = productRepository.search(companyId, null, null);
+            String finalStatus = status;
+            return found.stream()
+                    .filter(p -> finalStatus == null || finalStatus.equals(p.getStatus()))
+                    .map(this::mapToGetAllDto)
+                    .collect(Collectors.toList());
         }
 
         List<Product> all = productRepository.findAll();
+        String finalStatus1 = status;
         return all.stream()
-                .filter(p -> status == null || status.equals(p.getStatus()))
+                .filter(p -> finalStatus1 == null || finalStatus1.equals(p.getStatus()))
                 .map(this::mapToGetAllDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Page<ProductGetAllDto> searchCustom(Map<String, String> customQuery) {
+    public Page<ProductGetAllDto> searchCustom(Map<String, String> customQuery, Long companyId) {
         String orders = "ASC";
         String sortBy = "productId";
         int page = 0;
         int size = 5;
 
-        Long companyId = null;
         String name = null;
         Long categoryId = null;
 
-        if (customQuery.containsKey("companyId")) companyId = Long.valueOf(customQuery.get("companyId"));
-        if (customQuery.containsKey("name")) name = customQuery.get("name");
-        if (customQuery.containsKey("categoryId")) categoryId = Long.valueOf(customQuery.get("categoryId"));
-        if (customQuery.containsKey("orders")) orders = customQuery.get("orders");
-        if (customQuery.containsKey("sortBy")) sortBy = customQuery.get("sortBy");
-        if (customQuery.containsKey("page")) page = Integer.parseInt(customQuery.get("page"));
-        if (customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
+        if (customQuery != null && customQuery.containsKey("name")) name = customQuery.get("name");
+        if (customQuery != null && customQuery.containsKey("categoryId")) categoryId = Long.valueOf(customQuery.get("categoryId"));
+        if (customQuery != null && customQuery.containsKey("orders")) orders = customQuery.get("orders");
+        if (customQuery != null && customQuery.containsKey("sortBy")) sortBy = customQuery.get("sortBy");
+        if (customQuery != null && customQuery.containsKey("page")) page = Integer.parseInt(customQuery.get("page"));
+        if (customQuery != null && customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
 
         if (companyId != null) {
             List<Product> found = productRepository.search(companyId, name, categoryId);
@@ -164,7 +180,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
             return new PageImpl<>(content, PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(orders), sortBy)), found.size());
         }
 
-        return getAll(page, size, orders, sortBy);
+        return getAll(page, size, orders, sortBy, null);
     }
 
     private ProductDto mapToDto(Product product) {
