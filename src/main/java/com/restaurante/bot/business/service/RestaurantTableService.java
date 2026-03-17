@@ -105,7 +105,9 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(changeStatusTableDTO.getTableNumber(), company.getId());
         table.setStatus(2L);
 
-        notificationService.sendNotificationToClient(subscription.getToken(), "se actualizo la mesa " + changeStatusTableDTO.getTableNumber(), "actualizar las mesas para ver el cambio");
+        String title = "Mesa " + changeStatusTableDTO.getTableNumber() + " - Estado actualizado";
+        String body = "La mesa " + changeStatusTableDTO.getTableNumber() + " ha cambiado de estado. Revisa la lista de mesas.";
+        notificationService.sendNotificationToClient(subscription.getToken(), title, body);
 
         return restaurantTableRepository.save(table);
     }
@@ -155,7 +157,10 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber.getTableNumber(), company.getId());
         table.setStatus(3L);
 
-        notificationService.sendNotificationToClient(subscription.getToken(), "se actualizo la mesa " + tableNumber, "actualizar las mesas para ver el cambio");
+        Long tn = tableNumber.getTableNumber();
+        String titleReq = "Mesa " + tn + " - Solicitud de servicio";
+        String bodyReq = "El cliente en la mesa " + tn + " ha solicitado servicio. Atiéndelo, por favor.";
+        notificationService.sendNotificationToClient(subscription.getToken(), titleReq, bodyReq);
 
         return restaurantTableRepository.save(table);
     }
@@ -193,7 +198,10 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber.getTableNumber(), company.getId());
         table.setStatus(5L);
 
-        notificationService.sendNotificationToClient(subscription.getToken(), "se actualizo la mesa " + tableNumber, "actualizar las mesas para ver el cambio");
+        Long tnPay = tableNumber.getTableNumber();
+        String titlePay = "Mesa " + tnPay + " - Pago solicitado";
+        String bodyPay = "La mesa " + tnPay + " ha solicitado pagar. Revisar y procesar pago.";
+        notificationService.sendNotificationToClient(subscription.getToken(), titlePay, bodyPay);
 
         return restaurantTableRepository.save(table);
     }

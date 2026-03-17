@@ -433,8 +433,10 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
             customerOrderRepository.save(order);
         }
-        notificationService.sendNotificationToClient(subscription.getToken(), "Orden confirmada",
-                "Actualizar las ordenes");
+        String notifTitle = isConfirmed ? "Orden confirmada - Mesa " + tableNumber : "Orden cancelada - Mesa " + tableNumber;
+        String notifBody = isConfirmed ? "La orden en la mesa " + tableNumber + " ha sido confirmada. Revisa las órdenes pendientes." :
+            "La orden en la mesa " + tableNumber + " ha sido cancelada. Revisa las órdenes pendientes.";
+        notificationService.sendNotificationToClient(subscription.getToken(), notifTitle, notifBody);
         String message = isConfirmed ? "Orden confirmada" : "Orden cancelada";
         return new GenericResponse(message, 200L);
     }

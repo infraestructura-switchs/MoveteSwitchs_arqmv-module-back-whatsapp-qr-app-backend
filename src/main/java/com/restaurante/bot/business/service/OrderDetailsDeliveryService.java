@@ -163,7 +163,9 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
 
         customerRepository.save(customer);
 
-        notificationService.sendNotificationToClient(subscription.getToken(), "Se creo una orden dell delivery" , "actualizar las ordenes del delivery para ver el cambio");
+        String title = "Pedido delivery actualizado";
+        String body = "Orden de delivery para " + orderDetailsDeliveryDTO.getNameClient() + " (tel: " + orderDetailsDeliveryDTO.getPhone() + ") ha sido actualizada. Revisa los pedidos de delivery.";
+        notificationService.sendNotificationToClient(subscription.getToken(), title, body);
 
         return new GenericResponse("Orden actualizada con exito", 200L);
     }

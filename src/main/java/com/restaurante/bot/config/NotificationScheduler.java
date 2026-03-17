@@ -36,13 +36,13 @@ public class NotificationScheduler {
         // Envía notificaciones
         journalReminders.forEach(sub -> {
             if (sub.isJournalNotificationEnabled()) {
-                notificationService.sendNotificationToClient(sub.getToken(), "Recordatorio Journal", "Tienes un journal pendiente!");
+                notificationService.sendNotificationToClient(sub.getToken(), "Recordatorio: Journal pendiente", "Tienes un journal pendiente. Revisa tu agenda para más detalles.");
             }
         });
 
         appointmentReminders.forEach(sub -> {
             if (sub.isAppointmentNotificationEnabled()) {
-                notificationService.sendNotificationToClient(sub.getToken(), "Recordatorio Appointment", "Tienes una cita pronto!");
+                notificationService.sendNotificationToClient(sub.getToken(), "Recordatorio: Cita próxima", "Tienes una cita programada pronto. Revisa los detalles en tu calendario.");
             }
         });
     }
