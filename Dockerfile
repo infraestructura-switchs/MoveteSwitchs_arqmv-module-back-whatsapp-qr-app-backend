@@ -1,21 +1,33 @@
-# Build stage
+# syntax=docker/dockerfile:1.4
+
+# Build stage: use Gradle image and keep Gradle cache with BuildKit cache mounts
 FROM gradle:8.7-jdk17 AS build
 WORKDIR /app
-COPY --chown=gradle:gradle . .
-RUN gradle build -x test --no-daemon --info --console=plain
 
-# Package stage
+# Copy only build files first to leverage Docker layer caching for dependencies
+COPY gradlew gradlew.bat settings.gradle build.gradle gradle.properties ./
+
+# Make the Gradle wrapper executable and warm the dependency cache
+RUN chmod +x gradlew
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+	gradle --version || true
+
+# Copy full project and build using cached Gradle directory
+COPY . .
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+	gradle bootJar -x test --no-daemon --info --console=plain
+
+# Package stage: smaller runtime image
 FROM amazoncorretto:17-al2-jdk
-WORKDIR /apl/
+WORKDIR /app
 
-# Copiar el jar desde la etapa de compilación (Gradle lo pone en build/libs)
+# Copy jar from build stage
 COPY --from=build /app/build/libs/*.jar app.jar
 
-# Crear directorios necesarios
-RUN mkdir -p /apl/files/
-RUN mkdir -p /apl/tmp/
+# Create runtime directories
+RUN mkdir -p /app/files /app/tmp
 
-# Configurar Timezone (America/Bogota) en Amazon Linux 2
+# Configure timezone (America/Bogota)
 RUN rm -f /etc/localtime && ln -s /usr/share/zoneinfo/America/Bogota /etc/localtime
 
 EXPOSE 8080

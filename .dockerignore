@@ -1,4 +1,18 @@
-.gradle
+# Ignore build outputs and IDE files to reduce Docker build context
+build/
+target/
+.gradle/
+/.git
+.idea
+*.iml
+tmp/
+test_output.txt
+**/node_modules
+.DS_Store
+
+# Exclude local run artifacts
+bin/
+run-local.ps1.gradle
 build/
 target/
 jdk-17.0.10+7/

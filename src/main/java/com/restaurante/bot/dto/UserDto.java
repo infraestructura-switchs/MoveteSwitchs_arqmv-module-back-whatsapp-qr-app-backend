@@ -1,6 +1,6 @@
 package com.restaurante.bot.dto;
 
-import com.restaurante.bot.model.Rol;
+import com.restaurante.bot.dto.RolDto;
 import lombok.*;
 
 import java.util.Date;
@@ -17,7 +17,7 @@ public class UserDto {
     private String login;
     private String password;
     private String email;
-    private Rol rol;
+    private RolDto rol;
     private Long rolId;
     private Long companyId;
     private Long positionId;

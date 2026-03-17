@@ -143,7 +143,14 @@ public class UserApplicationService implements UserUseCase {
     /* helper mapping methods */
     private UserDto mapUserDto(com.restaurante.bot.model.User u) {
         UserDto dto = new UserDto();
-        org.springframework.beans.BeanUtils.copyProperties(u, dto);
+        org.springframework.beans.BeanUtils.copyProperties(u, dto, "rol");
+        if (u.getRol() != null) {
+            dto.setRol(com.restaurante.bot.dto.RolDto.builder()
+                    .rolId(u.getRol().getRolId())
+                    .name(u.getRol().getName())
+                    .build());
+            dto.setRolId(u.getRol().getRolId());
+        }
         return dto;
     }
 
