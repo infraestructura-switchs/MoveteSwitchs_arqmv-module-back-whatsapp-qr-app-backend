@@ -14,5 +14,10 @@ public class ProductGetAllDto {
     private Double price;
     private String status;
     private Long categoryId;
+    private String description;
+    private String image;
+    private java.util.List<String> comments;
+    private String information;
+    private Integer preparationTime;
 
 }

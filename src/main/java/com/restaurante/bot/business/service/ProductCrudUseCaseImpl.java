@@ -204,6 +204,18 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         dto.setPrice(product.getPrice());
         dto.setStatus(product.getStatus());
         dto.setCategoryId(product.getCategoryId());
+        dto.setDescription(product.getDescription());
+        dto.setImage(product.getImgProduct());
+        if (product.getComments() != null) {
+            String raw = product.getComments();
+            java.util.List<String> list = java.util.Arrays.stream(raw.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(java.util.stream.Collectors.toList());
+            dto.setComments(list);
+        }
+        dto.setInformation(product.getInformation());
+        dto.setPreparationTime(product.getPreparationTime());
         return dto;
     }
 }
