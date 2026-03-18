@@ -16,7 +16,7 @@ spring:
 
 app:
   db:
-    type: local
+    type: mysql
 
 logging:
   level:
