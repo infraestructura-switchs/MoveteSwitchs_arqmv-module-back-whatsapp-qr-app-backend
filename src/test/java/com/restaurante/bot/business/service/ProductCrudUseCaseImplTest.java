@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductSaveAndUpdateDto;
 import com.restaurante.bot.model.Product;
+import com.restaurante.bot.model.ProductDiscount;
 import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.CommentRepository;
 import com.restaurante.bot.repository.ProductCommentRepository;
@@ -41,6 +42,9 @@ class ProductCrudUseCaseImplTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private ProductDiscountSupport productDiscountSupport;
+
     @InjectMocks
     private ProductCrudUseCaseImpl productCrudUseCase;
 
@@ -62,6 +66,10 @@ class ProductCrudUseCaseImplTest {
 
         when(productRepository.save(any(Product.class))).thenReturn(persistedProduct);
         when(productCommentRepository.findByProductId(any())).thenReturn(java.util.Collections.emptyList());
+        when(productDiscountSupport.findActiveDiscount(273L, 649L)).thenReturn(null);
+        when(productDiscountSupport.summarize(34000.0, null))
+            .thenReturn(new ProductDiscountSupport.ProductPriceSummary(34000.0, 34000.0, 0.0));
+        when(productDiscountSupport.toDto(null)).thenReturn(null);
 
         ProductDto response = productCrudUseCase.save(request);
 
@@ -97,6 +105,10 @@ class ProductCrudUseCaseImplTest {
         when(productRepository.findById(649L)).thenReturn(Optional.of(existingProduct));
         when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
         when(productCommentRepository.findByProductId(any())).thenReturn(java.util.Collections.emptyList());
+        when(productDiscountSupport.findActiveDiscount(273L, 649L)).thenReturn(null);
+        when(productDiscountSupport.summarize(34000.0, null))
+            .thenReturn(new ProductDiscountSupport.ProductPriceSummary(34000.0, 34000.0, 0.0));
+        when(productDiscountSupport.toDto(null)).thenReturn(null);
 
         ProductDto response = productCrudUseCase.update(649L, request);
 
@@ -105,5 +117,34 @@ class ProductCrudUseCaseImplTest {
         assertEquals("valor anterior", productCaptor.getValue().getInformation());
         assertEquals("valor anterior", response.getInformation());
         assertEquals("Carne Asadaa", productCaptor.getValue().getName());
+    }
+
+    @Test
+    void get_ShouldExposeDiscountedPrice_WhenActiveDiscountExists() {
+        Product existingProduct = new Product();
+        existingProduct.setProductId(649L);
+        existingProduct.setName("Carne Asada");
+        existingProduct.setPrice(34000.0);
+        existingProduct.setCompanyId(273L);
+
+        ProductDiscount activeDiscount = ProductDiscount.builder()
+                .productDiscountId(10L)
+                .productId(649L)
+                .companyId(273L)
+                .discountAmount(4000.0)
+                .status("ACTIVE")
+                .build();
+
+        when(productRepository.findById(649L)).thenReturn(Optional.of(existingProduct));
+        when(productCommentRepository.findByProductId(any())).thenReturn(java.util.Collections.emptyList());
+        when(productDiscountSupport.findActiveDiscount(273L, 649L)).thenReturn(activeDiscount);
+        when(productDiscountSupport.summarize(34000.0, activeDiscount))
+                .thenReturn(new ProductDiscountSupport.ProductPriceSummary(34000.0, 30000.0, 4000.0));
+
+        ProductDto response = productCrudUseCase.get(649L);
+
+        assertEquals(30000.0, response.getPrice());
+        assertEquals(34000.0, response.getOriginalPrice());
+        assertEquals(4000.0, response.getDiscountAmount());
     }
 }

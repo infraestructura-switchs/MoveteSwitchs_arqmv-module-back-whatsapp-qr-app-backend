@@ -9,6 +9,7 @@ import com.restaurante.bot.dto.ProductGetAllDto;
 import com.restaurante.bot.dto.ProductSaveAndUpdateDto;
 import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.Product;
+import com.restaurante.bot.model.ProductDiscount;
 import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.CommentRepository;
 import com.restaurante.bot.repository.ProductCommentRepository;
@@ -36,6 +37,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     private final CommentRepository commentRepository;
     private final CategoryRepository categoryRepository;
     private final ObjectMapper objectMapper;
+    private final ProductDiscountSupport productDiscountSupport;
 
     @Override
     @Transactional
@@ -155,8 +157,9 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
         Page<Product> entityPage = productRepository.findAll(pagingSort);
         int total = (int) entityPage.getTotalElements();
+        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), companyId);
         List<ProductGetAllDto> list = entityPage.getContent().stream()
-                .map(this::mapToGetAllDto)
+            .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.toList());
         return new PageImpl<>(list, pagingSort, total);
     }
@@ -177,8 +180,9 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
         Page<Product> entityPage = productRepository.findAll(pagingSort);
         int total = (int) entityPage.getTotalElements();
+        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), companyId);
         List<ProductGetAllDto> list = entityPage.getContent().stream()
-                .map(this::mapToGetAllDto)
+            .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.toList());
         return new PageImpl<>(list, pagingSort, total);
     }
@@ -195,7 +199,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
             String finalStatus = status;
             return found.getContent().stream()
                 .filter(p -> finalStatus == null || finalStatus.equals(p.getStatus()))
-                .map(this::mapToGetAllDto)
+                .map(product -> mapToGetAllDto(product, productDiscountSupport.findActiveDiscount(product.getCompanyId(), product.getProductId())))
                 .collect(Collectors.toList());
         }
 
@@ -204,7 +208,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         String finalStatus1 = status;
         return all.getContent().stream()
             .filter(p -> finalStatus1 == null || finalStatus1.equals(p.getStatus()))
-            .map(this::mapToGetAllDto)
+            .map(product -> mapToGetAllDto(product, productDiscountSupport.findActiveDiscount(product.getCompanyId(), product.getProductId())))
             .collect(Collectors.toList());
     }
 
@@ -228,7 +232,10 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (companyId != null) {
             Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(orders), sortBy));
             org.springframework.data.domain.Page<Product> foundPage = productRepository.search(companyId, name, categoryId, pageable);
-            java.util.List<ProductGetAllDto> content = foundPage.getContent().stream().map(this::mapToGetAllDto).collect(Collectors.toList());
+            Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(foundPage.getContent(), companyId);
+            java.util.List<ProductGetAllDto> content = foundPage.getContent().stream()
+                    .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
+                    .collect(Collectors.toList());
             return new PageImpl<>(content, pageable, foundPage.getTotalElements());
         }
 
@@ -236,15 +243,20 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     private ProductDto mapToDto(Product product) {
+        ProductDiscount activeDiscount = productDiscountSupport.findActiveDiscount(product.getCompanyId(), product.getProductId());
+        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(product.getPrice(), activeDiscount);
         ProductDto.ProductDtoBuilder dtoBuilder = ProductDto.builder()
             .id(product.getProductId())
             .productName(product.getName())
-            .price(product.getPrice())
+            .price(priceSummary.finalPrice())
+            .originalPrice(priceSummary.originalPrice())
+            .discountAmount(priceSummary.discountAmount())
             .description(product.getDescription())
             .status(product.getStatus())
             .image(product.getImgProduct())
             .categoryId(product.getCategoryId())
-            .companyId(product.getCompanyId());
+            .companyId(product.getCompanyId())
+            .activeDiscount(productDiscountSupport.toDto(activeDiscount));
         // First try normalized product_comments -> comments
         java.util.List<String> commentsList = new java.util.ArrayList<>();
         try {
@@ -302,16 +314,20 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         return dtoBuilder.build();
     }
 
-    private ProductGetAllDto mapToGetAllDto(Product product) {
+    private ProductGetAllDto mapToGetAllDto(Product product, ProductDiscount activeDiscount) {
+        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(product.getPrice(), activeDiscount);
         ProductGetAllDto.ProductGetAllDtoBuilder dtoBuilder = ProductGetAllDto.builder()
             .id(product.getProductId())
             .productName(product.getName())
-            .price(product.getPrice())
+            .price(priceSummary.finalPrice())
+            .originalPrice(priceSummary.originalPrice())
+            .discountAmount(priceSummary.discountAmount())
             .status(product.getStatus())
             .categoryId(product.getCategoryId())
             .description(product.getDescription())
             .image(product.getImgProduct())
-            .companyId(product.getCompanyId());
+            .companyId(product.getCompanyId())
+            .activeDiscount(productDiscountSupport.toDto(activeDiscount));
         java.util.List<String> commentsList = new java.util.ArrayList<>();
         try {
             java.math.BigDecimal pid = java.math.BigDecimal.valueOf(product.getProductId());
@@ -365,5 +381,22 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
             } catch (Exception ignored) {}
         }
         return dtoBuilder.build();
+    }
+
+    private Map<Long, ProductDiscount> resolveActiveDiscounts(List<Product> products, Long companyId) {
+        List<Long> productIds = products.stream()
+                .map(Product::getProductId)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (productIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Long resolvedCompanyId = companyId != null
+                ? companyId
+                : products.stream().map(Product::getCompanyId).filter(java.util.Objects::nonNull).findFirst().orElse(null);
+
+        return productDiscountSupport.findActiveDiscountsByProductIds(resolvedCompanyId, productIds);
     }
 }

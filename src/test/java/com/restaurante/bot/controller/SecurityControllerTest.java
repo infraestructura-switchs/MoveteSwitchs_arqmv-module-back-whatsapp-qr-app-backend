@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.regex.Pattern;
 
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -69,6 +70,7 @@ class SecurityControllerTest {
                 .build();
 
         when(companyRepository.existsByExternalCompanyId(273L)).thenReturn(true);
+        when(jwtUtil.generateSessionId()).thenReturn("9ba2153735304a0eb1b0ba67e9823e54");
         when(jwtUtil.generateToken(eq(273L), eq(9L), anyString()))
                 .thenAnswer(invocation -> "jwt-" + invocation.getArgument(2, String.class));
 
@@ -77,7 +79,7 @@ class SecurityControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", startsWith("jwt-")))
-                .andExpect(jsonPath("$.session_id", value -> assertTrue(SESSION_ID_PATTERN.matcher(value).matches())));
+                .andExpect(jsonPath("$.session_id", matchesPattern("^[a-f0-9]{32}$")));
 
         verify(sessionRegistryService).registerSession(org.mockito.ArgumentMatchers.anyString(), eq(273L), eq(9L));
     }

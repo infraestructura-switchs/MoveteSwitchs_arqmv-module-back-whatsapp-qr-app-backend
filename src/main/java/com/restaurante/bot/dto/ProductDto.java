@@ -16,6 +16,8 @@ public class ProductDto {
     private Long id;
     private String productName;
     private Double price;
+    private Double originalPrice;
+    private Double discountAmount;
     private String description;
     private String status;
     private String image;
@@ -25,5 +27,6 @@ public class ProductDto {
     private List<String> comments;
     private String information;
     private Integer preparationTime;
+    private ProductDiscountDto activeDiscount;
 
 }

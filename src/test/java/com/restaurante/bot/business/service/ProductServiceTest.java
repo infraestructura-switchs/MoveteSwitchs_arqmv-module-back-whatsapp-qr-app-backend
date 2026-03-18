@@ -6,6 +6,7 @@ import com.restaurante.bot.dto.ProductCategoryDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.model.Category;
 import com.restaurante.bot.model.Product;
+import com.restaurante.bot.model.ProductDiscount;
 import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.CategoryMappingRepository;
 import com.restaurante.bot.repository.CompanyRepository;
@@ -53,6 +54,9 @@ class ProductServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private ProductDiscountSupport productDiscountSupport;
+
     @InjectMocks
     private ProductService productService;
 
@@ -97,6 +101,10 @@ class ProductServiceTest {
         when(categoryRepository.findByCompanyId(companyId)).thenReturn(Arrays.asList(bebidasCategory));
         when(productRepository.findByCompanyIdOrderByNameAsc(companyId)).thenReturn(Arrays.asList(cocaColaProduct));
         when(companyRepository.existsByExternalCompanyId(companyId)).thenReturn(true); // Mock para la verificación de compañía
+        when(productDiscountSupport.findActiveDiscountsByProductIds(eq(companyId), anyList())).thenReturn(java.util.Collections.emptyMap());
+        when(productDiscountSupport.summarize(2500.0, null))
+            .thenReturn(new ProductDiscountSupport.ProductPriceSummary(2500.0, 2500.0, 0.0));
+        when(productDiscountSupport.toDto(null)).thenReturn(null);
 
         CategorizedProductsDTO result = productService.getProductsSfotRestaurantByCompanyId(companyId);
 
@@ -129,6 +137,7 @@ class ProductServiceTest {
         when(categoryRepository.findByCompanyId(companyId)).thenReturn(Arrays.asList(bebidasCategory));
         when(productRepository.findByCompanyIdOrderByNameAsc(companyId)).thenReturn(Arrays.asList());
         when(companyRepository.existsByExternalCompanyId(companyId)).thenReturn(true); // Mock para la verificación de compañía
+        when(productDiscountSupport.findActiveDiscountsByProductIds(eq(companyId), anyList())).thenReturn(java.util.Collections.emptyMap());
 
         CategorizedProductsDTO result = productService.getProductsSfotRestaurantByCompanyId(companyId);
 
@@ -140,4 +149,41 @@ class ProductServiceTest {
         verify(companyRepository, times(1)).existsByExternalCompanyId(companyId);
         verifyNoInteractions(callServiceHttp);
     }
+
+        @Test
+        void getProductsSfotRestaurantByCompanyId_ShouldExposeDiscountedValues() {
+        Long companyId = 1L;
+        ProductDiscount activeDiscount = ProductDiscount.builder()
+            .productDiscountId(99L)
+            .productId(1L)
+            .companyId(companyId)
+            .discountAmount(500.0)
+            .status("ACTIVE")
+            .build();
+
+        when(categoryRepository.findByCompanyId(companyId)).thenReturn(Arrays.asList(bebidasCategory));
+        when(productRepository.findByCompanyIdOrderByNameAsc(companyId)).thenReturn(Arrays.asList(cocaColaProduct));
+        when(companyRepository.existsByExternalCompanyId(companyId)).thenReturn(true);
+        when(productDiscountSupport.findActiveDiscountsByProductIds(eq(companyId), anyList()))
+            .thenReturn(java.util.Map.of(1L, activeDiscount));
+        when(productDiscountSupport.summarize(2500.0, activeDiscount))
+            .thenReturn(new ProductDiscountSupport.ProductPriceSummary(2500.0, 2000.0, 500.0));
+        when(productDiscountSupport.toDto(activeDiscount))
+            .thenReturn(com.restaurante.bot.dto.ProductDiscountDto.builder()
+                .id(99L)
+                .productId(1L)
+                .discountAmount(500.0)
+                .status("ACTIVE")
+                .active(true)
+                .build());
+
+        CategorizedProductsDTO result = productService.getProductsSfotRestaurantByCompanyId(companyId);
+
+        ProductDto productDto = result.getCategories().get(0).getProducts().get(0);
+        assertEquals(2000.0, productDto.getPrice());
+        assertEquals(2500.0, productDto.getOriginalPrice());
+        assertEquals(500.0, productDto.getDiscountAmount());
+        assertNotNull(productDto.getActiveDiscount());
+        assertEquals(99L, productDto.getActiveDiscount().getId());
+        }
 }

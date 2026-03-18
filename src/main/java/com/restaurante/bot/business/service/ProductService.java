@@ -43,6 +43,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
     private final ObjectMapper objectMapper;
     private final CategoryMappingRepository categoryMappingRepository;
     private final ParameterRepository parameterRepository;
+    private final ProductDiscountSupport productDiscountSupport;
 
 
     private final Map<Long, Map<String, Long>> dynamicCategoryMapping = new HashMap<>();
@@ -82,7 +83,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
         });
     }
 
-    private ProductDto toDto(Product product, String productImageBycompany) {
+    private ProductDto toDto(Product product, String productImageBycompany, ProductDiscount activeDiscount) {
         List<String> commentsList = new ArrayList<>();
         if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {
             commentsList = product.getProductComments().stream()
@@ -100,10 +101,13 @@ public class ProductService implements ProductInterface, ProductUseCase {
                         .collect(Collectors.toList());
             }
         }
+        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(product.getPrice(), activeDiscount);
         return ProductDto.builder()
             .id(product.getProductId())
             .productName(product.getName())
-            .price(product.getPrice())
+            .price(priceSummary.finalPrice())
+            .originalPrice(priceSummary.originalPrice())
+            .discountAmount(priceSummary.discountAmount())
             .description(product.getDescription())
             .status(product.getStatus())
             .image(imageOrDefault(product.getImgProduct(), productImageBycompany))
@@ -113,6 +117,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             .comments(commentsList)
             .information(product.getInformation())
             .preparationTime(product.getPreparationTime())
+            .activeDiscount(productDiscountSupport.toDto(activeDiscount))
             .build();
     }
 
@@ -134,9 +139,12 @@ public class ProductService implements ProductInterface, ProductUseCase {
         List<Product> products = productRepository.findByCompanyIdOrderByNameAsc(companyId);
 
         String imageByCompany = imageByCompanyId(companyId.intValue());
+        Map<Long, ProductDiscount> activeDiscounts = productDiscountSupport.findActiveDiscountsByProductIds(
+            companyId,
+            products.stream().map(Product::getProductId).collect(Collectors.toList()));
 
         Map<Long, List<ProductDto>> categorizedProductMap = products.stream()
-                .map( product -> toDto(product, imageByCompany))
+            .map(product -> toDto(product, imageByCompany, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.groupingBy(ProductDto::getCategoryId));
 
         CategorizedProductsDTO categorizedProductsDTO = new CategorizedProductsDTO();
@@ -277,13 +285,15 @@ public class ProductService implements ProductInterface, ProductUseCase {
         Product updatedProduct = productRepository.save(product);
 
         String imageByCompany = imageByCompanyId(product.getCompanyId().intValue());
-
-
+        ProductDiscount activeDiscount = productDiscountSupport.findActiveDiscount(product.getCompanyId(), product.getProductId());
+        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(updatedProduct.getPrice(), activeDiscount);
 
         return ProductDto.builder()
             .id(updatedProduct.getProductId())
             .productName(updatedProduct.getName())
-            .price(updatedProduct.getPrice())
+            .price(priceSummary.finalPrice())
+            .originalPrice(priceSummary.originalPrice())
+            .discountAmount(priceSummary.discountAmount())
             .description(updatedProduct.getDescription())
             .status(updatedProduct.getStatus())
             .image(imageOrDefault(updatedProduct.getImgProduct(), imageByCompany))
@@ -293,6 +303,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             .comments(commentsList)
             .information(updatedProduct.getInformation())
             .preparationTime(updatedProduct.getPreparationTime())
+            .activeDiscount(productDiscountSupport.toDto(activeDiscount))
             .build();
     }
 
@@ -361,9 +372,12 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
         org.springframework.data.domain.Page<com.restaurante.bot.model.Product> foundPage = productRepository.search(companyId, term, categoryId, pageable);
+        Map<Long, ProductDiscount> activeDiscounts = productDiscountSupport.findActiveDiscountsByProductIds(
+                companyId,
+                foundPage.getContent().stream().map(Product::getProductId).collect(Collectors.toList()));
 
         return foundPage.getContent().stream()
-            .map(product -> toDto(product, imageByCompany))
+            .map(product -> toDto(product, imageByCompany, activeDiscounts.get(product.getProductId())))
             .collect(Collectors.toList());
     }
 
@@ -391,9 +405,12 @@ public class ProductService implements ProductInterface, ProductUseCase {
             .findAllByCompanyAndCategoryAndNameOrderByPrice(companyId, categoryId, name, pageable);
 
         String imageByCompany = imageByCompanyId(companyId.intValue());
+        Map<Long, ProductDiscount> activeDiscounts = productDiscountSupport.findActiveDiscountsByProductIds(
+                companyId,
+                foundPage.getContent().stream().map(Product::getProductId).collect(Collectors.toList()));
 
         return foundPage.getContent().stream()
-            .map(product -> toDto(product, imageByCompany))
+            .map(product -> toDto(product, imageByCompany, activeDiscounts.get(product.getProductId())))
             .toList();
     }
 

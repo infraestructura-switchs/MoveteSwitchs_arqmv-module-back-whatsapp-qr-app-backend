@@ -135,6 +135,14 @@
         </attributes>
     </entity>
 
+    <entity class="com.restaurante.bot.model.ProductDiscount">
+        <attributes>
+            <id name="productDiscountId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
+
     <entity class="com.restaurante.bot.model.Rating">
         <attributes>
             <id name="ratingId">

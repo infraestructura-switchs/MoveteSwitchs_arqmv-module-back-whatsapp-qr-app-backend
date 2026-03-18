@@ -14,6 +14,8 @@ public class ProductGetAllDto {
     private Long id;
     private String productName;
     private Double price;
+    private Double originalPrice;
+    private Double discountAmount;
     private String status;
     private Long categoryId;
     private CategoryResponseDTO category;
@@ -23,5 +25,6 @@ public class ProductGetAllDto {
     private Long companyId;
     private String information;
     private Integer preparationTime;
+    private ProductDiscountDto activeDiscount;
 
 }

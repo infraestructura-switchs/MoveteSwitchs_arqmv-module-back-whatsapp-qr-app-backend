@@ -150,6 +150,15 @@
         </attributes>
     </entity>
 
+    <entity class="com.restaurante.bot.model.ProductDiscount">
+        <attributes>
+            <id name="productDiscountId">
+                <generated-value strategy="SEQUENCE" generator="PRODUCT_DISCOUNT_SEQ"/>
+                <sequence-generator name="PRODUCT_DISCOUNT_SEQ" sequence-name="PRODUCT_DISCOUNT_SEQ" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
+
     <entity class="com.restaurante.bot.model.Rating">
         <attributes>
             <id name="ratingId">
