@@ -1,5 +1,7 @@
 package com.restaurante.bot.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.restaurante.bot.util.FlexibleStringDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
@@ -28,6 +30,7 @@ public class ProductSaveAndUpdateDto {
 
     private Long categoryId;
 
+    @JsonDeserialize(using = FlexibleStringDeserializer.class)
     private String information;
 
     private Integer preparationTime;

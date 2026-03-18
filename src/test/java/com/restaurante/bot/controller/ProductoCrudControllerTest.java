@@ -76,6 +76,27 @@ class ProductoCrudControllerTest {
                 .andExpect(jsonPath("$.productName").value("Test Product"));
     }
 
+        @Test
+        void updateProduct_WithArrayInformation_ShouldReturnOk() throws Exception {
+                when(productCrudUseCase.update(any(Long.class), any(ProductSaveAndUpdateDto.class))).thenReturn(sampleProduct);
+
+                String request = """
+                                {
+                                    \"productName\": \"Test Product\",
+                                    \"price\": 9.99,
+                                    \"companyId\": 273,
+                                    \"information\": [],
+                                    \"comments\": [\"sinaguacuate\"]
+                                }
+                                """;
+
+                mockMvc.perform(put("/api/back-whatsapp-qr-app/producto/update/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(request))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.productName").value("Test Product"));
+        }
+
     @Test
     void deleteProduct_ShouldReturnNoContent() throws Exception {
         when(productCrudUseCase.delete(1L)).thenReturn(true);
