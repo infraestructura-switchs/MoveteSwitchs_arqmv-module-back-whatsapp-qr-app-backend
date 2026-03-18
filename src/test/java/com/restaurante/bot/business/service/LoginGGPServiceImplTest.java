@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class LoginGGPServiceImplTest {
+
+        private static final Pattern SESSION_ID_PATTERN = Pattern.compile("^[a-f0-9]{32}$");
 
     @Mock
     private UserRepository userRepository;
@@ -77,6 +80,7 @@ class LoginGGPServiceImplTest {
         assertNotNull(response.getData());
         assertNotNull(response.getData().getSessionId());
         assertFalse(response.getData().getSessionId().isBlank());
+        assertTrue(SESSION_ID_PATTERN.matcher(response.getData().getSessionId()).matches());
         assertEquals("jwt-" + response.getData().getSessionId(), response.getData().getToken());
         assertEquals("******", response.getData().getPassword());
                 verify(sessionRegistryService).registerSession(eq(response.getData().getSessionId()), eq(273L), eq(9L));

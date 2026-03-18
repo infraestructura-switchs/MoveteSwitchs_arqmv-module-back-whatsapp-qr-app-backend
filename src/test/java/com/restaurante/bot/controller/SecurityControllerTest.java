@@ -15,6 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.regex.Pattern;
+
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,6 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc(addFilters = false)
 class SecurityControllerTest {
+
+        private static final Pattern SESSION_ID_PATTERN = Pattern.compile("^[a-f0-9]{32}$");
 
     @Autowired
     private MockMvc mockMvc;
@@ -73,7 +77,7 @@ class SecurityControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", startsWith("jwt-")))
-                .andExpect(jsonPath("$.session_id").isNotEmpty());
+                .andExpect(jsonPath("$.session_id", value -> assertTrue(SESSION_ID_PATTERN.matcher(value).matches())));
 
         verify(sessionRegistryService).registerSession(org.mockito.ArgumentMatchers.anyString(), eq(273L), eq(9L));
     }

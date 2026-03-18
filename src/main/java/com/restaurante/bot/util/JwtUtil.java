@@ -23,7 +23,11 @@ public class JwtUtil {
 
     // Genera un token con companyId como claim
     public String generateToken(Long companyId, Long userId) {
-        return generateToken(companyId, userId, UUID.randomUUID().toString());
+        return generateToken(companyId, userId, generateSessionId());
+    }
+
+    public String generateSessionId() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
     public String generateToken(Long companyId, Long userId, String sessionId) {

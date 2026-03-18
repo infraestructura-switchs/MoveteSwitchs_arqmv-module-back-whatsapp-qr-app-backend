@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -60,7 +59,7 @@ public class LoginGGPServiceImpl implements LoginGGPService {
             objectDtoVo.setAbility(ability);
 
             if (isCorrect) {
-                String sessionId = UUID.randomUUID().toString();
+                String sessionId = jwtUtilUser.generateSessionId();
                 objectDtoVo.setTokenDateExpired(new Date(System.currentTimeMillis() + EXPIRATION_TIME_LONG));
                 token = jwtUtilUser.generateToken(
                         objectOptional.get().getCompany().getExternalCompanyId(),

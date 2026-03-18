@@ -22,7 +22,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/security")
@@ -55,7 +54,7 @@ public class SecurityController {
         if (!companyRepository.existsByExternalCompanyId(generateTokenRequestDTO.getCompanyId())) {
             return new ResponseEntity<>("Compañía no existe", HttpStatus.NOT_FOUND);
         }
-        String sessionId = UUID.randomUUID().toString();
+        String sessionId = jwtUtil.generateSessionId();
         String token = jwtUtil.generateToken(
             generateTokenRequestDTO.getCompanyId(),
             generateTokenRequestDTO.getUserId(),
@@ -83,7 +82,7 @@ public class SecurityController {
 
         Company company= companyRepository.findByExternalCompanyId(generateLinkIn.getCompanyId());
 
-        String sessionId = UUID.randomUUID().toString();
+        String sessionId = jwtUtil.generateSessionId();
         String token = jwtUtil.generateToken(generateLinkIn.getCompanyId(), generateLinkIn.getUserId(), sessionId);
         sessionRegistryService.registerSession(
             sessionId,
