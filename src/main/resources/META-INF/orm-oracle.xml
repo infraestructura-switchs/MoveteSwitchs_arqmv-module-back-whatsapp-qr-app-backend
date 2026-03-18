@@ -98,7 +98,7 @@
 
     <entity class="com.restaurante.bot.model.OrderProductDelivery">
         <attributes>
-            <id name="orderProductId">
+            <id name="orderProductDeliveryId">
                 <generated-value strategy="SEQUENCE" generator="ORDER_PRODUCT_DELIVERY_SEQ"/>
                 <sequence-generator name="ORDER_PRODUCT_DELIVERY_SEQ" sequence-name="ORDER_PRODUCT_DELIVERY_SEQ" allocation-size="1"/>
             </id>

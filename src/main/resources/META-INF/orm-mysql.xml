@@ -89,7 +89,7 @@
 
     <entity class="com.restaurante.bot.model.OrderProductDelivery">
         <attributes>
-            <id name="orderProductId">
+            <id name="orderProductDeliveryId">
                 <generated-value strategy="IDENTITY"/>
             </id>
         </attributes>

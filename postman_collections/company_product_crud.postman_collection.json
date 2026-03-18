@@ -10,7 +10,8 @@
     { "key": "appRequestMapping", "value": "api/back-whatsapp-qr-app" },
     { "key": "apiKey", "value": "" },
     { "key": "authToken", "value": "" },
-    { "key": "companyId", "value": "1" }
+    { "key": "companyId", "value": "1" },
+    { "key": "productId", "value": "1" }
   ],
   "item": [
     {
@@ -18,6 +19,26 @@
       "item": [
         {
           "name": "Create Company (form-data)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create Company returns success', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "var companyId = jsonData.companyId || jsonData.id;",
+                  "if (companyId) {",
+                  "    pm.collectionVariables.set('companyId', String(companyId));",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [],
@@ -174,7 +195,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"productId\": 1, \"description\": \"Nueva descripción\" }",
+              "raw": "{ \"productId\": {{productId}}, \"description\": \"Nueva descripción\" }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -223,12 +244,32 @@
         ,
         {
           "name": "Product CRUD (create)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create Product returns success', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "var productId = jsonData.id || jsonData.productId;",
+                  "if (productId) {",
+                  "    pm.collectionVariables.set('productId', String(productId));",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"name\": \"Pizza\", \"price\": 12000, \"companyId\": {{companyId}} }",
+              "raw": "{ \"productName\": \"Pizza\", \"price\": 12000, \"companyId\": {{companyId}} }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -245,9 +286,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/{{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/{{productId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "{{appRequestMapping}}", "admin", "product", "{{companyId}}" ]
+              "path": [ "{{appRequestMapping}}", "admin", "product", "{{productId}}" ]
             }
           },
           "response": []
@@ -259,13 +300,13 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"name\": \"Pizza Hawaiana\", \"price\": 13000 }",
+              "raw": "{ \"productName\": \"Pizza Hawaiana\", \"price\": 13000, \"companyId\": {{companyId}} }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/update/{{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/update/{{productId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "{{appRequestMapping}}", "admin", "product", "update", "{{companyId}}" ]
+              "path": [ "{{appRequestMapping}}", "admin", "product", "update", "{{productId}}" ]
             }
           },
           "response": []
@@ -276,9 +317,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/delete/{{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/delete/{{productId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "{{appRequestMapping}}", "admin", "product", "delete", "{{companyId}}" ]
+              "path": [ "{{appRequestMapping}}", "admin", "product", "delete", "{{productId}}" ]
             }
           },
           "response": []

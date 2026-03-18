@@ -16,7 +16,7 @@ public class OrderProductDelivery {
 
     @Id
     @Column(name = "order_product_delivery_id")
-    private Long orderProductId;
+    private Long orderProductDeliveryId;
 
     @Column(name = "order_transaction_delivery_id")
     private Long orderTransactionDeliveryId;
