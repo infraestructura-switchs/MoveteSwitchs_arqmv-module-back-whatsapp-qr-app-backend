@@ -22,6 +22,114 @@
   ],
   "item": [
     {
+      "name": "Category",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/categories",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "categories" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Categories By Company",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/categories/company/{{companyId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "categories", "company", "{{companyId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/categories/{{categoryId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "categories", "{{categoryId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{ \"name\": \"Mi Categoria\", \"companyId\": {{companyId}} }", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/categories", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "categories" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{ \"name\": \"Categoria Modificada\" }", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/categories/{{categoryId}}", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "categories", "{{categoryId}}" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/categories/{{categoryId}}", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "categories", "{{categoryId}}" ] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Area",
+      "item": [
+        {
+          "name": "Create Area",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{ \"name\": \"Zona 1\", \"companyId\": {{companyId}} }", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/area/create", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "area", "create" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Area By Id",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/area/{{areaId}}", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "area", "{{areaId}}" ] } },
+          "response": []
+        },
+        {
+          "name": "Update Area",
+          "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{ \"name\": \"Zona Modificada\" }", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/area/update/{{areaId}}", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "area", "update", "{{areaId}}" ] } },
+          "response": []
+        },
+        {
+          "name": "Delete Area",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/area/delete/{{areaId}}", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "area", "delete", "{{areaId}}" ] } },
+          "response": []
+        },
+        {
+          "name": "Search Areas",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/area/search?name=Zona", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "area", "search" ] } },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Auth",
       "item": [
         {

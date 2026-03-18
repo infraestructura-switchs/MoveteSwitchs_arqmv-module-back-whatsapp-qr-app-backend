@@ -1,0 +1,29 @@
+# Local profile overrides for developers
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  datasource:
+    # Default to an in-memory H2 for local development; override with env var for a local DB
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:localdb;DB_CLOSE_DELAY=-1}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+app:
+  db:
+    type: local
+
+logging:
+  level:
+    com:
+      restaurante:
+        bot: DEBUG
+
+security:
+  session:
+    expiration-ms: ${SESSION_ID_EXPIRATION_MS:3600000}
