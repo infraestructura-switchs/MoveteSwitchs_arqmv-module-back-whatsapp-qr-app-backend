@@ -48,7 +48,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         entity.setStatus(productDto.getStatus() == null ? Constants.ACTIVE_STATUS : productDto.getStatus());
         entity.setImgProduct(productDto.getImage());
         entity.setCategoryId(productDto.getCategoryId());
-        entity.setInformation(productDto.getInformation());
+        entity.setInformation(normalizeInformation(productDto.getInformation()));
         entity.setPreparationTime(productDto.getPreparationTime());
         entity.setCompanyId(productDto.getCompanyId());
         if (productDto.getComments() != null) {
@@ -84,7 +84,12 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (productDto.getStatus() != null) entity.setStatus(productDto.getStatus());
         if (productDto.getImage() != null) entity.setImgProduct(productDto.getImage());
         if (productDto.getCategoryId() != null) entity.setCategoryId(productDto.getCategoryId());
-        if (productDto.getInformation() != null) entity.setInformation(productDto.getInformation());
+        if (productDto.getInformation() != null) {
+            String normalizedInformation = normalizeInformation(productDto.getInformation());
+            if (normalizedInformation != null) {
+                entity.setInformation(normalizedInformation);
+            }
+        }
         if (productDto.getPreparationTime() != null) entity.setPreparationTime(productDto.getPreparationTime());
         // companyId is required for update
         entity.setCompanyId(productDto.getCompanyId());
@@ -100,6 +105,19 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
         Product updated = productRepository.save(entity);
         return mapToDto(updated);
+    }
+
+    private String normalizeInformation(String information) {
+        if (information == null) {
+            return null;
+        }
+
+        String trimmedInformation = information.trim();
+        if (trimmedInformation.isEmpty() || "[]".equals(trimmedInformation)) {
+            return null;
+        }
+
+        return information;
     }
 
     @Override
