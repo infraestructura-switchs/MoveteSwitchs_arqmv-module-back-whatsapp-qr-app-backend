@@ -240,10 +240,11 @@ public class UserServiceImpl implements UserService {
                                 .name(objects.getRol().getName())
                                 .build())
                         .rolId(objects.getRol().getRolId())
-                        .position(objects.getPosition())
-                        .company(objects.getCompany())
-                        .status(objects.getStatus())
-                        .build())
+                        .position(mapPositionDto(objects.getPosition()))
+                        .company(mapCompanyResponseDto(objects.getCompany()))
+                        .area(mapAreaDto(objects.getArea()))
+                            .status(objects.getStatus())
+                            .build())
                 .collect(Collectors.toList());
     }
 
@@ -369,16 +370,84 @@ public class UserServiceImpl implements UserService {
         return objectDtoVo;
     }
 
+    private GgpUserGetAllDto mapUserToGetAllDto(User objectUser) {
+        GgpUserGetAllDto dto = new GgpUserGetAllDto();
+        dto.setUserId(objectUser.getUserId());
+        dto.setName(objectUser.getName());
+        dto.setLogin(objectUser.getLogin());
+        dto.setPassword(objectUser.getPassword());
+        dto.setEmail(objectUser.getEmail());
+        if (objectUser.getRol() != null) {
+            dto.setRol(RolDto.builder()
+                    .rolId(objectUser.getRol().getRolId())
+                    .name(objectUser.getRol().getName())
+                    .build());
+            dto.setRolId(objectUser.getRol().getRolId());
+            dto.setRolName(objectUser.getRol().getName());
+        }
+        dto.setPosition(mapPositionDto(objectUser.getPosition()));
+        dto.setCompany(mapCompanyResponseDto(objectUser.getCompany()));
+        dto.setArea(mapAreaDto(objectUser.getArea()));
+        dto.setStatus(objectUser.getStatus());
+        return dto;
+    }
+
+    private PositionDto mapPositionDto(Position position) {
+        if (position == null) {
+            return null;
+        }
+        return PositionDto.builder()
+                .positionId(position.getPositionId())
+                .description(position.getDescription())
+                .status(position.getStatus())
+                .build();
+    }
+
+    private CompanyResponseDTO mapCompanyResponseDto(Company company) {
+        if (company == null) {
+            return null;
+        }
+        return CompanyResponseDTO.builder()
+                .id(company.getId())
+                .companyName(company.getName())
+                .logo(company.getLogo())
+                .whatsappNumber(company.getNumberWhatsapp())
+                .latitude(company.getLatitude())
+                .longitude(company.getLongitude())
+                .baseValue(company.getBaseValue())
+                .aditionalValue(company.getAdditionalValue())
+                .status(company.getStatus())
+                .externalId(company.getExternalCompanyId())
+                .cityId(company.getCityId())
+                .apiKey(company.getApiKey())
+                .rappyId(company.getRpIntegrationId())
+                .numberId(company.getNumberId())
+                .tokenMetaQr(company.getTokenMeta())
+                .numberBotDelivery(company.getNumberBotDelivery())
+                .numberBotMesa(company.getNumberBotMesa())
+                .statusRappy(company.getStatusIntegrationRp())
+                .tokenMetaDelivery(company.getTokenMetaDelivery())
+                .landingTemplate(company.getLandingTemplate())
+                .build();
+    }
+
+    private AreaDto mapAreaDto(Area area) {
+        if (area == null) {
+            return null;
+        }
+        return AreaDto.builder()
+                .id(area.getAreaId())
+                .description(area.getDescription())
+                .status(area.getStatus())
+                .build();
+    }
+
     private Page<GgpUserGetAllDto> mapPageUserDto(Page<User> entityPage, Pageable pagingSort) {
         int totalElements = (int) entityPage.getTotalElements();
         return new PageImpl<>(
-                ObjectMapperUtils.mapAll(entityPage.getContent(),
-                        GgpUserGetAllDto.class),
-                pagingSort, totalElements).map(ggpUserGetAllDto -> {
-                    // log.info("Mapping User to GgpUserGetAllDto: {}", ggpUserGetAllDto);
-                    ggpUserGetAllDto.setRolId(ggpUserGetAllDto.getRol().getRolId());
-                    ggpUserGetAllDto.setRolName(ggpUserGetAllDto.getRol().getName());
-                    return ggpUserGetAllDto;
-                });
+                entityPage.getContent().stream()
+                        .map(this::mapUserToGetAllDto)
+                        .toList(),
+                pagingSort, totalElements);
     }
 }

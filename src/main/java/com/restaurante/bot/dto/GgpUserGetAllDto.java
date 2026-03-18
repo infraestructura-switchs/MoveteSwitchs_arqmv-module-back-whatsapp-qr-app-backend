@@ -1,8 +1,5 @@
 package com.restaurante.bot.dto;
 
-import com.restaurante.bot.model.Area;
-import com.restaurante.bot.model.Company;
-import com.restaurante.bot.model.Position;
 import lombok.*;
 
 import java.util.Date;
@@ -22,9 +19,9 @@ public class GgpUserGetAllDto {
     private RolDto rol;
     private long rolId;
     private String rolName;
-    private Position position;
-    private Company company;
-    private Area Area;
+    private PositionDto position;
+    private CompanyResponseDTO company;
+    private AreaDto area;
     private List<AbilityDto> ability;
 
     private Date tokenDateExpired;

@@ -4,12 +4,14 @@ import com.restaurante.bot.application.ports.incoming.CompanyUseCase;
 import com.restaurante.bot.application.ports.outgoing.CompanyRepositoryPort;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
+import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.Company;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,12 +28,20 @@ public class CompanyApplicationService implements CompanyUseCase {
     private final CompanyRepositoryPort companyRepo;
     private final com.cloudinary.Cloudinary cloudinary;
 
+    private String uploadLogo(MultipartFile logoFile) throws IOException {
+        if (logoFile == null || logoFile.isEmpty()) {
+            return null;
+        }
+
+        Map uploadResult = cloudinary.uploader().upload(logoFile.getBytes(), com.cloudinary.utils.ObjectUtils.asMap("resource_type", "auto"));
+        return (String) uploadResult.get("url");
+    }
+
     @Override
     @Transactional
     public CompanyRequest save(CompanyRequest companyRequest, MultipartFile logoFile) {
         try {
-            Map uploadResult = cloudinary.uploader().upload(logoFile.getBytes(), com.cloudinary.utils.ObjectUtils.asMap("resource_type", "auto"));
-            String logoUrl = (String) uploadResult.get("url");
+            String logoUrl = uploadLogo(logoFile);
 
             Company company = new Company();
             company.setName(companyRequest.getNameCompany());
@@ -77,7 +87,7 @@ public class CompanyApplicationService implements CompanyUseCase {
 
                 return response;
         } catch (IOException e) {
-            throw new RuntimeException("Error al subir la imagen del logo", e);
+            throw new GenericException("Error al subir la imagen del logo", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -95,7 +105,7 @@ public class CompanyApplicationService implements CompanyUseCase {
             companyRepo.save(company);
             return true;
         } else {
-            throw new RuntimeException("La compañia no fue encontrada por el id " + id);
+            throw new GenericException("La compañia no fue encontrada por el id " + id, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -103,7 +113,7 @@ public class CompanyApplicationService implements CompanyUseCase {
     @Transactional
     public CompanyRequest update(CompanyRequest companyRequest, MultipartFile logoFile) {
         Company company = companyRepo.findById(companyRequest.getCompanyId())
-                .orElseThrow(() -> new RuntimeException("Empresa con ID " + companyRequest.getCompanyId() + " no existe"));
+                .orElseThrow(() -> new GenericException("Empresa con ID " + companyRequest.getCompanyId() + " no existe", HttpStatus.NOT_FOUND));
 
         // update fields if present
         if (companyRequest.getNameCompany() != null) {
@@ -151,11 +161,10 @@ public class CompanyApplicationService implements CompanyUseCase {
 
         if (logoFile != null && !logoFile.isEmpty()) {
             try {
-                Map uploadResult = cloudinary.uploader().upload(logoFile.getBytes(), com.cloudinary.utils.ObjectUtils.asMap("resource_type", "auto"));
-                String logoUrl = (String) uploadResult.get("url");
+                String logoUrl = uploadLogo(logoFile);
                 company.setLogo(logoUrl);
             } catch (IOException e) {
-                throw new RuntimeException("Error al subir la imagen del logo", e);
+                throw new GenericException("Error al subir la imagen del logo", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -196,7 +205,8 @@ public class CompanyApplicationService implements CompanyUseCase {
 
     @Override
     public CompanyRequest get(Long id) {
-        Company company = companyRepo.findById(id).orElseThrow(() -> new RuntimeException("Empresa no encontrada con id " + id));
+        Company company = companyRepo.findById(id)
+            .orElseThrow(() -> new GenericException("Empresa no encontrada con id " + id, HttpStatus.NOT_FOUND));
         return CompanyRequest.builder()
                 .companyId(company.getId())
                 .nameCompany(company.getName())

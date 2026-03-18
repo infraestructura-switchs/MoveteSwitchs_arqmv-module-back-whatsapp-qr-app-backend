@@ -7,6 +7,7 @@ import com.restaurante.bot.dto.CategoryResponseDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductGetAllDto;
 import com.restaurante.bot.dto.ProductSaveAndUpdateDto;
+import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.Product;
 import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.CommentRepository;
@@ -16,6 +17,7 @@ import com.restaurante.bot.util.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,14 +69,14 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     public ProductDto get(Long id) {
         Optional<Product> opt = productRepository.findById(id);
         if (opt.isPresent()) return mapToDto(opt.get());
-        throw new RuntimeException("Producto no encontrado");
+        throw new GenericException("Producto no encontrado", HttpStatus.NOT_FOUND);
     }
 
     @Override
     @Transactional
     public ProductDto update(Long productId, ProductSaveAndUpdateDto productDto) {
         Optional<Product> opt = productRepository.findById(productId);
-        if (!opt.isPresent()) throw new RuntimeException("Producto no existe");
+        if (!opt.isPresent()) throw new GenericException("Producto no existe", HttpStatus.NOT_FOUND);
         Product entity = opt.get();
         if (productDto.getProductName() != null) entity.setName(productDto.getProductName());
         if (productDto.getPrice() != null) entity.setPrice(productDto.getPrice());

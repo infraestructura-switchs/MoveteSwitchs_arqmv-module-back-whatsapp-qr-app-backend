@@ -168,9 +168,60 @@ public class UserApplicationService implements UserUseCase {
                     .name(u.getRol().getName())
                     .build());
         }
-        dto.setPosition(u.getPosition());
-        dto.setCompany(u.getCompany());
+        dto.setPosition(mapPositionDto(u.getPosition()));
+        dto.setCompany(mapCompanyResponseDto(u.getCompany()));
+        dto.setArea(mapAreaDto(u.getArea()));
         dto.setStatus(u.getStatus());
         return dto;
+    }
+
+    private PositionDto mapPositionDto(com.restaurante.bot.model.Position position) {
+        if (position == null) {
+            return null;
+        }
+        return PositionDto.builder()
+                .positionId(position.getPositionId())
+                .description(position.getDescription())
+                .status(position.getStatus())
+                .build();
+    }
+
+    private CompanyResponseDTO mapCompanyResponseDto(com.restaurante.bot.model.Company company) {
+        if (company == null) {
+            return null;
+        }
+        return CompanyResponseDTO.builder()
+                .id(company.getId())
+                .companyName(company.getName())
+                .logo(company.getLogo())
+                .whatsappNumber(company.getNumberWhatsapp())
+                .latitude(company.getLatitude())
+                .longitude(company.getLongitude())
+                .baseValue(company.getBaseValue())
+                .aditionalValue(company.getAdditionalValue())
+                .status(company.getStatus())
+                .externalId(company.getExternalCompanyId())
+                .cityId(company.getCityId())
+                .apiKey(company.getApiKey())
+                .rappyId(company.getRpIntegrationId())
+                .numberId(company.getNumberId())
+                .tokenMetaQr(company.getTokenMeta())
+                .numberBotDelivery(company.getNumberBotDelivery())
+                .numberBotMesa(company.getNumberBotMesa())
+                .statusRappy(company.getStatusIntegrationRp())
+                .tokenMetaDelivery(company.getTokenMetaDelivery())
+                .landingTemplate(company.getLandingTemplate())
+                .build();
+    }
+
+    private AreaDto mapAreaDto(com.restaurante.bot.model.Area area) {
+        if (area == null) {
+            return null;
+        }
+        return AreaDto.builder()
+                .id(area.getAreaId())
+                .description(area.getDescription())
+                .status(area.getStatus())
+                .build();
     }
 }

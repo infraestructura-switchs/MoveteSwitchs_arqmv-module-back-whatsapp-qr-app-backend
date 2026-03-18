@@ -7,8 +7,9 @@
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "appRequestMapping", "value": "api" },
+    { "key": "appRequestMapping", "value": "api/back-whatsapp-qr-app" },
     { "key": "apiKey", "value": "" },
+    { "key": "authToken", "value": "" },
     { "key": "companyId", "value": "1" }
   ],
   "item": [

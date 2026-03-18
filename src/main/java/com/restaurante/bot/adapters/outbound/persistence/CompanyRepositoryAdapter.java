@@ -40,58 +40,56 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
     @Override
     public List<CompanyRequest> getAllCompany() {
         List<Company> companies = companyRepository.findByStatus(Constants.ACTIVE_STATUS);
-        return companies.stream().map(c -> CompanyRequest.builder()
-                .companyId(c.getId())
-                .nameCompany(c.getName())
-                .logoUrl(c.getLogo())
-                .numberWhatsapp(c.getNumberWhatsapp())
-                .longitude(c.getLongitude())
-                .latitude(c.getLatitude())
-                .baseValue(c.getBaseValue())
-                .additionalValue(c.getAdditionalValue())
-                .externalCompanyId(c.getExternalCompanyId())
-                .cityId(c.getCityId())
-                .apiKey(c.getApiKey())
-                .rpIntegrationId(c.getRpIntegrationId())
-                .numberId(c.getNumberId())
-                .tokenMeta(c.getTokenMeta())
-                .tokenMetaDelivery(c.getTokenMetaDelivery())
-                .numberBotMesa(c.getNumberBotMesa())
-                .numberBotDelivery(c.getNumberBotDelivery())
-                .landingTemplate(c.getLandingTemplate())
-                .status(c.getStatus())
-                .build())
-                .collect(Collectors.toList());
+        return companies.stream().map(c -> {
+            CompanyRequest dto = new CompanyRequest();
+            dto.setCompanyId(c.getId());
+            dto.setNameCompany(c.getName());
+            dto.setLogoUrl(c.getLogo());
+            dto.setNumberWhatsapp(c.getNumberWhatsapp());
+            dto.setLongitude(c.getLongitude());
+            dto.setLatitude(c.getLatitude());
+            dto.setBaseValue(c.getBaseValue());
+            dto.setAdditionalValue(c.getAdditionalValue());
+            dto.setExternalCompanyId(c.getExternalCompanyId());
+            dto.setCityId(c.getCityId());
+            dto.setApiKey(c.getApiKey());
+            dto.setRpIntegrationId(c.getRpIntegrationId());
+            dto.setNumberId(c.getNumberId());
+            dto.setTokenMeta(c.getTokenMeta());
+            dto.setTokenMetaDelivery(c.getTokenMetaDelivery());
+            dto.setNumberBotMesa(c.getNumberBotMesa());
+            dto.setNumberBotDelivery(c.getNumberBotDelivery());
+            dto.setLandingTemplate(c.getLandingTemplate());
+            dto.setStatus(c.getStatus());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
     public Page<CompanyResponseDTO> getAllPageCompany(Pageable pageable) {
         Page<Company> page = companyRepository.findByStatus(Constants.ACTIVE_STATUS, pageable);
         List<CompanyResponseDTO> content = page.getContent().stream().map(c -> {
-            CompanyResponseDTO dto = CompanyResponseDTO.builder()
-                    .id(c.getId())
-                    .companyName(c.getName())
-                    .logo(c.getLogo())
-                    .whatsappNumber(c.getNumberWhatsapp())
-                    .latitude(c.getLatitude())
-                    .longitude(c.getLongitude())
-                    .baseValue(c.getBaseValue())
-                    .aditionalValue(c.getAdditionalValue())
-                    .status(c.getStatus())
-                    .externalId(c.getExternalCompanyId())
-                    .cityId(c.getCityId())
-                    .apiKey(c.getApiKey())
-                    .rappyId(c.getRpIntegrationId())
-                    .numberId(c.getNumberId())
-                    .tokenMetaQr(c.getTokenMeta())
-                    .numberBotDelivery(c.getNumberBotDelivery())
-                    .numberBotMesa(c.getNumberBotMesa())
-                    .statusRappy(c.getStatusIntegrationRp())
-                    .tokenMetaDelivery(c.getTokenMetaDelivery())
-                    .landingTemplate(c.getLandingTemplate())
-                    .build();
-
-            // If City info is needed, adapt to fetch City entity and map to CityResponseDTO here
+            CompanyResponseDTO dto = new CompanyResponseDTO();
+            dto.setId(c.getId());
+            dto.setCompanyName(c.getName());
+            dto.setLogo(c.getLogo());
+            dto.setWhatsappNumber(c.getNumberWhatsapp());
+            dto.setLatitude(c.getLatitude());
+            dto.setLongitude(c.getLongitude());
+            dto.setBaseValue(c.getBaseValue());
+            dto.setAditionalValue(c.getAdditionalValue());
+            dto.setStatus(c.getStatus());
+            dto.setExternalId(c.getExternalCompanyId());
+            dto.setCityId(c.getCityId());
+            dto.setApiKey(c.getApiKey());
+            dto.setRappyId(c.getRpIntegrationId());
+            dto.setNumberId(c.getNumberId());
+            dto.setTokenMetaQr(c.getTokenMeta());
+            dto.setNumberBotDelivery(c.getNumberBotDelivery());
+            dto.setNumberBotMesa(c.getNumberBotMesa());
+            dto.setStatusRappy(c.getStatusIntegrationRp());
+            dto.setTokenMetaDelivery(c.getTokenMetaDelivery());
+            dto.setLandingTemplate(c.getLandingTemplate());
             dto.setCity(null);
             return dto;
         }).collect(Collectors.toList());

@@ -5,12 +5,14 @@ import com.cloudinary.utils.ObjectUtils;
 import com.restaurante.bot.business.interfaces.CompanyInterface;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
+import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.repository.CompanyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,11 +31,19 @@ public class CompanyService implements CompanyInterface {
     private final CompanyRepository companyRepository;
     private final Cloudinary cloudinary;
 
+    private String uploadLogo(MultipartFile logoFile) throws IOException {
+        if (logoFile == null || logoFile.isEmpty()) {
+            return null;
+        }
+
+        Map uploadResult = cloudinary.uploader().upload(logoFile.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+        return (String) uploadResult.get("url");
+    }
+
     @Override
     public CompanyRequest save(CompanyRequest companyRequest, MultipartFile logoFile) {
         try {
-            Map uploadResult = cloudinary.uploader().upload(logoFile.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
-            String logoUrl = (String) uploadResult.get("url");
+            String logoUrl = uploadLogo(logoFile);
 
             Company company = new Company();
             company.setName(companyRequest.getNameCompany());
@@ -63,7 +73,7 @@ public class CompanyService implements CompanyInterface {
 
         } catch (IOException e) {
             log.error("Error al subir la imagen del logo", e);
-            throw new RuntimeException("Error al subir la imagen del logo", e);
+            throw new GenericException("Error al subir la imagen del logo", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -102,7 +112,7 @@ public class CompanyService implements CompanyInterface {
             companyRepository.save(company);
             return true;
         } else {
-            throw new RuntimeException("La compañia no fue encontrada por el id " + id);
+            throw new GenericException("La compañia no fue encontrada por el id " + id, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -112,7 +122,7 @@ public class CompanyService implements CompanyInterface {
         log.info("Actualizando empresa con ID: {}", companyRequest.getCompanyId());
 
         Company company = companyRepository.findById(companyRequest.getCompanyId())
-                .orElseThrow(() -> new RuntimeException("Empresa con ID " + companyRequest.getCompanyId() + " no existe"));
+            .orElseThrow(() -> new GenericException("Empresa con ID " + companyRequest.getCompanyId() + " no existe", HttpStatus.NOT_FOUND));
 
         // Actualizar solo si el valor no es null
         if (companyRequest.getNameCompany() != null) {
@@ -160,12 +170,11 @@ public class CompanyService implements CompanyInterface {
 
         if (logoFile != null && !logoFile.isEmpty()) {
             try {
-                Map uploadResult = cloudinary.uploader().upload(logoFile.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
-                String logoUrl = (String) uploadResult.get("url");
+                String logoUrl = uploadLogo(logoFile);
                 company.setLogo(logoUrl);
             } catch (IOException e) {
                 log.error("Error al subir la imagen del logo", e);
-                throw new RuntimeException("Error al subir la imagen del logo", e);
+                throw new GenericException("Error al subir la imagen del logo", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
