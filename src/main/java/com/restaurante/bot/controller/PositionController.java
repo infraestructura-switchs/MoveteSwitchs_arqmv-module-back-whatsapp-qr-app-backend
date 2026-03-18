@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/position")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class PositionController {
 
     private final PositionUseCase positionUseCase;

@@ -26,7 +26,7 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class LoginGGPServiceImpl implements LoginGGPService {
 
     private final UserRepository iRepository;

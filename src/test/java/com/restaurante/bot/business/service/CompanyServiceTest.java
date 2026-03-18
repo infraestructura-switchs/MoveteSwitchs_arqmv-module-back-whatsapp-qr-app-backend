@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
@@ -51,8 +53,8 @@ class CompanyServiceTest {
     @Test
     void getAllCompany_ShouldReturnCompanyList() {
         // Given
-        List<CompanyRequest> mockCompanies = Arrays.asList(mockCompanyRequest);
-        when(companyRepository.getAllCompany()).thenReturn(mockCompanies);
+        List<Company> mockCompanies = Arrays.asList(mockCompany);
+        when(companyRepository.findByStatus("ACTIVE")).thenReturn(mockCompanies);
 
         // When
         List<CompanyRequest> result = companyService.getAllCompany();
@@ -62,7 +64,7 @@ class CompanyServiceTest {
         assertEquals(1, result.size());
         assertEquals("Test Company", result.get(0).getNameCompany());
         
-        verify(companyRepository, times(1)).getAllCompany();
+        verify(companyRepository, times(1)).findByStatus("ACTIVE");
     }
 
     @Test

@@ -29,4 +29,5 @@ public class CompanyRequest {
     private String numberBotMesa;
     private String numberBotDelivery;
     private String landingTemplate;
+    private String status;
 }

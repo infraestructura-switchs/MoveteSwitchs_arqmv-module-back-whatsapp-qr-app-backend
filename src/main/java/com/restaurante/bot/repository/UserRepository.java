@@ -1,6 +1,6 @@
 package com.restaurante.bot.repository;
 
-import com.restaurante.bot.dto.GgpUserGetAllDto;
+// Projection removed: map to DTOs in service layer instead
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.model.Rol;
 import com.restaurante.bot.model.User;
@@ -29,24 +29,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
         @Override
         Page<User> findAll(Pageable pageable);
 
-        @Query(value = "SELECT new com.restaurante.bot.dto.GgpUserGetAllDto(u.userId, u.name, u.login,u.password, u.email, r.rolId, r.name, u.status) "
-                        +
-                        "FROM User u " +
-                        "INNER JOIN u.rol r " +
-                        "WHERE u.status = 'ACTIVE'", countQuery = "SELECT COUNT(u) " +
-                                        "FROM User u " +
-                                        "INNER JOIN u.rol r " +
-                                        "WHERE u.status = 'ACTIVE'")
-        Page<GgpUserGetAllDto> getStatus(Pageable pageable);
+        // Use existing findByStatus methods; mapping to DTO is handled in service
 
         Page<User> findByStatus(String status, Pageable pageable);
 
         List<User> findByStatus(String status);
 
-        @Query(value = """
-                        SELECT *
-                        FROM user_app ua WHERE ua.company_id = :companyId
-                        """, nativeQuery = true)
+        @Query("SELECT u FROM User u WHERE u.company.id = :companyId")
         User findUserByCompany(@Param("companyId")  Long companyId);
 
         @Query("SELECT u FROM User u " +

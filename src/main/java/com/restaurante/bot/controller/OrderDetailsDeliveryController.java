@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/order-delivery")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 @Slf4j
 public class OrderDetailsDeliveryController {

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 
 public class PositionServiceImpl implements IPositionService, PositionUseCase {
 

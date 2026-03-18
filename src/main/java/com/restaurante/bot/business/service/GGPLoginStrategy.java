@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import static com.restaurante.bot.business.service.LoginExecutorImpl.addLoginStrategy;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class GGPLoginStrategy implements LoginStrategy {
 
     private final LoginGGPService iLoginGGPService;

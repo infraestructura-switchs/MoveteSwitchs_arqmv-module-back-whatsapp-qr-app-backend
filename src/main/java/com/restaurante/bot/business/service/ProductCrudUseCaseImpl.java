@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
     private final ProductRepository productRepository;

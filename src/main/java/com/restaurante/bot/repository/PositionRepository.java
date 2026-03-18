@@ -21,15 +21,15 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
 
         Page<Position> findByStatus(String status, Pageable pageable);
 
-        @Query(value = "SELECT * FROM position " +
-                        "WHERE (:id IS NULL OR CAST(position_id AS CHAR) LIKE CONCAT(:id, '%')) " +
-                        "AND (:description IS NULL OR UPPER(description) LIKE UPPER(CONCAT('%', :description, '%'))) " +
-                        "AND (:status IS NULL OR UPPER(status) = UPPER(:status) OR status = 'ACTIVE') " +
-                        "ORDER BY position_id ASC", countQuery = "SELECT COUNT(*) FROM position " +
-                                        "WHERE (:id IS NULL OR CAST(position_id AS CHAR) LIKE CONCAT(:id, '%')) " +
-                                        "AND (:description IS NULL OR UPPER(description) LIKE UPPER(CONCAT('%', :description, '%'))) "
-                                        +
-                                        "AND (:status IS NULL OR UPPER(status) = UPPER(:status) OR status = 'ACTIVE')", nativeQuery = true)
+        @Query(value = "SELECT p FROM Position p " +
+                        "WHERE (:id IS NULL OR str(p.positionId) LIKE CONCAT(:id, '%')) " +
+                        "AND (:description IS NULL OR UPPER(p.description) LIKE UPPER(CONCAT('%', :description, '%'))) " +
+                        "AND (:status IS NULL OR UPPER(p.status) = UPPER(:status) OR p.status = 'ACTIVE') " +
+                        "ORDER BY p.positionId ASC",
+                countQuery = "SELECT COUNT(p) FROM Position p " +
+                        "WHERE (:id IS NULL OR str(p.positionId) LIKE CONCAT(:id, '%')) " +
+                        "AND (:description IS NULL OR UPPER(p.description) LIKE UPPER(CONCAT('%', :description, '%'))) " +
+                        "AND (:status IS NULL OR UPPER(p.status) = UPPER(:status) OR p.status = 'ACTIVE')")
         Page<Position> findByIdOrDescriptionContainingIgnoreCaseAndStatus(
                         @Param("id") String id,
                         @Param("description") String description,

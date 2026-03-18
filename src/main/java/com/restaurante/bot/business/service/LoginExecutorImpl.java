@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class LoginExecutorImpl implements LoginExecutor {
 
     private static HashMap<LoginMode, LoginStrategy> loginStrategyMap = new HashMap<>();

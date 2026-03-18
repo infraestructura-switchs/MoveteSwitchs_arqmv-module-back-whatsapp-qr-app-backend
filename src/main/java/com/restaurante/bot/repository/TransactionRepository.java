@@ -7,38 +7,29 @@ import org.springframework.data.repository.query.Param;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-        @Query(value = "SELECT t.* " +
-                        "FROM transaction t " +
-                        "JOIN restaurant_table r ON t.table_id = r.table_id " +
-                        "WHERE r.table_number = :tableNumber AND t.status = 1 " +
-                        "AND t.company_id = :companyId ", nativeQuery = true)
-        Transaction findTransactionByTableId(Long tableNumber, Long companyId);
+        @Query("SELECT t FROM Transaction t, RestaurantTable r " +
+                        "WHERE t.tableId = r.tableId AND r.tableNumber = :tableNumber AND t.status = 1 " +
+                        "AND t.companyId = :companyId")
+        Transaction findTransactionByTableId(@Param("tableNumber") Long tableNumber, @Param("companyId") Long companyId);
 
         Transaction findByTransactionId(Long id);
 
-        @Query(value = "SELECT DISTINCT t.* " +
-                        "FROM order_transaction ot " +
-                        "JOIN transaction t ON ot.transaction_id = t.transaction_id " +
-                        "JOIN restaurant_table r ON r.table_id = t.table_id " +
-                        "JOIN customer_order co ON co.order_id = ot.order_id " +
-                        "WHERE r.table_number = :tableNumber AND co.status = 1 AND t.company_id = :companyId", nativeQuery = true)
+        @Query("SELECT DISTINCT t FROM OrderTransaction ot, Transaction t, RestaurantTable r, CustomerOrder co " +
+                        "WHERE ot.transactionId = t.transactionId AND ot.orderId = co.orderId AND r.tableId = t.tableId " +
+                        "AND r.tableNumber = :tableNumber AND co.status = 1 AND t.companyId = :companyId")
         Transaction getTransactionByTableAndStatus(@Param("tableNumber") Integer tableNumber,
                         @Param("companyId") Long companyId);
 
-        @Query(value = "SELECT DISTINCT t.* FROM transaction t " +
-                        "JOIN order_transaction ot ON ot.transaction_id = t.transaction_id " +
-                        "JOIN restaurant_table r ON r.table_id = t.table_id " +
-                        "WHERE r.table_number = :tableNumber AND t.status = 1 AND t.company_id = :companyId ", nativeQuery = true)
+        @Query("SELECT DISTINCT t FROM Transaction t, OrderTransaction ot, RestaurantTable r " +
+                        "WHERE ot.transactionId = t.transactionId AND r.tableId = t.tableId " +
+                        "AND r.tableNumber = :tableNumber AND t.status = 1 AND t.companyId = :companyId")
         Transaction getTransactionByTableAndStatusSend(@Param("tableNumber") Integer tableNumber,
                         @Param("companyId") Long companyId);
 
-        @Query(value = "SELECT DISTINCT  t.transaction_id " +
-                        "FROM transaction t " +
-                        "JOIN order_transaction ot ON ot.transaction_id = t.transaction_id " +
-                        "JOIN customer_order co ON ot.order_id  = co.order_id " +
-                        "JOIN customer c ON co.customer_id  = c.customer_id " +
-                        "JOIN restaurant_table rt ON t.table_id = rt.table_id " +
-                        "WHERE c.phone = :phoneNumber AND t.status = 1 AND rt.table_number = :tableNumber AND t.company_id = :companyId ", nativeQuery = true)
+        @Query("SELECT DISTINCT t.transactionId FROM Transaction t, OrderTransaction ot, CustomerOrder co, Customer c, RestaurantTable rt " +
+                        "WHERE ot.transactionId = t.transactionId AND ot.orderId = co.orderId AND co.customerId = c.customer_id " +
+                        "AND rt.tableId = t.tableId AND c.phone = :phoneNumber AND t.status = 1 " +
+                        "AND rt.tableNumber = :tableNumber AND t.companyId = :companyId")
         Long getTransactionIdByPhoneNumber(@Param("phoneNumber") String phoneNumber,
                         @Param("tableNumber") Long tableNumber,
                         @Param("companyId") Long companyId);

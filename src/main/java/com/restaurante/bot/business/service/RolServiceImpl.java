@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 
 public class RolServiceImpl implements RolInterface, RolUseCase {
 
@@ -119,7 +119,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        return rolRepository.findAllByStatus(pagingSort);
+        return mapPageRolDto(rolRepository.findByStatus(Constants.ACTIVE_STATUS, pagingSort), pagingSort);
     }
 
     @Override

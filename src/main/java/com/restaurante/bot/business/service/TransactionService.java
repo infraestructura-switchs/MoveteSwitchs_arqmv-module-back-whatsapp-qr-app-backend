@@ -17,7 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class TransactionService implements TransactionInterface, TransactionUseCase {
 
     private final RestaurantTableRepository restaurantTableRepository;

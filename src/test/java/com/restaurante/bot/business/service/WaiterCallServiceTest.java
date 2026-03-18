@@ -2,10 +2,10 @@ package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.WaiterCallRequest;
 import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.application.ports.outgoing.RestaurantTableLookupPort;
+import com.restaurante.bot.application.ports.outgoing.WaiterCallRepositoryPort;
 import com.restaurante.bot.model.RestaurantTable;
 import com.restaurante.bot.model.WaiterCall;
-import com.restaurante.bot.repository.RestaurantTableRepository;
-import com.restaurante.bot.repository.WaiterCallRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,10 +25,10 @@ import static org.mockito.Mockito.*;
 class WaiterCallServiceTest {
 
     @Mock
-    private WaiterCallRepository waiterCallRepository;
+    private WaiterCallRepositoryPort waiterCallRepository;
 
     @Mock
-    private RestaurantTableRepository restaurantTableRepository;
+    private RestaurantTableLookupPort restaurantTableRepository;
 
     @InjectMocks
     private WaiterCallService waiterCallService;

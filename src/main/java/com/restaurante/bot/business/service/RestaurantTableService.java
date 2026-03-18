@@ -22,7 +22,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class RestaurantTableService implements RestaurantTableInterface, RestaurantTableUseCase {
 
     private final RestaurantTableRepository restaurantTableRepository;

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class NotificationService implements NotificationInterface, NotificationUseCase, NotificationObserver {
 
     private final SubscriptionRepository subscriptionRepository;

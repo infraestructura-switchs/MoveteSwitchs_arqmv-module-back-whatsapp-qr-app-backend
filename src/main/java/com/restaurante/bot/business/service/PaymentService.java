@@ -1,16 +1,16 @@
 package com.restaurante.bot.business.service;
 
+import com.restaurante.bot.application.ports.outgoing.PaymentRepositoryPort;
 import com.restaurante.bot.model.Payment;
-import com.restaurante.bot.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 import com.restaurante.bot.application.ports.incoming.PaymentUseCase;
 import java.util.List;
 
 @Service
 public class PaymentService implements PaymentUseCase {
-    private final PaymentRepository paymentRepository;
+    private final PaymentRepositoryPort paymentRepository;
 
-    public PaymentService(PaymentRepository paymentRepository) {
+    public PaymentService(PaymentRepositoryPort paymentRepository) {
         this.paymentRepository = paymentRepository;
     }
 

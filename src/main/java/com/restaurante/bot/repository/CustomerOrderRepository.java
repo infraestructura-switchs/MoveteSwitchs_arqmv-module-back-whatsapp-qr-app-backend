@@ -8,11 +8,9 @@ import java.util.List;
 
 public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Long> {
 
-    @Query(value = "SELECT co.* " +
-            "FROM customer_order co " +
-            "JOIN order_transaction ot ON co.order_id = ot.order_id " +
-            "WHERE ot.transaction_id = :transactionId AND co.status = 3", nativeQuery = true)
-    List<CustomerOrder> findByTransactionIdAndStatusNoConfirm(Long transactionId);
+        @Query("SELECT co FROM CustomerOrder co, OrderTransaction ot " +
+            "WHERE co.orderId = ot.orderId AND ot.transactionId = :transactionId AND co.status = 3")
+        List<CustomerOrder> findByTransactionIdAndStatusNoConfirm(@org.springframework.data.repository.query.Param("transactionId") Long transactionId);
 
 
     CustomerOrder findByOrderIdAndCompanyId(Long orderId, Long companyId);

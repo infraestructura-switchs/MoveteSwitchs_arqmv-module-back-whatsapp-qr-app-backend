@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'io.freefair.lombok' version '8.6'
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'com.github.ben-manes.versions' version '0.47.0'
@@ -52,8 +53,10 @@ dependencies {
     
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
     
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
     
     implementation 'com.cloudinary:cloudinary-http44:1.26.0'
     
@@ -69,6 +72,11 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('compileJava') {
+    dependsOn tasks.named('delombok')
+    source = fileTree("$buildDir/generated/sources/delombok/java/main")
 }
 
 // Ensure we only produce one executable JAR and with a predictable name for Docker

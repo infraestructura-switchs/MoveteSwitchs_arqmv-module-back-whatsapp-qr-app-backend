@@ -1,6 +1,5 @@
 package com.restaurante.bot.repository;
 
-import com.restaurante.bot.dto.RolGetAllDto;
 import com.restaurante.bot.model.Rol;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +20,8 @@ public interface RolRepository extends JpaRepository<Rol, Long> {
     List<Rol> findByStatus(String status);
 
 
+    // Replaced select-new DTO projection with entity query; mapping to DTO happens in the service layer
     Page<Rol> findByStatus(String status, Pageable pageable);
-
-    @Query("SELECT new com.restaurante.bot.dto.RolGetAllDto(r.rolId, r.name, r.status) FROM Rol r WHERE r.status = 'ACTIVE' ")
-    Page<RolGetAllDto> findAllByStatus(Pageable pageable);
 
 
     @Query("SELECT r FROM Rol r WHERE (r.rolId = :id OR r.name LIKE %:name%) AND r.status = 'ACTIVE' ")

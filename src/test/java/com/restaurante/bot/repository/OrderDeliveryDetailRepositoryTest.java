@@ -30,8 +30,8 @@ class OrderDeliveryDetailRepositoryTest {
     }
 
     @Test
-    void testGetOrderDetail() {
-        List<OrderDeliveryResponseDTO> orders = repository.getOrderDetail();
+    void testFindByStatusAndStatusOrder() {
+        List<OrderDetailDelivery> orders = repository.findByStatusAndStatusOrder("ACTIVE", "PENDIENTE");
         Assertions.assertNotNull(orders);
     }
 }

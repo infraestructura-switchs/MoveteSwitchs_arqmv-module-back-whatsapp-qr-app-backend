@@ -1,7 +1,7 @@
 package com.restaurante.bot.business.service;
 
+import com.restaurante.bot.application.ports.outgoing.CustomerOrderRepositoryPort;
 import com.restaurante.bot.model.CustomerOrder;
-import com.restaurante.bot.repository.CustomerOrderRepository;
 import org.springframework.stereotype.Service;
 import com.restaurante.bot.application.ports.incoming.CustomerOrderUseCase;
 
@@ -11,9 +11,9 @@ import java.util.List;
 
 public class CustomerOrderService implements CustomerOrderUseCase {
 
-    private final CustomerOrderRepository customerOrderRepository;
+    private final CustomerOrderRepositoryPort customerOrderRepository;
 
-    public CustomerOrderService(CustomerOrderRepository customerOrderRepository) {
+    public CustomerOrderService(CustomerOrderRepositoryPort customerOrderRepository) {
         this.customerOrderRepository = customerOrderRepository;
     }
 

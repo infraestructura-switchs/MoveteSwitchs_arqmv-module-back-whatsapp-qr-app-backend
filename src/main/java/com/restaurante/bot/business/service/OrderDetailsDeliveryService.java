@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @Slf4j
 public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderDetailsDeliveryUseCase {
 
@@ -91,32 +91,53 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
     }
     @Override
     public List<OrderDeliveryResponseDTO> getOrderDetails() {
-        List<OrderDeliveryResponseDTO> orderResponses = orderRepository.getOrderDetail();
+        List<OrderDetailDelivery> orderDetails = orderRepository.findByStatusAndStatusOrder("ACTIVE", "PENDIENTE");
 
-        List<Long> orderIds = orderResponses.stream()
-                .map(OrderDeliveryResponseDTO::getOrderTransactionDeliveryId)
+        List<Long> orderIds = orderDetails.stream()
+                .map(OrderDetailDelivery::getOrderTransactionDeliveryId)
                 .collect(Collectors.toList());
 
-        List<OrderProductDeliveryResponseDTO> allProducts = orderRepository.getOrderDetailProduct(orderIds);
+        List<OrderProductDelivery> allProducts = orderProductRepository.findByOrderTransactionDeliveryIdIn(orderIds);
 
         Map<Long, List<SellProducts>> productsGroupedByOrder = allProducts.stream()
                 .collect(Collectors.groupingBy(
-                        OrderProductDeliveryResponseDTO::getOrderTransactionDeliveryId,
+                        OrderProductDelivery::getOrderTransactionDeliveryId,
                         Collectors.mapping(op -> {
                             SellProducts product = new SellProducts();
-                            product.setProductId((op.getProductId()));
+                            product.setProductId(op.getProductId());
                             product.setProductName(op.getName());
                             product.setQty(op.getQuantity());
-                            product.setUnitePrice(op.getPrice());
+                            product.setUnitePrice(op.getUnitPrice());
                             return product;
                         }, Collectors.toList())
                 ));
 
-        for (OrderDeliveryResponseDTO dto : orderResponses) {
-            dto.setProducts(productsGroupedByOrder.getOrDefault(dto.getOrderTransactionDeliveryId(), List.of()));
+        List<OrderDeliveryResponseDTO> responses = new ArrayList<>();
+
+        for (OrderDetailDelivery od : orderDetails) {
+            OrderDeliveryResponseDTO dto = new OrderDeliveryResponseDTO();
+            dto.setPhone(customerRepository.findById(od.getCustomerId()).map(com.restaurante.bot.model.Customer::getPhone).orElse(null));
+            dto.setOrderTransactionDeliveryId(od.getOrderTransactionDeliveryId());
+            dto.setTotal(od.getTotal());
+            dto.setPaymentId(od.getPaymentId());
+            dto.setMethod(od.getMethod());
+            dto.setStatus(od.getStatus());
+            dto.setStatusOrder(od.getStatusOrder());
+
+            com.restaurante.bot.model.Customer customer = customerRepository.findById(od.getCustomerId()).orElse(null);
+            if (customer != null) {
+                dto.setNameClient(customer.getName());
+                dto.setAddress(customer.getAddress());
+                dto.setPhone(customer.getPhone());
+                dto.setMail(customer.getEmail());
+                dto.setNumerIdentification(customer.getNumerIdentification());
+            }
+
+            dto.setProducts(productsGroupedByOrder.getOrDefault(od.getOrderTransactionDeliveryId(), List.of()));
+            responses.add(dto);
         }
 
-        return orderResponses;
+        return responses;
     }
 
     @Override

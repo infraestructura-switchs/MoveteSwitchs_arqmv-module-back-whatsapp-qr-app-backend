@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
 
@@ -218,7 +218,7 @@ public class UserServiceImpl implements UserService {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pagingSort = PageRequest.of(page, size, sort);
 
-        return iRepository.getStatus(pagingSort);
+        return mapPageUserDto(iRepository.findByStatus(Constants.ACTIVE_STATUS, pagingSort), pagingSort);
     }
 
     @Override

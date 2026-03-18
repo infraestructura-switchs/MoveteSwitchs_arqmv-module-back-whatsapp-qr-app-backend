@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping({"/${app.request.mapping}/admin/product", "/api/back-whatsapp-qr-app/producto"})
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @Slf4j
 public class ProductoCrudController {
 

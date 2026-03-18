@@ -1,17 +1,16 @@
 package com.restaurante.bot.business.service;
 
 
+import com.restaurante.bot.business.interfaces.IAreaService;
 import com.restaurante.bot.dto.AreaDto;
 import com.restaurante.bot.dto.AreaGetAllDto;
 import com.restaurante.bot.dto.AreaSaveAndUpdateDto;
+import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.Area;
 import com.restaurante.bot.repository.AreaRepository;
-import com.restaurante.bot.business.interfaces.IAreaService;
 import com.restaurante.bot.util.Constants;
-import com.restaurante.bot.exception.CustomErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class AreaServiceImpl implements IAreaService, com.restaurante.bot.application.ports.incoming.AreaUseCase {
 
     private final AreaRepository areaRepository;

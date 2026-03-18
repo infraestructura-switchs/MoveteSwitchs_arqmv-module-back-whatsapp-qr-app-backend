@@ -10,11 +10,7 @@ import com.restaurante.bot.repository.CompanyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,10 +18,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @Slf4j
 public class CompanyService implements CompanyInterface {
 
@@ -72,7 +69,29 @@ public class CompanyService implements CompanyInterface {
 
     @Override
     public List<CompanyRequest> getAllCompany() {
-        return companyRepository.getAllCompany();
+        return companyRepository.findByStatus("ACTIVE").stream()
+            .map(company -> CompanyRequest.builder()
+                .companyId(company.getId())
+                .nameCompany(company.getName())
+                .logoUrl(company.getLogo())
+                .numberWhatsapp(company.getNumberWhatsapp())
+                .longitude(company.getLongitude())
+                .latitude(company.getLatitude())
+                .baseValue(company.getBaseValue())
+                .additionalValue(company.getAdditionalValue())
+                .externalCompanyId(company.getExternalCompanyId())
+                .cityId(company.getCityId())
+                .apiKey(company.getApiKey())
+                .rpIntegrationId(company.getRpIntegrationId())
+                .numberId(company.getNumberId())
+                .tokenMeta(company.getTokenMeta())
+                .tokenMetaDelivery(company.getTokenMetaDelivery())
+                .numberBotMesa(company.getNumberBotMesa())
+                .numberBotDelivery(company.getNumberBotDelivery())
+                .landingTemplate(company.getLandingTemplate())
+                .status(company.getStatus())
+                .build())
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -167,7 +186,31 @@ public class CompanyService implements CompanyInterface {
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Sort sort = Sort.by(direction, sortBy);
         Pageable pagingSort = PageRequest.of(page, size, sort);
-        return companyRepository.getAllPageCompany(pagingSort);
+        Page<Company> companies = companyRepository.findByStatus("ACTIVE", pagingSort);
+        List<CompanyResponseDTO> content = companies.getContent().stream().map(company -> CompanyResponseDTO.builder()
+                .id(company.getId())
+                .companyName(company.getName())
+                .logo(company.getLogo())
+                .whatsappNumber(company.getNumberWhatsapp())
+                .latitude(company.getLatitude())
+                .longitude(company.getLongitude())
+                .baseValue(company.getBaseValue())
+                .aditionalValue(company.getAdditionalValue())
+                .status(company.getStatus())
+                .externalId(company.getExternalCompanyId())
+                .cityId(company.getCityId())
+                .apiKey(company.getApiKey())
+                .rappyId(company.getRpIntegrationId())
+                .numberId(company.getNumberId())
+                .tokenMetaQr(company.getTokenMeta())
+                .numberBotDelivery(company.getNumberBotDelivery())
+                .numberBotMesa(company.getNumberBotMesa())
+                .statusRappy(company.getStatusIntegrationRp())
+                .tokenMetaDelivery(company.getTokenMetaDelivery())
+                .landingTemplate(company.getLandingTemplate())
+                .build()).collect(Collectors.toList());
+
+        return new PageImpl<>(content, pagingSort, companies.getTotalElements());
 
     }
 

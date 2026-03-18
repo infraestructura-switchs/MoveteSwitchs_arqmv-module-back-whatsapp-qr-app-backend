@@ -1,15 +1,14 @@
 package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.application.ports.incoming.WaiterCallUseCase;
+import com.restaurante.bot.application.ports.outgoing.RestaurantTableLookupPort;
+import com.restaurante.bot.application.ports.outgoing.WaiterCallRepositoryPort;
 import com.restaurante.bot.business.interfaces.WaiterCallInterface;
 import com.restaurante.bot.dto.WaiterCallRequest;
 import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.RestaurantTable;
 import com.restaurante.bot.model.WaiterCall;
-import com.restaurante.bot.repository.RestaurantTableRepository;
-import com.restaurante.bot.repository.WaiterCallRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +17,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class WaiterCallService implements WaiterCallInterface, WaiterCallUseCase {
 
-    private  final WaiterCallRepository waiterCallRepository;
+    private final WaiterCallRepositoryPort waiterCallRepository;
 
-    private final RestaurantTableRepository restaurantTableRepository;
+    private final RestaurantTableLookupPort restaurantTableRepository;
 
 
     @Override

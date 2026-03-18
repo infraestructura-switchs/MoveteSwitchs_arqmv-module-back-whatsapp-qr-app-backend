@@ -27,6 +27,9 @@ public class OrderProduct {
     @Column(name = "quantity")
     private Integer quantity;
 
+    @Column(name = "unite_price")
+    private Double unitePrice;
+
     @Column(name = "comment_product")
     private String commentProduct;
 

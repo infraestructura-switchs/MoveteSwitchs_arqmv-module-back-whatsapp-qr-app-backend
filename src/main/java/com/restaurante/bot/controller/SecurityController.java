@@ -21,7 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/security")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
 @Slf4j

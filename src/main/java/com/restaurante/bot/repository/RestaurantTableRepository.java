@@ -13,22 +13,16 @@ public interface RestaurantTableRepository extends JpaRepository<RestaurantTable
 
         Optional<RestaurantTable> findByTableId(Integer tableId);
 
-        @Query(value = "SELECT MAX(table_number) AS highest_table_number " +
-                        "FROM restaurant_table ", nativeQuery = true)
+        @Query("SELECT MAX(rt.tableNumber) FROM RestaurantTable rt")
         Long findHighestTableNumber();
 
         Boolean existsByTableNumberAndCompanyId(Long tableNumber, Long companyId);
 
-        @Query(value = "SELECT rt.table_number AS mesa, ts.description AS statusMesa, t.transaction_total AS totalGeneral "
-                        +
-                        "FROM restaurant_table rt " +
-                        "JOIN transaction t ON rt.table_id = t.table_id " +
-                        "JOIN transaction_status ts ON t.status = ts.transaction_status_id ", nativeQuery = true)
+        @Query("SELECT rt.tableNumber AS mesa, ts.description AS statusMesa, t.transactionTotal AS totalGeneral " +
+                        "FROM RestaurantTable rt, Transaction t, TransactionStatus ts " +
+                        "WHERE rt.tableId = t.tableId AND t.status = ts.transactionStatusId")
         List<Object[]> findAllTablesWithTransactionData();
 
-        @Query(value = "SELECT * " +
-                        "FROM restaurant_table rt " +
-                        "WHERE rt.company_id =:companyId " +
-                        "ORDER BY rt.table_number asc ", nativeQuery = true)
+        @Query("SELECT rt FROM RestaurantTable rt WHERE rt.companyId = :companyId ORDER BY rt.tableNumber ASC")
         List<RestaurantTable> findAllTablesAsc(Long companyId);
 }

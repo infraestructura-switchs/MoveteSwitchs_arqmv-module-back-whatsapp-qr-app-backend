@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class ProductService implements ProductInterface, ProductUseCase {
 
     private final ProductRepository productRepository;

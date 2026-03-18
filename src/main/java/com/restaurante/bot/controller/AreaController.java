@@ -1,15 +1,13 @@
 package com.restaurante.bot.controller;
 
+import com.restaurante.bot.application.ports.incoming.AreaUseCase;
 import com.restaurante.bot.dto.AreaDto;
 import com.restaurante.bot.dto.AreaGetAllDto;
 import com.restaurante.bot.dto.AreaSaveAndUpdateDto;
-
-import com.restaurante.bot.application.ports.incoming.AreaUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +21,7 @@ import java.util.Map;
 @RequestMapping("/${app.request.mapping}/area")
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @Slf4j
 public class AreaController {
 

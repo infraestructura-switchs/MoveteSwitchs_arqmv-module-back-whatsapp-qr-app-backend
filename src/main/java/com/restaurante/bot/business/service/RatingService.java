@@ -1,8 +1,7 @@
 package com.restaurante.bot.business.service;
 
-import com.restaurante.bot.model.CustomerOrder;
+import com.restaurante.bot.application.ports.outgoing.RatingRepositoryPort;
 import com.restaurante.bot.model.Rating;
-import com.restaurante.bot.repository.RatingRepository;
 import org.springframework.stereotype.Service;
 import com.restaurante.bot.application.ports.incoming.RatingUseCase;
 
@@ -12,9 +11,9 @@ import java.util.List;
 
 public class RatingService implements RatingUseCase {
 
-    private final RatingRepository ratingRepository;
+    private final RatingRepositoryPort ratingRepository;
 
-    public RatingService(RatingRepository ratingRepository) {
+    public RatingService(RatingRepositoryPort ratingRepository) {
         this.ratingRepository = ratingRepository;
     }
 

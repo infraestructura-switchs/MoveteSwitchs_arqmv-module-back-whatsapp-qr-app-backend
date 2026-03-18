@@ -6,7 +6,6 @@ import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/company")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 @Slf4j
 public class CompanyController {
@@ -42,7 +41,9 @@ public class CompanyController {
             @RequestParam(value = "tokenMetaQr", required = false) String tokenMetaQr,
             @RequestParam(value = "numberBotMesa", required = false) String numberBotMesa,
             @RequestParam(value = "numberBotDelivery", required = false) String numberBotDelivery,
-            @RequestParam(value = "tokenMetaDelivery", required = false) String tokenMetaDelivery
+            @RequestParam(value = "tokenMetaDelivery", required = false) String tokenMetaDelivery,
+            @RequestParam(value = "landingTemplate", required = false) String landingTemplate,
+            @RequestParam(value = "status", required = false) String status
             ) {
 
         CompanyRequest companyRequest = new CompanyRequest();
@@ -61,6 +62,8 @@ public class CompanyController {
         companyRequest.setTokenMetaDelivery(tokenMetaDelivery);
         companyRequest.setNumberBotMesa(numberBotMesa);
         companyRequest.setNumberBotDelivery(numberBotDelivery);
+        companyRequest.setLandingTemplate(landingTemplate);
+        companyRequest.setStatus(status);
 
 
         CompanyRequest savedCompany = companyUseCase.save(companyRequest, logo);
@@ -105,7 +108,9 @@ public class CompanyController {
             @RequestParam(value = "tokenMetaQr", required = false) String tokenMetaQr,
             @RequestParam(value = "numberBotMesa", required = false) String numberBotMesa,
             @RequestParam(value = "numberBotDelivery", required = false) String numberBotDelivery,
-            @RequestParam(value = "tokenMetaDelivery", required = false) String tokenMetaDelivery) {
+            @RequestParam(value = "tokenMetaDelivery", required = false) String tokenMetaDelivery,
+            @RequestParam(value = "landingTemplate", required = false) String landingTemplate,
+            @RequestParam(value = "status", required = false) String status) {
 
         log.info("Iniciando actualización de empresa con ID: {}", companyId);
 
@@ -125,6 +130,8 @@ public class CompanyController {
         companyRequest.setTokenMeta(tokenMetaQr);
         companyRequest.setNumberBotMesa(numberBotMesa);
         companyRequest.setNumberBotDelivery(numberBotDelivery);
+        companyRequest.setLandingTemplate(landingTemplate);
+        companyRequest.setStatus(status);
 
         CompanyRequest updatedCompany = companyUseCase.update(companyRequest, logo);
         return ResponseEntity.ok(updatedCompany);
