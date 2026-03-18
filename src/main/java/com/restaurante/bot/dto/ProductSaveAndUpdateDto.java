@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @Data
 @Builder
@@ -16,10 +17,11 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor
 public class ProductSaveAndUpdateDto {
 
-    @NotBlank
+    @NotBlank(message = "productName is required")
     private String productName;
 
-    @NotNull
+    @NotNull(message = "price is required")
+    @Positive(message = "price must be greater than 0")
     private Double price;
 
     private String description;
@@ -28,13 +30,19 @@ public class ProductSaveAndUpdateDto {
 
     private String image;
 
+    @NotNull(message = "categoryId is required")
+    @Positive(message = "categoryId must be greater than 0")
     private Long categoryId;
 
     @JsonDeserialize(using = FlexibleStringDeserializer.class)
     private String information;
 
+    @NotNull(message = "preparationTime is required")
+    @Positive(message = "preparationTime must be greater than 0")
     private Integer preparationTime;
-    @NotNull
+
+    @NotNull(message = "companyId is required")
+    @Positive(message = "companyId must be greater than 0")
     private Long companyId;
 
     private java.util.List<String> comments;

@@ -11,7 +11,9 @@
     { "key": "apiKey", "value": "" },
     { "key": "authToken", "value": "" },
     { "key": "companyId", "value": "1" },
-    { "key": "productId", "value": "1" }
+    { "key": "productId", "value": "1" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "preparationTime", "value": "15" }
   ],
   "item": [
     {
@@ -269,7 +271,25 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"productName\": \"Pizza\", \"price\": 12000, \"companyId\": {{companyId}} }",
+              "raw": "{ \"productName\": \"Pizza\", \"price\": 12000, \"companyId\": {{companyId}}, \"categoryId\": {{categoryId}}, \"preparationTime\": {{preparationTime}} }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/create",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product", "create" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Product CRUD (create validation error)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"productName\": \"Pizza invalida\", \"price\": 0, \"companyId\": {{companyId}}, \"categoryId\": 0 }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -300,7 +320,25 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"productName\": \"Pizza Hawaiana\", \"price\": 13000, \"companyId\": {{companyId}} }",
+              "raw": "{ \"productName\": \"Pizza Hawaiana\", \"price\": 13000, \"companyId\": {{companyId}}, \"categoryId\": {{categoryId}}, \"preparationTime\": {{preparationTime}} }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/update/{{productId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "admin", "product", "update", "{{productId}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Product CRUD (update validation error)",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"productName\": \"Pizza rota\", \"price\": -1, \"companyId\": {{companyId}}, \"preparationTime\": 0 }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
