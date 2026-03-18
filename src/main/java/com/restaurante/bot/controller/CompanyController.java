@@ -6,12 +6,14 @@ import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.restaurante.bot.exception.GenericException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +37,7 @@ public class CompanyController {
             @RequestParam(value = "logo", required = false) MultipartFile logo,
             @RequestParam(value = "externalId", required = false) Long externalId,
             @RequestParam(value = "cityId", required = false) Long cityId,
-            @RequestParam(value = "apiKey") String apiKey,
+            @RequestParam(value = "apiKey", required = false) String apiKey,
             @RequestParam(value = "rappyId", required = false) String rappyId,
             @RequestParam(value = "numberId", required = false) String numberId,
             @RequestParam(value = "tokenMetaQr", required = false) String tokenMetaQr,
@@ -65,6 +67,7 @@ public class CompanyController {
         companyRequest.setLandingTemplate(landingTemplate);
         companyRequest.setStatus(status);
 
+        validateCreateCompanyRequest(companyRequest);
 
         CompanyRequest savedCompany = companyUseCase.save(companyRequest, logo);
 
@@ -102,7 +105,7 @@ public class CompanyController {
             @RequestParam(value = "logo", required = false) MultipartFile logo,
             @RequestParam(value = "externalId", required = false) Long externalId,
             @RequestParam(value = "cityId", required = false) Long cityId,
-            @RequestParam(value = "apiKey") String apiKey,
+            @RequestParam(value = "apiKey", required = false) String apiKey,
             @RequestParam(value = "rappyId", required = false) String rappyId,
             @RequestParam(value = "numberId", required = false) String numberId,
             @RequestParam(value = "tokenMetaQr", required = false) String tokenMetaQr,
@@ -133,8 +136,50 @@ public class CompanyController {
         companyRequest.setLandingTemplate(landingTemplate);
         companyRequest.setStatus(status);
 
+        validateUpdateCompanyRequest(companyRequest);
+
         CompanyRequest updatedCompany = companyUseCase.update(companyRequest, logo);
         return ResponseEntity.ok(updatedCompany);
+    }
+
+    private void validateCreateCompanyRequest(CompanyRequest companyRequest) {
+        List<String> missingFields = new ArrayList<>();
+
+        addMissingField(missingFields, "companyName", companyRequest.getNameCompany());
+        addMissingField(missingFields, "whatsappNumber", companyRequest.getNumberWhatsapp());
+        addMissingField(missingFields, "longitude", companyRequest.getLongitude());
+        addMissingField(missingFields, "latitude", companyRequest.getLatitude());
+        addMissingField(missingFields, "apiKey", companyRequest.getApiKey());
+
+        if (companyRequest.getBaseValue() == null) {
+            missingFields.add("baseValue");
+        }
+        if (companyRequest.getAdditionalValue() == null) {
+            missingFields.add("additionalValue");
+        }
+        if (companyRequest.getCityId() == null) {
+            missingFields.add("cityId");
+        }
+
+        throwIfMissingFields(missingFields);
+    }
+
+    private void validateUpdateCompanyRequest(CompanyRequest companyRequest) {
+        List<String> missingFields = new ArrayList<>();
+        addMissingField(missingFields, "apiKey", companyRequest.getApiKey());
+        throwIfMissingFields(missingFields);
+    }
+
+    private void addMissingField(List<String> missingFields, String fieldName, String value) {
+        if (value == null || value.trim().isEmpty()) {
+            missingFields.add(fieldName);
+        }
+    }
+
+    private void throwIfMissingFields(List<String> missingFields) {
+        if (!missingFields.isEmpty()) {
+            throw new GenericException("Campos obligatorios faltantes: " + String.join(", ", missingFields), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/get-all")

@@ -1,8 +1,11 @@
 package com.restaurante.bot.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
@@ -31,5 +34,34 @@ public class CustomExceptionHandler {
         body.put("path", request.getDescription(false));
 
         return ResponseEntity.status(ex.getStatus()).body(body);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Object> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex,
+                                                                                WebRequest request) {
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Falta el parametro obligatorio: " + ex.getParameterName(),
+                request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex,
+                                                                            WebRequest request) {
+        String requiredType = ex.getRequiredType() == null ? "valor valido" : ex.getRequiredType().getSimpleName();
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "El parametro '" + ex.getName() + "' debe ser de tipo " + requiredType,
+                request);
+    }
+
+    private ResponseEntity<Object> buildErrorResponse(HttpStatus status, String message, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+        body.put("path", request.getDescription(false));
+        return ResponseEntity.status(status).body(body);
     }
 }
