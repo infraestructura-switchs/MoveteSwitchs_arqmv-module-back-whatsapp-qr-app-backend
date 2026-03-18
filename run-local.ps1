@@ -16,7 +16,7 @@ if (Test-Path .env) {
 # Force port 8081 to avoid conflict on 8080
 [System.Environment]::SetEnvironmentVariable("SERVER_PORT", "8081", "Process")
 # Activate 'local' Spring profile for local runs
-[System.Environment]::SetEnvironmentVariable("SPRING_PROFILES_ACTIVE", "local", "Process")
+[System.Environment]::SetEnvironmentVariable("SPRING_PROFILES_ACTIVE", "prod", "Process")
 
 # Run the project
 .\gradlew.bat bootRun
