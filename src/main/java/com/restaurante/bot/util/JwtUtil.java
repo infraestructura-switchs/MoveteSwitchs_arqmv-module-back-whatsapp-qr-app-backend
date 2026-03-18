@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -22,9 +23,14 @@ public class JwtUtil {
 
     // Genera un token con companyId como claim
     public String generateToken(Long companyId, Long userId) {
+        return generateToken(companyId, userId, UUID.randomUUID().toString());
+    }
+
+    public String generateToken(Long companyId, Long userId, String sessionId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("companyId", companyId);
         claims.put("userId", userId);
+        claims.put("sessionId", sessionId);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -51,6 +57,18 @@ public class JwtUtil {
     // Extrae companyId del token
     public Long extractCompanyId(String token) {
         return extractClaim(token, claims -> claims.get("companyId", Long.class));
+    }
+
+    public String extractSessionId(String token) {
+        return extractClaim(token, claims -> claims.get("sessionId", String.class));
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
     // Valida si el token es válido (no expirado y firmado correctamente)

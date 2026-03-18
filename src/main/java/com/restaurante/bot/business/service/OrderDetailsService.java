@@ -129,12 +129,19 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         historyRepository.save(history);
     }
 
+    private Long getAuthenticatedCompanyId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof Long tokenCompanyId)) {
+            throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
+        }
+        return tokenCompanyId;
+    }
+
     @Override
     @Transactional
     public GenericResponse saveOrder(OrderDetailsDTO orderDetailsDTO) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
+        Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
@@ -176,8 +183,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     @Override
     public List<OrderResponseAdminDTO> getOrders() {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
+        Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
@@ -401,8 +407,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     @Override
     public GenericResponse confirmationOrder(String phoneNumber, Boolean isConfirmed, Long tableNumber) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
+        Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
@@ -444,8 +449,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     @Override
     public List<OrderResponseDTO> noConfirmationOrder(Long tableNumber, String phoneNumber) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
+        Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
@@ -496,8 +500,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
     @Override
     public List<OrderResponseDTO> confirmedOreders(Long tableNumber, String phoneNumber) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
+        Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);

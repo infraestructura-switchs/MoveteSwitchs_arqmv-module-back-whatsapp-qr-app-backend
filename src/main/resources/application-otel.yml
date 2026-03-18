@@ -1,0 +1,31 @@
+spring:
+  config:
+    activate:
+      on-profile: otel
+
+management:
+  metrics:
+    tags:
+      service.name: ${OTEL_SERVICE_NAME:${spring.application.name}}
+      service.namespace: ${OTEL_SERVICE_NAMESPACE:movete}
+      deployment.environment: ${OTEL_ENVIRONMENT:${spring.profiles.active}}
+      service.instance.id: ${OTEL_SERVICE_INSTANCE_ID:${HOSTNAME:${COMPUTERNAME:unknown}}}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+      slo:
+        http.server.requests: 100ms,250ms,500ms,1s,2s,5s
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTEL_METRICS_ENABLED:true}
+        url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://localhost:4318/v1/metrics}
+        step: ${OTEL_EXPORTER_OTLP_METRICS_STEP:30s}
+        batch-size: ${OTEL_EXPORTER_OTLP_METRICS_BATCH_SIZE:10000}
+        aggregation-temporality: ${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY:cumulative}
+        resource-attributes:
+          service.name: ${OTEL_SERVICE_NAME:${spring.application.name}}
+          service.namespace: ${OTEL_SERVICE_NAMESPACE:movete}
+          deployment.environment: ${OTEL_ENVIRONMENT:${spring.profiles.active}}
+          service.instance.id: ${OTEL_SERVICE_INSTANCE_ID:${HOSTNAME:${COMPUTERNAME:unknown}}}

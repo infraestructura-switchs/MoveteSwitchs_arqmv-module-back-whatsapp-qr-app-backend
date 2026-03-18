@@ -1,0 +1,17 @@
+package com.restaurante.bot.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class SessionValidationRequestDTO {
+
+    @JsonProperty("session_id")
+    private String sessionId;
+}

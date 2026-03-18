@@ -10,12 +10,143 @@
     { "key": "appRequestMapping", "value": "api/back-whatsapp-qr-app" },
     { "key": "apiKey", "value": "" },
     { "key": "authToken", "value": "" },
+    { "key": "sessionId", "value": "" },
+    { "key": "loginUsername", "value": "admin" },
+    { "key": "loginPassword", "value": "123456" },
+    { "key": "loginUserId", "value": "1" },
+    { "key": "loginMode", "value": "GGP_LOGIN" },
     { "key": "companyId", "value": "1" },
     { "key": "productId", "value": "1" },
     { "key": "categoryId", "value": "1" },
     { "key": "preparationTime", "value": "15" }
   ],
   "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User Login returns success', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) pm.collectionVariables.set('authToken', jsonData.token);",
+                  "if (jsonData.session_id) pm.collectionVariables.set('sessionId', jsonData.session_id);",
+                  "if (jsonData.companyId) pm.collectionVariables.set('companyId', String(jsonData.companyId));",
+                  "if (jsonData.userId) pm.collectionVariables.set('loginUserId', String(jsonData.userId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"username\": \"{{loginUsername}}\", \"password\": \"{{loginPassword}}\", \"loginMode\": \"{{loginMode}}\" }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/user/login",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "user", "login" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Generate Token returns success', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) pm.collectionVariables.set('authToken', jsonData.token);",
+                  "if (jsonData.session_id) pm.collectionVariables.set('sessionId', jsonData.session_id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"companyId\": {{companyId}}, \"userId\": {{loginUserId}} }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/security/generateToken",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "security", "generateToken" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Session",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"session_id\": \"{{sessionId}}\" }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/security/validateSession",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "security", "validateSession" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Logout returns success', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('authToken', '');",
+                  "pm.collectionVariables.set('sessionId', '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/security/logout",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "security", "logout" ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
     {
       "name": "Company",
       "item": [

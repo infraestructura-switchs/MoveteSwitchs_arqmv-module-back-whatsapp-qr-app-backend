@@ -1,6 +1,7 @@
 package com.restaurante.bot.util;
 
 import io.jsonwebtoken.*;
+import com.restaurante.bot.security.SessionRegistryService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final SessionRegistryService sessionRegistryService;
 
     private final String HEADER = "Authorization";
     private final String PREFIX = "Bearer ";
@@ -46,7 +48,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
                 if (jwtUtil.isTokenValid(token)) {
                     Long companyId = jwtUtil.extractCompanyId(token);
+                    String sessionId = jwtUtil.extractSessionId(token);
                     log.debug("Token valid, extracted companyId: {}", companyId);
+
+                    if (sessionId == null || !sessionRegistryService.isSessionActive(sessionId)) {
+                        log.warn("Inactive or missing session for token");
+                        SecurityContextHolder.clearContext();
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Sesion invalida o expirada");
+                        return;
+                    }
 
                     // Opcional: Si necesitas authorities (del código original de security), extrae aquí
                     @SuppressWarnings("unchecked")

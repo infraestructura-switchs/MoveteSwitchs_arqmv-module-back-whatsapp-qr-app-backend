@@ -3,8 +3,12 @@ package com.restaurante.bot.controller;
 import com.restaurante.bot.application.ports.incoming.ShortLinkUseCase;
 import com.restaurante.bot.dto.GenerateLinkIn;
 import com.restaurante.bot.dto.GenerateTokenRequestDTO;
+import com.restaurante.bot.dto.GenerateTokenResponseDTO;
+import com.restaurante.bot.dto.SessionValidationRequestDTO;
+import com.restaurante.bot.dto.SessionValidationResponseDTO;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.repository.CompanyRepository;
+import com.restaurante.bot.security.SessionRegistryService;
 import com.restaurante.bot.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/security")
@@ -33,6 +38,8 @@ public class SecurityController {
 
     private final ShortLinkUseCase shortLinkservice;
 
+    private final SessionRegistryService sessionRegistryService;
+
     @Value("${landing.page.url}")
     private String landingPageUrl;
 
@@ -43,13 +50,25 @@ public class SecurityController {
     private String mappingPageUrl;
 
     @PostMapping("/generateToken")
-    public ResponseEntity<String> generateToken(@RequestBody GenerateTokenRequestDTO generateTokenRequestDTO) {
+    public ResponseEntity<?> generateToken(@RequestBody GenerateTokenRequestDTO generateTokenRequestDTO) {
         log.info("Se inicia el endpoint que genera un token");
         if (!companyRepository.existsByExternalCompanyId(generateTokenRequestDTO.getCompanyId())) {
             return new ResponseEntity<>("Compañía no existe", HttpStatus.NOT_FOUND);
         }
+        String sessionId = UUID.randomUUID().toString();
+        String token = jwtUtil.generateToken(
+            generateTokenRequestDTO.getCompanyId(),
+            generateTokenRequestDTO.getUserId(),
+            sessionId);
+        sessionRegistryService.registerSession(
+            sessionId,
+            generateTokenRequestDTO.getCompanyId(),
+            generateTokenRequestDTO.getUserId());
         return new ResponseEntity<>(
-                jwtUtil.generateToken(generateTokenRequestDTO.getCompanyId(), generateTokenRequestDTO.getCompanyId()),
+                GenerateTokenResponseDTO.builder()
+                .token(token)
+                        .sessionId(sessionId)
+                        .build(),
                 HttpStatus.OK);
 
     }
@@ -64,9 +83,15 @@ public class SecurityController {
 
         Company company= companyRepository.findByExternalCompanyId(generateLinkIn.getCompanyId());
 
-        String token = jwtUtil.generateToken(generateLinkIn.getCompanyId(), generateLinkIn.getUserId());
+        String sessionId = UUID.randomUUID().toString();
+        String token = jwtUtil.generateToken(generateLinkIn.getCompanyId(), generateLinkIn.getUserId(), sessionId);
+        sessionRegistryService.registerSession(
+            sessionId,
+            generateLinkIn.getCompanyId(),
+            generateLinkIn.getUserId());
 
         queryParams.put("token", token);
+        queryParams.put("session_id", sessionId);
         queryParams.put("companyId", String.valueOf(generateLinkIn.getCompanyId()));
         queryParams.put("userToken", generateLinkIn.getUserToken());
         queryParams.put("mesa", generateLinkIn.getMesa());
@@ -87,6 +112,38 @@ public class SecurityController {
         var shortLink = shortLinkservice.createShortLink(fullLink);
         String shortUrl = backendUrl + "/" + mappingPageUrl + "/h/" + shortLink.getShortCode();
         return new ResponseEntity<>(shortUrl, HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>(Map.of("message", "Authorization header invalido"), HttpStatus.BAD_REQUEST);
+        }
+
+        String token = authorizationHeader.substring(7);
+        if (!jwtUtil.isTokenValid(token)) {
+            return new ResponseEntity<>(Map.of("message", "Token invalido"), HttpStatus.UNAUTHORIZED);
+        }
+
+        String sessionId = jwtUtil.extractSessionId(token);
+        sessionRegistryService.invalidateSession(sessionId);
+        return ResponseEntity.ok(Map.of(
+                "message", "Sesion cerrada correctamente",
+                "session_id", sessionId));
+    }
+
+    @PostMapping("/validateSession")
+    public ResponseEntity<SessionValidationResponseDTO> validateSession(
+            @RequestBody SessionValidationRequestDTO requestDTO) {
+        SessionRegistryService.SessionStatus sessionStatus = sessionRegistryService.getSessionStatus(requestDTO.getSessionId());
+        return ResponseEntity.ok(SessionValidationResponseDTO.builder()
+                .sessionId(sessionStatus.sessionId())
+                .active(sessionStatus.active())
+                .expired(sessionStatus.expired())
+            .remainingMs(sessionStatus.remainingMs())
+                .expiresAt(sessionStatus.expiresAt())
+                .build());
     }
 
     private String buildUrl(String baseUrl, Map<String, String> params) {

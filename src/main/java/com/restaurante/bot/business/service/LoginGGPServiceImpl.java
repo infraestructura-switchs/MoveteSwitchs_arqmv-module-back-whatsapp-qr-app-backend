@@ -9,6 +9,7 @@ import com.restaurante.bot.dto.UserDto;
 import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.User;
 import com.restaurante.bot.repository.UserRepository;
+import com.restaurante.bot.security.SessionRegistryService;
 import com.restaurante.bot.util.JwtUtil;
 import com.restaurante.bot.util.Utils;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Service
@@ -32,6 +34,8 @@ public class LoginGGPServiceImpl implements LoginGGPService {
     private final UserRepository iRepository;
 
     private final JwtUtil jwtUtilUser;
+
+    private final SessionRegistryService sessionRegistryService;
 
     private final Utils utils;
 
@@ -56,10 +60,19 @@ public class LoginGGPServiceImpl implements LoginGGPService {
             objectDtoVo.setAbility(ability);
 
             if (isCorrect) {
+                String sessionId = UUID.randomUUID().toString();
                 objectDtoVo.setTokenDateExpired(new Date(System.currentTimeMillis() + EXPIRATION_TIME_LONG));
-                token = jwtUtilUser.generateToken(objectOptional.get().getCompany().getExternalCompanyId(), objectOptional.get().getUserId());
+                token = jwtUtilUser.generateToken(
+                        objectOptional.get().getCompany().getExternalCompanyId(),
+                        objectOptional.get().getUserId(),
+                        sessionId);
+                sessionRegistryService.registerSession(
+                    sessionId,
+                    objectOptional.get().getCompany().getExternalCompanyId(),
+                    objectOptional.get().getUserId());
 
                 objectDtoVo.setToken(token);
+                objectDtoVo.setSessionId(sessionId);
 
                 objectDtoVo.setPassword("******");
 

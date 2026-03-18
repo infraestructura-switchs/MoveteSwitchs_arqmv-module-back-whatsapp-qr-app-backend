@@ -1,5 +1,6 @@
 package com.restaurante.bot.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.restaurante.bot.dto.RolDto;
 import lombok.*;
 
@@ -26,6 +27,8 @@ public class UserDto {
 
     private Date tokenDateExpired;
     private String token;
+    @JsonProperty("session_id")
+    private String sessionId;
     private String status;
 
 

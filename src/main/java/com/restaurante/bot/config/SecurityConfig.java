@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/generateToken").permitAll()
                         .requestMatchers("/getProductByCompany/**").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/back-whatsapp-qr-app/order").authenticated()
                         .requestMatchers("/api/back-whatsapp-qr-app/change/status-ocuped/**").authenticated()
                         .requestMatchers("/api/back-whatsapp-qr-app/change/status-pay/**").authenticated()
                         .requestMatchers("/api/back-whatsapp-qr-app/restauranttable/change/status-requesting-service/**").authenticated()

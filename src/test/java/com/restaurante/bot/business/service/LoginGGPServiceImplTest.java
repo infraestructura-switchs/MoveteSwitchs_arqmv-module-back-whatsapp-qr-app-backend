@@ -1,0 +1,84 @@
+package com.restaurante.bot.business.service;
+
+import com.restaurante.bot.dto.LoginIn;
+import com.restaurante.bot.dto.LoginOut;
+import com.restaurante.bot.model.Area;
+import com.restaurante.bot.model.Company;
+import com.restaurante.bot.model.Position;
+import com.restaurante.bot.model.Rol;
+import com.restaurante.bot.model.User;
+import com.restaurante.bot.repository.UserRepository;
+import com.restaurante.bot.security.SessionRegistryService;
+import com.restaurante.bot.util.JwtUtil;
+import com.restaurante.bot.util.LoginMode;
+import com.restaurante.bot.util.Utils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
+class LoginGGPServiceImplTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private JwtUtil jwtUtil;
+
+    @Mock
+    private Utils utils;
+
+        @Mock
+        private SessionRegistryService sessionRegistryService;
+
+    @InjectMocks
+    private LoginGGPServiceImpl loginGGPService;
+
+    @Test
+    void loginShouldGenerateSessionIdAndAttachItToToken() {
+        User user = User.builder()
+                .userId(9L)
+                .name("Admin")
+                .login("admin")
+                .password("hashed-password")
+                .email("admin@test.com")
+                .rol(Rol.builder().rolId(1L).name("ADMIN").build())
+                .area(Area.builder().areaId(2L).description("Area").build())
+                .position(Position.builder().positionId(3L).description("Manager").build())
+                .company(Company.builder().id(4L).externalCompanyId(273L).name("Company").build())
+                .status("ACTIVE")
+                .build();
+
+        LoginIn loginIn = LoginIn.builder()
+                .username("admin")
+                .password("secret")
+                .loginMode(LoginMode.GGP_LOGIN)
+                .build();
+
+        when(userRepository.findByLogin("admin")).thenReturn(Optional.of(user));
+        when(utils.doPasswordsMatch("secret", "hashed-password")).thenReturn(true);
+        when(jwtUtil.generateToken(eq(273L), eq(9L), anyString()))
+                .thenAnswer(invocation -> "jwt-" + invocation.getArgument(2, String.class));
+
+        LoginOut response = loginGGPService.login(loginIn);
+
+        assertNotNull(response);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().getSessionId());
+        assertFalse(response.getData().getSessionId().isBlank());
+        assertEquals("jwt-" + response.getData().getSessionId(), response.getData().getToken());
+        assertEquals("******", response.getData().getPassword());
+                verify(sessionRegistryService).registerSession(eq(response.getData().getSessionId()), eq(273L), eq(9L));
+    }
+}

@@ -63,6 +63,8 @@ backend:
 security:
   jwt:
     secret-key: ${JWT_SECRET_KEY:3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
+  session:
+    expiration-ms: ${SESSION_ID_EXPIRATION_MS:3600000}
 
 logging:
   level:
@@ -82,11 +84,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        include: health,info,metrics,prometheus
+  otlp:
+    metrics:
+      export:
+        enabled: false
   endpoint:
     prometheus:
       enabled: true
   metrics:
+    tags:
+      application: ${spring.application.name}
     export:
       prometheus:
         enabled: true

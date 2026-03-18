@@ -13,10 +13,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
 
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false
+
 app:
   db:
     type: test
-
-security:
-  session:
-    expiration-ms: 3600000
