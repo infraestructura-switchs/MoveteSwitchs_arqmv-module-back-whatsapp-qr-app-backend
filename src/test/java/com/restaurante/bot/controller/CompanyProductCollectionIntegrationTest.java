@@ -90,7 +90,9 @@ class CompanyProductCollectionIntegrationTest {
         ProductSaveAndUpdateDto request = ProductSaveAndUpdateDto.builder()
                 .productName("Pizza Hawaiana")
                 .price(13000.0)
-                .companyId(1L)
+            .companyId(1L)
+            .categoryId(1L)
+            .preparationTime(10)
                 .build();
 
         mockMvc.perform(put("/api/back-whatsapp-qr-app/admin/product/update/999999")

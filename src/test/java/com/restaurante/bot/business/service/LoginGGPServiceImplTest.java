@@ -69,10 +69,12 @@ class LoginGGPServiceImplTest {
                 .loginMode(LoginMode.GGP_LOGIN)
                 .build();
 
+        String fixedSessionId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         when(userRepository.findByLogin("admin")).thenReturn(Optional.of(user));
         when(utils.doPasswordsMatch("secret", "hashed-password")).thenReturn(true);
-        when(jwtUtil.generateToken(eq(273L), eq(9L), anyString()))
-                .thenAnswer(invocation -> "jwt-" + invocation.getArgument(2, String.class));
+        when(jwtUtil.generateSessionId()).thenReturn(fixedSessionId);
+        when(jwtUtil.generateToken(eq(273L), eq(9L), eq(fixedSessionId)))
+                .thenReturn("jwt-" + fixedSessionId);
 
         LoginOut response = loginGGPService.login(loginIn);
 
