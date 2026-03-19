@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -53,6 +55,20 @@ public class CustomExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 "El parametro '" + ex.getName() + "' debe ser de tipo " + requiredType,
                 request);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, WebRequest request) {
+        Throwable cause = ex.getMostSpecificCause();
+        String message = "Malformed JSON request";
+        if (cause instanceof UnrecognizedPropertyException) {
+            UnrecognizedPropertyException upe = (UnrecognizedPropertyException) cause;
+            String prop = upe.getPropertyName();
+            message = "Campo JSON desconocido: " + prop;
+        } else if (ex.getMessage() != null) {
+            message = ex.getMessage();
+        }
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, message, request);
     }
 
     private ResponseEntity<Object> buildErrorResponse(HttpStatus status, String message, WebRequest request) {

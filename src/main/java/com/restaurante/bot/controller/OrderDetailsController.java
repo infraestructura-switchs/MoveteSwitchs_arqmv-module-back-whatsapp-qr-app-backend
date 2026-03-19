@@ -3,6 +3,7 @@ package com.restaurante.bot.controller;
 import com.restaurante.bot.application.ports.incoming.OrderUseCase;
 import com.restaurante.bot.dto.*;
 import com.restaurante.bot.model.GenericResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ public class OrderDetailsController {
     private final OrderUseCase orderInterface;
 
     @PostMapping
-    public ResponseEntity<GenericResponse> saveOrder(@RequestBody OrderDetailsDTO order) {
+    public ResponseEntity<GenericResponse> saveOrder(@RequestBody @Valid OrderDetailsDTO order) {
         log.info("Se inicio el procedimiento de guardar una orden con el request -> {}", order);
         return new ResponseEntity<>(orderInterface.saveOrder(order), HttpStatus.OK);
     }
