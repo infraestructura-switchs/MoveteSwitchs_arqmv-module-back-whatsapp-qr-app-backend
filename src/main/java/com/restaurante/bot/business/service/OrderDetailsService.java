@@ -67,10 +67,35 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             orderProduct.setOrderId(orderId);
             orderProduct.setProductId(item.getProductId());
             orderProduct.setQuantity(item.getQty());
+            orderProduct.setUnitPrice(item.getUnitPrice());
             orderProduct.setCommentProduct(item.getComment());
             orderProduct.setCompanyId(companyId);
 
             orderProductRepository.save(orderProduct);
+        }
+    }
+
+    private void validateOrderRequest(OrderDetailsDTO orderDetailsDTO) {
+        if (orderDetailsDTO == null) {
+            throw new GenericException("Request body is missing", HttpStatus.BAD_REQUEST);
+        }
+
+        List<ItemRequest> items = orderDetailsDTO.getItems();
+        if (items == null || items.isEmpty()) {
+            throw new GenericException("La orden debe contener al menos un item", HttpStatus.BAD_REQUEST);
+        }
+
+        List<String> missing = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++) {
+            ItemRequest it = items.get(i);
+            String base = "items[" + i + "]";
+            if (it.getProductId() == null || it.getProductId().isEmpty()) missing.add(base + ".productId");
+            if (it.getQty() == null) missing.add(base + ".qty");
+            if (it.getUnitPrice() == null) missing.add(base + ".unitPrice");
+        }
+
+        if (!missing.isEmpty()) {
+            throw new GenericException("Campos obligatorios faltantes: " + String.join(", ", missing), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -148,6 +173,9 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        // Verifica la validez del request (items, campos requeridos)
+        validateOrderRequest(orderDetailsDTO);
+
         // Verifica la mesa
         RestaurantTable table = findTableByNumber(orderDetailsDTO.getRestaurantTable(), company.getId());
 

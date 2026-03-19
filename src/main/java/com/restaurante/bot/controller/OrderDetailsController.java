@@ -5,7 +5,6 @@ import com.restaurante.bot.dto.*;
 import com.restaurante.bot.model.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,14 +37,6 @@ public class OrderDetailsController {
         log.info("Inicicia el servicio que cambia el estado enviado a la orden");
         return new ResponseEntity<>(orderInterface.sendOrderStatus(orderIds), HttpStatus.OK);
     }
-/*
-    @GetMapping("/enviada/{tableNumber}")
-    public ResponseEntity<List<OrderResponseDTO>> getSendOrder(@PathVariable("tableNumber")Long tableNumber) {
-        log.info("Se inicia el servicio para traer las ordenes enviadas por medio de la mesa");
-        return new ResponseEntity<>(orderInterface.getSendOrder(tableNumber), HttpStatus.OK);
-    }
-
- */
 
     @GetMapping("/by-phone/{phoneNumber}")
     public ResponseEntity<CustomerOrderResponseDTO> getOrederByPhoneNumber(@PathVariable("phoneNumber")String phoneNumber) {

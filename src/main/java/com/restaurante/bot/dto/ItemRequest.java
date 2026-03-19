@@ -14,4 +14,5 @@ public class ItemRequest {
     private String productId;
     private Integer qty;
     private String comment;
+    private Double unitPrice;
 }
