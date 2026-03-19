@@ -2,6 +2,7 @@ package com.restaurante.bot.controller;
 
 import com.restaurante.bot.application.ports.incoming.ShortLinkUseCase;
 import com.restaurante.bot.dto.GenerateLinkIn;
+import com.restaurante.bot.dto.GenerateLinkResponseDTO;
 import com.restaurante.bot.dto.GenerateTokenRequestDTO;
 import com.restaurante.bot.dto.GenerateTokenResponseDTO;
 import com.restaurante.bot.dto.SessionValidationRequestDTO;
@@ -53,12 +54,12 @@ public class SecurityController {
     public ResponseEntity<?> generateToken(@Valid @RequestBody GenerateTokenRequestDTO generateTokenRequestDTO) {
         log.info("Se inicia el endpoint que genera un token");
         if (!companyRepository.existsByExternalCompanyId(generateTokenRequestDTO.getCompanyId())) {
-            return new ResponseEntity<>("Compañía no existe", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<String>("Compañía no existe", HttpStatus.NOT_FOUND);
         }
         // Validate apiKey provided in the request
         Company company = companyRepository.findByExternalCompanyId(generateTokenRequestDTO.getCompanyId());
         if (company.getApiKey() == null || !company.getApiKey().equals(generateTokenRequestDTO.getApiKey())) {
-            return new ResponseEntity<>("apiKey invalido", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<String>("apiKey invalido", HttpStatus.UNAUTHORIZED);
         }
 
         String sessionId = jwtUtil.generateSessionId();
@@ -80,18 +81,18 @@ public class SecurityController {
     }
 
     @PostMapping("/generateLink")
-    public ResponseEntity<String> generateLink(@Valid @RequestBody GenerateLinkIn generateLinkIn) {
+    public ResponseEntity<GenerateLinkResponseDTO> generateLink(@Valid @RequestBody GenerateLinkIn generateLinkIn) {
         Map<String, String> queryParams = new HashMap<>();
 
         if (!companyRepository.existsByExternalCompanyId(generateLinkIn.getCompanyId())) {
-            return new ResponseEntity<>("Compañía no existe", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         Company company= companyRepository.findByExternalCompanyId(generateLinkIn.getCompanyId());
 
         // Validate apiKey provided in the request
         if (generateLinkIn.getApiKey() == null || !generateLinkIn.getApiKey().equals(company.getApiKey())) {
-            return new ResponseEntity<>("apiKey invalido", HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         String sessionId = generateLinkIn.getSessionId();
@@ -125,7 +126,16 @@ public class SecurityController {
         String fullLink = buildUrl(landingPageUrl, queryParams);
         var shortLink = shortLinkservice.createShortLink(fullLink);
         String shortUrl = backendUrl + "/" + mappingPageUrl + "/h/" + shortLink.getShortCode();
-        return new ResponseEntity<>(shortUrl, HttpStatus.OK);
+
+        GenerateLinkResponseDTO response = GenerateLinkResponseDTO.builder()
+            .shortUrl(shortUrl)
+            .fullUrl(fullLink)
+            .shortCode(shortLink.getShortCode())
+            .token(token)
+            .sessionId(sessionId)
+            .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/logout")
