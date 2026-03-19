@@ -24,6 +24,8 @@ public class ProductSaveAndUpdateDto {
     @Positive(message = "price must be greater than 0")
     private Double price;
 
+    private Double originalPrice;
+
     private String description;
 
     private String status;

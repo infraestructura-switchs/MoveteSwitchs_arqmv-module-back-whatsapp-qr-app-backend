@@ -101,7 +101,10 @@ public class ProductService implements ProductInterface, ProductUseCase {
                         .collect(Collectors.toList());
             }
         }
-        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(product.getPrice(), activeDiscount);
+        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(
+            product.getOriginalPrice() != null ? product.getOriginalPrice() : product.getPrice(),
+            activeDiscount
+        );
         return ProductDto.builder()
             .id(product.getProductId())
             .productName(product.getName())
@@ -286,7 +289,10 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
         String imageByCompany = imageByCompanyId(product.getCompanyId().intValue());
         ProductDiscount activeDiscount = productDiscountSupport.findActiveDiscount(product.getCompanyId(), product.getProductId());
-        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(updatedProduct.getPrice(), activeDiscount);
+        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(
+            updatedProduct.getOriginalPrice() != null ? updatedProduct.getOriginalPrice() : updatedProduct.getPrice(),
+            activeDiscount
+        );
 
         return ProductDto.builder()
             .id(updatedProduct.getProductId())
@@ -314,6 +320,12 @@ public class ProductService implements ProductInterface, ProductUseCase {
         product.setSoftRestaurantId(productDTO.getIdProducto());
         product.setName(productDTO.getData().getDescripcion());
         product.setPrice(productDTO.getData().getPrecio());
+        // Prefer explicit original price from source if available (PrecioSinImpuestos), otherwise fallback to Precio
+        if (productDTO.getData().getPrecioSinImpuestos() != null) {
+            product.setOriginalPrice(productDTO.getData().getPrecioSinImpuestos());
+        } else {
+            product.setOriginalPrice(productDTO.getData().getPrecio());
+        }
         product.setStatus("ACTIVE");
         product.setImgProduct(productDTO.getData().getImagenMenu());
         product.setCompanyId(companyId);
@@ -340,6 +352,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             existing.setName(product.getName());
             existing.setSoftRestaurantId(product.getSoftRestaurantId());
             existing.setPrice(product.getPrice());
+            existing.setOriginalPrice(product.getOriginalPrice());
             existing.setStatus(product.getStatus());
             existing.setImgProduct(product.getImgProduct());
             existing.setCompanyId(product.getCompanyId());

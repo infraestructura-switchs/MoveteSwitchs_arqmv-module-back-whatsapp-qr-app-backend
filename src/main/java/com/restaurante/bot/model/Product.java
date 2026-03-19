@@ -27,6 +27,9 @@ public class Product {
     @Column(name = "price")
     private Double price;
 
+    @Column(name = "original_price")
+    private Double originalPrice;
+
     @Column(name = "description")
     private String description;
 

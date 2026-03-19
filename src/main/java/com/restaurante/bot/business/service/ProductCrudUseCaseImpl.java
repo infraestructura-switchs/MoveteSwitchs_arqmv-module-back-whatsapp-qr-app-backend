@@ -46,6 +46,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         // productId left null to allow DB to generate if applicable
         entity.setName(productDto.getProductName());
         entity.setPrice(productDto.getPrice());
+        if (productDto.getOriginalPrice() != null) entity.setOriginalPrice(productDto.getOriginalPrice());
         entity.setDescription(productDto.getDescription());
         entity.setStatus(productDto.getStatus() == null ? Constants.ACTIVE_STATUS : productDto.getStatus());
         entity.setImgProduct(productDto.getImage());
@@ -82,6 +83,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         Product entity = opt.get();
         if (productDto.getProductName() != null) entity.setName(productDto.getProductName());
         if (productDto.getPrice() != null) entity.setPrice(productDto.getPrice());
+        if (productDto.getOriginalPrice() != null) entity.setOriginalPrice(productDto.getOriginalPrice());
         if (productDto.getDescription() != null) entity.setDescription(productDto.getDescription());
         if (productDto.getStatus() != null) entity.setStatus(productDto.getStatus());
         if (productDto.getImage() != null) entity.setImgProduct(productDto.getImage());
@@ -244,7 +246,10 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
     private ProductDto mapToDto(Product product) {
         ProductDiscount activeDiscount = productDiscountSupport.findActiveDiscount(product.getCompanyId(), product.getProductId());
-        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(product.getPrice(), activeDiscount);
+        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(
+            product.getOriginalPrice() != null ? product.getOriginalPrice() : product.getPrice(),
+            activeDiscount
+        );
         ProductDto.ProductDtoBuilder dtoBuilder = ProductDto.builder()
             .id(product.getProductId())
             .productName(product.getName())
@@ -315,7 +320,10 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     private ProductGetAllDto mapToGetAllDto(Product product, ProductDiscount activeDiscount) {
-        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(product.getPrice(), activeDiscount);
+        ProductDiscountSupport.ProductPriceSummary priceSummary = productDiscountSupport.summarize(
+            product.getOriginalPrice() != null ? product.getOriginalPrice() : product.getPrice(),
+            activeDiscount
+        );
         ProductGetAllDto.ProductGetAllDtoBuilder dtoBuilder = ProductGetAllDto.builder()
             .id(product.getProductId())
             .productName(product.getName())
