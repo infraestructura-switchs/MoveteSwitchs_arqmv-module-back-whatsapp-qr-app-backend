@@ -205,6 +205,39 @@
           "response": []
         },
         {
+          "name": "Generate Link",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Generate Link returns success', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "var shortUrl = pm.response.text();",
+                  "if (shortUrl) pm.collectionVariables.set('shortUrl', shortUrl);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"companyId\": {{companyId}}, \"userId\": {{loginUserId}}, \"userToken\": \"{{authToken}}\", \"mesa\": \"1\", \"sessionId\": \"{{sessionId}}\" }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/security/generateLink",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "{{appRequestMapping}}", "security", "generateLink" ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Validate Session",
           "request": {
             "method": "POST",

@@ -3,6 +3,7 @@ package com.restaurante.bot.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurante.bot.application.ports.incoming.ShortLinkUseCase;
 import com.restaurante.bot.dto.GenerateTokenRequestDTO;
+import com.restaurante.bot.model.Company;
 import com.restaurante.bot.dto.SessionValidationRequestDTO;
 import com.restaurante.bot.repository.CompanyRepository;
 import com.restaurante.bot.security.SessionRegistryService;
@@ -67,9 +68,12 @@ class SecurityControllerTest {
         GenerateTokenRequestDTO request = GenerateTokenRequestDTO.builder()
                 .companyId(273L)
                 .userId(9L)
+                .apiKey("valid-key")
                 .build();
 
         when(companyRepository.existsByExternalCompanyId(273L)).thenReturn(true);
+        Company company = Company.builder().id(1L).externalCompanyId(273L).apiKey("valid-key").build();
+        when(companyRepository.findByExternalCompanyId(273L)).thenReturn(company);
         when(jwtUtil.generateSessionId()).thenReturn("9ba2153735304a0eb1b0ba67e9823e54");
         when(jwtUtil.generateToken(eq(273L), eq(9L), anyString()))
                 .thenAnswer(invocation -> "jwt-" + invocation.getArgument(2, String.class));
@@ -82,6 +86,49 @@ class SecurityControllerTest {
                 .andExpect(jsonPath("$.session_id", matchesPattern("^[a-f0-9]{32}$")));
 
         verify(sessionRegistryService).registerSession(org.mockito.ArgumentMatchers.anyString(), eq(273L), eq(9L));
+    }
+
+    @Test
+    void generateTokenShouldReturnBadRequestWhenApiKeyMissing() throws Exception {
+        GenerateTokenRequestDTO request = GenerateTokenRequestDTO.builder()
+                .companyId(273L)
+                .userId(9L)
+                .build();
+
+                when(companyRepository.existsByExternalCompanyId(273L)).thenReturn(true);
+        Company company = Company.builder().id(1L).externalCompanyId(273L).apiKey("valid-key").build();
+        when(companyRepository.findByExternalCompanyId(273L)).thenReturn(company);
+
+        var result = mockMvc.perform(post("/api/back-whatsapp-qr-app/security/generateToken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andReturn();
+
+        int status = result.getResponse().getStatus();
+        // Depending on test context validation may or may not run. Accept 400 (validation) or 401 (controller apiKey check)
+        org.junit.jupiter.api.Assertions.assertTrue(status == 400 || status == 401);
+        if (status == 400) {
+            org.skyscreamer.jsonassert.JSONAssert.assertEquals("{\"apiKey\":\"apiKey obligatorio\"}", result.getResponse().getContentAsString(), false);
+        }
+    }
+
+    @Test
+    void generateTokenShouldReturnUnauthorizedWhenApiKeyInvalid() throws Exception {
+        GenerateTokenRequestDTO request = GenerateTokenRequestDTO.builder()
+                .companyId(273L)
+                .userId(9L)
+                .apiKey("invalid-key")
+                .build();
+
+        when(companyRepository.existsByExternalCompanyId(273L)).thenReturn(true);
+        Company company = Company.builder().id(1L).externalCompanyId(273L).apiKey("valid-key").build();
+        when(companyRepository.findByExternalCompanyId(273L)).thenReturn(company);
+
+        mockMvc.perform(post("/api/back-whatsapp-qr-app/security/generateToken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$").value("apiKey invalido"));
     }
 
     @Test

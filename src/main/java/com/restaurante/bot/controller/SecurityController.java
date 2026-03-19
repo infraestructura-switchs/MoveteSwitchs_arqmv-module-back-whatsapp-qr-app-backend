@@ -22,6 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/security")
@@ -49,11 +50,17 @@ public class SecurityController {
     private String mappingPageUrl;
 
     @PostMapping("/generateToken")
-    public ResponseEntity<?> generateToken(@RequestBody GenerateTokenRequestDTO generateTokenRequestDTO) {
+    public ResponseEntity<?> generateToken(@Valid @RequestBody GenerateTokenRequestDTO generateTokenRequestDTO) {
         log.info("Se inicia el endpoint que genera un token");
         if (!companyRepository.existsByExternalCompanyId(generateTokenRequestDTO.getCompanyId())) {
             return new ResponseEntity<>("Compañía no existe", HttpStatus.NOT_FOUND);
         }
+        // Validate apiKey provided in the request
+        Company company = companyRepository.findByExternalCompanyId(generateTokenRequestDTO.getCompanyId());
+        if (company.getApiKey() == null || !company.getApiKey().equals(generateTokenRequestDTO.getApiKey())) {
+            return new ResponseEntity<>("apiKey invalido", HttpStatus.UNAUTHORIZED);
+        }
+
         String sessionId = jwtUtil.generateSessionId();
         String token = jwtUtil.generateToken(
             generateTokenRequestDTO.getCompanyId(),
@@ -73,7 +80,7 @@ public class SecurityController {
     }
 
     @PostMapping("/generateLink")
-    public ResponseEntity<String> generateLink(@RequestBody GenerateLinkIn generateLinkIn) {
+    public ResponseEntity<String> generateLink(@Valid @RequestBody GenerateLinkIn generateLinkIn) {
         Map<String, String> queryParams = new HashMap<>();
 
         if (!companyRepository.existsByExternalCompanyId(generateLinkIn.getCompanyId())) {
@@ -82,7 +89,7 @@ public class SecurityController {
 
         Company company= companyRepository.findByExternalCompanyId(generateLinkIn.getCompanyId());
 
-        String sessionId = jwtUtil.generateSessionId();
+        String sessionId = generateLinkIn.getSessionId();
         String token = jwtUtil.generateToken(generateLinkIn.getCompanyId(), generateLinkIn.getUserId(), sessionId);
         sessionRegistryService.registerSession(
             sessionId,
@@ -100,7 +107,7 @@ public class SecurityController {
         }
 
         if (generateLinkIn.getDelivery() != null && !generateLinkIn.getDelivery().isEmpty()) {
-            queryParams.put("Delivery", generateLinkIn.getDelivery());
+            queryParams.put("delivery", generateLinkIn.getDelivery());
         }
 
         if (company.getLandingTemplate() != null && !company.getLandingTemplate().isEmpty()) {
