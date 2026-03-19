@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface OrderProductRepository extends JpaRepository<OrderProduct, Long> {
     Optional<OrderProduct> findByOrderId(Long orderId);
 
-    @Query("SELECT SUM(op.quantity * op.unitePrice) FROM OrderProduct op WHERE op.orderId = :orderId GROUP BY op.orderId")
+    @Query("SELECT SUM(op.quantity * op.unitPrice) FROM OrderProduct op WHERE op.orderId = :orderId GROUP BY op.orderId")
     Double findTotalAmountByOrderId(Long orderId);
 }

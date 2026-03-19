@@ -219,7 +219,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             Integer productId = (result[4] != null) ? ((Number) result[4]).intValue() : null;
             String productName = (result[5] != null) ? (String) result[5] : "Unknown Product";
             Integer qty = (result[6] != null) ? ((Number) result[6]).intValue() : 0;
-            Double unitePrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
+            Double unitPrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
             Double totalPrice = (result[8] != null) ? ((Number) result[8]).doubleValue() : 0.0;
             Double transactionId = (result[9] != null) ? ((Number) result[9]).doubleValue() : 0.0;
             String date = (result[10] != null) ? result[10].toString() : null;
@@ -241,8 +241,8 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             }
 
             // Agregar a la lista correspondiente según el estado de la orden
-            OrderDTO orderDTO = new OrderDTO(orderId, productId != null ? productId.toString() : null,
-                    productName, qty, unitePrice, totalPrice, date);
+                OrderDTO orderDTO = new OrderDTO(orderId, productId != null ? productId.toString() : null,
+                    productName, qty, unitPrice, totalPrice, date);
             if (orderStatus != null && orderStatus == 2) {
                 dto.getSentOrders().add(orderDTO);
             } else if (orderStatus != null && (orderStatus == 1 || orderStatus == 5)) {
@@ -474,7 +474,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             Integer productId = (result[4] != null) ? ((Number) result[4]).intValue() : null;
             String productName = (result[5] != null) ? (String) result[5] : "Unknown Product";
             Integer qty = (result[6] != null) ? ((Number) result[6]).intValue() : 0;
-            Double unitePrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
+            Double unitPrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
             Double totalPrice = (result[8] != null) ? ((Number) result[8]).doubleValue() : 0.0;
             Double transactionId = (result[9] != null) ? ((Number) result[9]).doubleValue() : 0.0;
             String date = (result[10] != null) ? result[10].toString() : null;
@@ -490,8 +490,8 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             }
 
             // Agregar la orden a la mesa
-            dto.getOrders()
-                    .add(new OrderDTO(orderId, productId.toString(), productName, qty, unitePrice, totalPrice, date));
+                dto.getOrders()
+                    .add(new OrderDTO(orderId, productId.toString(), productName, qty, unitPrice, totalPrice, date));
         }
 
         // Devolver el resultado
@@ -522,7 +522,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             Integer productId = (result[4] != null) ? ((Number) result[4]).intValue() : null;
             String productName = (result[5] != null) ? (String) result[5] : "Unknown Product";
             Integer qty = (result[6] != null) ? ((Number) result[6]).intValue() : 0;
-            Double unitePrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
+            Double unitPrice = (result[7] != null) ? ((Number) result[7]).doubleValue() : 0.0;
             Double totalPrice = (result[8] != null) ? ((Number) result[8]).doubleValue() : 0.0;
             Double transactionId = (result[9] != null) ? ((Number) result[9]).doubleValue() : 0.0;
             String date = (result[10] != null) ? result[10].toString() : null;
@@ -538,8 +538,8 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             }
 
             // Agregar la orden a la mesa
-            dto.getOrders()
-                    .add(new OrderDTO(orderId, productId.toString(), productName, qty, unitePrice, totalPrice, date));
+                dto.getOrders()
+                    .add(new OrderDTO(orderId, productId.toString(), productName, qty, unitPrice, totalPrice, date));
         }
 
         // Devolver el resultado

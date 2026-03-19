@@ -241,13 +241,13 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
                         String productId = r[4] != null ? String.valueOf(r[4]) : null;
                         String productName = r[5] != null ? String.valueOf(r[5]) : null;
                         int qty = r[6] != null ? ((Number) r[6]).intValue() : 0;
-                        Double unitePrice = r[7] != null ? ((Number) r[7]).doubleValue() : 0.0;
+                        Double unitPrice = r[7] != null ? ((Number) r[7]).doubleValue() : 0.0;
                         Double totalPrice = r[8] != null ? ((Number) r[8]).doubleValue() : 0.0;
                         Long transactionId = r[9] != null ? ((Number) r[9]).longValue() : null;
                         String date = r.length > 10 && r[10] != null ? String.valueOf(r[10]) : null;
                         Integer statusMesa = r.length > 11 && r[11] != null ? ((Number) r[11]).intValue() : null;
 
-                        OrderDTO orderItem = new OrderDTO(orderId, productId, productName, qty, unitePrice, totalPrice, date);
+                        OrderDTO orderItem = new OrderDTO(orderId, productId, productName, qty, unitPrice, totalPrice, date);
 
                         Long key = orderId != null ? orderId : (transactionId != null ? transactionId : Long.valueOf(grouped.size()+1));
 

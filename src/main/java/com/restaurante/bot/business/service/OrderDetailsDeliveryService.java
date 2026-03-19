@@ -107,7 +107,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
                             product.setProductId(op.getProductId());
                             product.setProductName(op.getName());
                             product.setQty(op.getQuantity());
-                            product.setUnitePrice(op.getUnitPrice());
+                            product.setUnitPrice(op.getUnitPrice());
                             return product;
                         }, Collectors.toList())
                 ));

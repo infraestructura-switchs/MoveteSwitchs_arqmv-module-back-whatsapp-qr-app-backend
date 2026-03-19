@@ -15,7 +15,7 @@ public class OrderDTO {
     private String productId;
     private String name;
     private int qty;
-    private Double unitePrice;
+    private Double unitPrice;
     private Double totalPrice;
     private String date;
 

@@ -14,6 +14,6 @@ public class SellProducts {
     private Long productId;
     private String productName;
     private Long qty;
-    private Double unitePrice;
+    private Double unitPrice;
     private String comment;
 }
