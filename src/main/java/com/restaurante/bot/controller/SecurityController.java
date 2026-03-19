@@ -89,17 +89,24 @@ public class SecurityController {
 
         Company company= companyRepository.findByExternalCompanyId(generateLinkIn.getCompanyId());
 
+        // Validate apiKey provided in the request
+        if (generateLinkIn.getApiKey() == null || !generateLinkIn.getApiKey().equals(company.getApiKey())) {
+            return new ResponseEntity<>("apiKey invalido", HttpStatus.UNAUTHORIZED);
+        }
+
         String sessionId = generateLinkIn.getSessionId();
+        if (sessionId == null || sessionId.isBlank()) {
+            log.warn("generateLink: sessionId absent in request, generating a new one");
+            sessionId = jwtUtil.generateSessionId();
+        }
+
         String token = jwtUtil.generateToken(generateLinkIn.getCompanyId(), generateLinkIn.getUserId(), sessionId);
-        sessionRegistryService.registerSession(
-            sessionId,
-            generateLinkIn.getCompanyId(),
-            generateLinkIn.getUserId());
+        sessionRegistryService.registerSession(sessionId, generateLinkIn.getCompanyId(), generateLinkIn.getUserId());
 
         queryParams.put("token", token);
         queryParams.put("session_id", sessionId);
         queryParams.put("companyId", String.valueOf(generateLinkIn.getCompanyId()));
-        queryParams.put("userToken", generateLinkIn.getUserToken());
+        // Note: do NOT include apiKey in the generated URL; it's used only for validation
         queryParams.put("mesa", generateLinkIn.getMesa());
 
         if (generateLinkIn.getQr() != null && !generateLinkIn.getQr().isEmpty()) {

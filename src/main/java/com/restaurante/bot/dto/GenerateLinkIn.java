@@ -15,8 +15,8 @@ public class GenerateLinkIn {
 
     @NotNull(message = "The companyId is required.")
     private Long companyId;
-    @NotBlank(message = "The userToken is required.")
-    private String userToken;
+    @NotBlank(message = "The apiKey is required.")
+    private String apiKey;
 
     private Long userId;
 

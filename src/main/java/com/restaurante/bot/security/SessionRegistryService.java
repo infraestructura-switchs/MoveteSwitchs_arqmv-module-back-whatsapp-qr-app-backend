@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +21,10 @@ public class SessionRegistryService {
     }
 
     public SessionMetadata registerSession(String sessionId, Long companyId, Long userId) {
+        if (sessionId == null) {
+            // Defensive: generate session id if caller provided null to avoid NPE on ConcurrentHashMap
+            sessionId = UUID.randomUUID().toString().replace("-", "");
+        }
         return registerSession(sessionId, companyId, userId, Instant.now().plusMillis(sessionExpirationMs));
     }
 
