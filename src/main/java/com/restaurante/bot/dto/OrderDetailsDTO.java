@@ -24,7 +24,7 @@ public class OrderDetailsDTO {
     @NotBlank(message = "phone es obligatorio")
     private String phone;
 
-    private Long companyId;
+    private Long companyExternalId;
 
     @NotEmpty(message = "items no puede ser vacio")
     @Valid
