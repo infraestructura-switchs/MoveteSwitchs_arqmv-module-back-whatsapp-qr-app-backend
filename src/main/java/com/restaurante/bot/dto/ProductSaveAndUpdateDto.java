@@ -43,9 +43,11 @@ public class ProductSaveAndUpdateDto {
     @Positive(message = "preparationTime must be greater than 0")
     private Integer preparationTime;
 
-    @NotNull(message = "companyId is required")
     @Positive(message = "companyId must be greater than 0")
     private Long companyId;
+
+    @Positive(message = "companyExternalId must be greater than 0")
+    private Long companyExternalId;
 
     private java.util.List<String> comments;
 }
