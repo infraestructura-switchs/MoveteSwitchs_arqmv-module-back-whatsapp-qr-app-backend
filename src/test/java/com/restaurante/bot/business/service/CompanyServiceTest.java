@@ -47,7 +47,6 @@ class CompanyServiceTest {
 
         mockCompanyRequest = new CompanyRequest();
         mockCompanyRequest.setNameCompany("Test Company");
-        mockCompanyRequest.setNumberWhatsapp("1234567890");
     }
 
     @Test

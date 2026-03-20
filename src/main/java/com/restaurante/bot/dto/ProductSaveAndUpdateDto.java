@@ -46,8 +46,5 @@ public class ProductSaveAndUpdateDto {
     @Positive(message = "companyId must be greater than 0")
     private Long companyId;
 
-    @Positive(message = "companyExternalId must be greater than 0")
-    private Long companyExternalId;
-
     private java.util.List<String> comments;
 }

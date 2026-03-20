@@ -66,7 +66,7 @@ class SecurityControllerTest {
     @Test
     void generateTokenShouldReturnTokenAndSessionId() throws Exception {
         GenerateTokenRequestDTO request = GenerateTokenRequestDTO.builder()
-                .companyExternalId(273L)
+                .externalCompanyId(273L)
                 .userId(9L)
                 .apiKey("valid-key")
                 .build();
@@ -91,7 +91,7 @@ class SecurityControllerTest {
     @Test
     void generateTokenShouldReturnBadRequestWhenApiKeyMissing() throws Exception {
         GenerateTokenRequestDTO request = GenerateTokenRequestDTO.builder()
-                .companyExternalId(273L)
+                .externalCompanyId(273L)
                 .userId(9L)
                 .build();
 
@@ -115,7 +115,7 @@ class SecurityControllerTest {
     @Test
     void generateTokenShouldReturnUnauthorizedWhenApiKeyInvalid() throws Exception {
         GenerateTokenRequestDTO request = GenerateTokenRequestDTO.builder()
-                .companyExternalId(273L)
+                .externalCompanyId(273L)
                 .userId(9L)
                 .apiKey("invalid-key")
                 .build();

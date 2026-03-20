@@ -125,7 +125,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
     }
 
     @Override
-    public CategorizedProductsDTO getProductsSfotRestaurantByCompanyId(Long companyExternalId) {
+    public CategorizedProductsDTO getProductsSfotRestaurantByCompanyId(Long externalCompanyId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -134,16 +134,16 @@ public class ProductService implements ProductInterface, ProductUseCase {
             throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
         }
 
-        if (!companyRepository.existsByExternalCompanyId(companyExternalId)) { // Asume companyRepository inyectado
+        if (!companyRepository.existsByExternalCompanyId(externalCompanyId)) { // Asume companyRepository inyectado
             throw  new GenericException("La compañia no existe", HttpStatus.NOT_FOUND);
         }
 
-        List<Category> categories = categoryRepository.findByCompanyId(companyExternalId);
-        List<Product> products = productRepository.findByCompanyIdOrderByNameAsc(companyExternalId);
+        List<Category> categories = categoryRepository.findByCompanyId(externalCompanyId);
+        List<Product> products = productRepository.findByCompanyIdOrderByNameAsc(externalCompanyId);
 
-        String imageByCompany = imageByCompanyId(companyExternalId.intValue());
+        String imageByCompany = imageByCompanyId(externalCompanyId.intValue());
         Map<Long, ProductDiscount> activeDiscounts = productDiscountSupport.findActiveDiscountsByProductIds(
-            companyExternalId,
+            externalCompanyId,
             products.stream().map(Product::getProductId).collect(Collectors.toList()));
 
         Map<Long, List<ProductDto>> categorizedProductMap = products.stream()
@@ -192,20 +192,20 @@ public class ProductService implements ProductInterface, ProductUseCase {
     }
 
     @Transactional
-    public GenericResponse updateOrCreateProductsWithCategory(Long companyExternalId) {
+    public GenericResponse updateOrCreateProductsWithCategory(Long externalCompanyId) {
         // Cargar o recargar el mapeo para esta compañía
-        loadCategoryMapping(companyExternalId); // Update usage here
+        loadCategoryMapping(externalCompanyId); // Update usage here
 
-        List<ProductDTO> products = callServiceHttp.getProduct(companyExternalId);
+        List<ProductDTO> products = callServiceHttp.getProduct(externalCompanyId);
         if (products == null || products.isEmpty()) {
-            log.warn("No se encontraron productos para la compañía {}", companyExternalId);
+            log.warn("No se encontraron productos para la compañía {}", externalCompanyId);
             return new GenericResponse("No se encontraron productos para actualizar", 200L);
         }
 
         for (ProductDTO productDTO : products) {
-            Product product = mapToProduct(productDTO, companyExternalId);
+            Product product = mapToProduct(productDTO, externalCompanyId);
 
-            Long categoryId = getOrCreateCategory(productDTO, companyExternalId);
+            Long categoryId = getOrCreateCategory(productDTO, externalCompanyId);
             product.setCategoryId(categoryId);
 
             productRepository.save(product);
@@ -215,10 +215,10 @@ public class ProductService implements ProductInterface, ProductUseCase {
     }
 
 
-    private void loadCategoryMapping(Long companyExternalId) {
-        dynamicCategoryMapping.computeIfAbsent(companyExternalId, k -> {
+    private void loadCategoryMapping(Long externalCompanyId) {
+        dynamicCategoryMapping.computeIfAbsent(externalCompanyId, k -> {
             Map<String, Long> mapping = new HashMap<>();
-            List<CategoryMapping> mappings = categoryMappingRepository.findByCompanyIdAndStatus(companyExternalId, "ACTIVE");
+            List<CategoryMapping> mappings = categoryMappingRepository.findByCompanyIdAndStatus(externalCompanyId, "ACTIVE");
             for (CategoryMapping cm : mappings) {
                 mapping.put(cm.getGroupId().toString(), cm.getCategoryId());
             }
@@ -226,11 +226,11 @@ public class ProductService implements ProductInterface, ProductUseCase {
         });
     }
 
-    private Long getOrCreateCategory(ProductDTO productDTO, Long companyExternalId) {
+    private Long getOrCreateCategory(ProductDTO productDTO, Long externalCompanyId) {
         String groupId = productDTO.getData().getGrupo().getIdGrupo();
         String groupDescription = productDTO.getData().getGrupo().getDescripcion().toUpperCase();
 
-        Map<String, Long> companyMapping = dynamicCategoryMapping.get(companyExternalId);
+        Map<String, Long> companyMapping = dynamicCategoryMapping.get(externalCompanyId);
         Long categoryId = companyMapping.get(groupId);  // Primero intenta con IdGrupo
 
         if (categoryId == null) {
@@ -244,7 +244,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             category.setName(groupDescription);
             category.setExternalId(Long.parseLong(groupId));
             category.setStatus("ACTIVE");
-            category.setCompanyId(companyExternalId);
+            category.setCompanyId(externalCompanyId);
             category = categoryRepository.save(category);
             categoryId = category.getCategoryId();
 
@@ -256,7 +256,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             CategoryMapping mapping = new CategoryMapping();
             mapping.setGroupId(Long.parseLong(groupId));
             mapping.setCategoryId(categoryId);
-            mapping.setCompanyId(companyExternalId);
+            mapping.setCompanyId(externalCompanyId);
             mapping.setStatus("ACTIVE");
             categoryMappingRepository.save(mapping);
             log.info("Nueva categoría creada para groupId {}: {}", groupId, categoryId);
@@ -313,7 +313,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             .build();
     }
 
-    private Product mapToProduct(ProductDTO productDTO, Long companyExternalId) {
+    private Product mapToProduct(ProductDTO productDTO, Long externalCompanyId) {
         Product product = new Product();
 
         product.setProductId(productDTO.getId());
@@ -327,7 +327,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
         }
         product.setStatus("ACTIVE");
         product.setImgProduct(productDTO.getData().getImagenMenu());
-        product.setCompanyId(companyExternalId);
+        product.setCompanyId(externalCompanyId);
 
         try {
                 if (productDTO.getData().getComentarios() != null) {
@@ -363,15 +363,15 @@ public class ProductService implements ProductInterface, ProductUseCase {
     }
 
     @Override
-    public List<ProductDto> searchProducts(Long companyExternalId, String name, String categoryName) {
+    public List<ProductDto> searchProducts(Long externalCompanyId, String name, String categoryName) {
         String term = (name == null || name.isBlank()) ? null : name.trim();
 
-        String imageByCompany = imageByCompanyId(companyExternalId.intValue());
+        String imageByCompany = imageByCompanyId(externalCompanyId.intValue());
 
         Long categoryId = null;
         if (categoryName != null && !categoryName.isBlank()) {
                 categoryId = categoryRepository
-                    .findByCompanyIdAndNameIgnoreCase(companyExternalId, categoryName.trim())
+                    .findByCompanyIdAndNameIgnoreCase(externalCompanyId, categoryName.trim())
                     .map(Category::getCategoryId)
                     .orElse(null);
             if (categoryId == null) {
@@ -380,9 +380,9 @@ public class ProductService implements ProductInterface, ProductUseCase {
         }
 
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
-        org.springframework.data.domain.Page<com.restaurante.bot.model.Product> foundPage = productRepository.search(companyExternalId, term, categoryId, pageable);
+        org.springframework.data.domain.Page<com.restaurante.bot.model.Product> foundPage = productRepository.search(externalCompanyId, term, categoryId, pageable);
         Map<Long, ProductDiscount> activeDiscounts = productDiscountSupport.findActiveDiscountsByProductIds(
-            companyExternalId,
+            externalCompanyId,
             foundPage.getContent().stream().map(Product::getProductId).collect(Collectors.toList()));
 
         return foundPage.getContent().stream()
@@ -391,7 +391,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
     }
 
     @Override
-    public List<ProductDto> listByPrice(Long companyExternalId, String categoryName, String sort, String name) {
+    public List<ProductDto> listByPrice(Long externalCompanyId, String categoryName, String sort, String name) {
         String order = null;
         if (sort != null) {
             String s = sort.trim().toUpperCase();
@@ -402,7 +402,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
         Long categoryId = null;
         if (categoryName != null && !categoryName.isBlank()) {
             categoryId = categoryRepository
-                .findByCompanyIdAndNameIgnoreCase(companyExternalId, categoryName.trim())
+                .findByCompanyIdAndNameIgnoreCase(externalCompanyId, categoryName.trim())
                     .map(Category::getCategoryId)
                     .orElse(null);
             if (categoryId == null) return List.of();
@@ -412,11 +412,11 @@ public class ProductService implements ProductInterface, ProductUseCase {
             Sort.by(Sort.Direction.fromString(order), "price"));
 
         org.springframework.data.domain.Page<Product> foundPage = productRepository
-            .findAllByCompanyAndCategoryAndNameOrderByPrice(companyExternalId, categoryId, name, pageable);
+            .findAllByCompanyAndCategoryAndNameOrderByPrice(externalCompanyId, categoryId, name, pageable);
 
-        String imageByCompany = imageByCompanyId(companyExternalId.intValue());
+        String imageByCompany = imageByCompanyId(externalCompanyId.intValue());
         Map<Long, ProductDiscount> activeDiscounts = productDiscountSupport.findActiveDiscountsByProductIds(
-                companyExternalId,
+                externalCompanyId,
                 foundPage.getContent().stream().map(Product::getProductId).collect(Collectors.toList()));
 
         return foundPage.getContent().stream()

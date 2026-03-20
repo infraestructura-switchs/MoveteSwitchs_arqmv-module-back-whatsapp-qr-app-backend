@@ -21,18 +21,18 @@ public class JwtUtil {
 
     private static final long EXPIRATION_TIME = 1000 * 60 * 60;
 
-    // Genera un token con companyExternalId como claim
-    public String generateToken(Long companyExternalId, Long userId) {
-        return generateToken(companyExternalId, userId, generateSessionId());
+    // Genera un token con externalCompanyId como claim
+    public String generateToken(Long externalCompanyId, Long userId) {
+        return generateToken(externalCompanyId, userId, generateSessionId());
     }
 
     public String generateSessionId() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public String generateToken(Long companyExternalId, Long userId, String sessionId) {
+    public String generateToken(Long externalCompanyId, Long userId, String sessionId) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("companyExternalId", companyExternalId);
+        claims.put("externalCompanyId", externalCompanyId);
         claims.put("userId", userId);
         claims.put("sessionId", sessionId);
 
@@ -58,9 +58,9 @@ public class JwtUtil {
                 .getBody();
     }
 
-    // Extrae companyExternalId del token
-    public Long extractCompanyExternalId(String token) {
-        return extractClaim(token, claims -> claims.get("companyExternalId", Long.class));
+    // Extrae externalCompanyId del token
+    public Long extractExternalCompanyId(String token) {
+        return extractClaim(token, claims -> claims.get("externalCompanyId", Long.class));
     }
 
     public String extractSessionId(String token) {

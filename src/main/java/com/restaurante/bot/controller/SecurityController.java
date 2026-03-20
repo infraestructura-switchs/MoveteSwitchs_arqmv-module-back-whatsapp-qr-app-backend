@@ -53,23 +53,23 @@ public class SecurityController {
     @PostMapping("/generateToken")
     public ResponseEntity<?> generateToken(@Valid @RequestBody GenerateTokenRequestDTO generateTokenRequestDTO) {
         log.info("Se inicia el endpoint que genera un token");
-        if (!companyRepository.existsByExternalCompanyId(generateTokenRequestDTO.getCompanyExternalId())) {
+        if (!companyRepository.existsByExternalCompanyId(generateTokenRequestDTO.getExternalCompanyId())) {
             return new ResponseEntity<String>("Compañía no existe", HttpStatus.NOT_FOUND);
         }
         // Validate apiKey provided in the request
-        Company company = companyRepository.findByExternalCompanyId(generateTokenRequestDTO.getCompanyExternalId());
+        Company company = companyRepository.findByExternalCompanyId(generateTokenRequestDTO.getExternalCompanyId());
         if (company.getApiKey() == null || !company.getApiKey().equals(generateTokenRequestDTO.getApiKey())) {
             return new ResponseEntity<String>("apiKey invalido", HttpStatus.UNAUTHORIZED);
         }
 
         String sessionId = jwtUtil.generateSessionId();
         String token = jwtUtil.generateToken(
-            generateTokenRequestDTO.getCompanyExternalId(),
+            generateTokenRequestDTO.getExternalCompanyId(),
             generateTokenRequestDTO.getUserId(),
             sessionId);
         sessionRegistryService.registerSession(
             sessionId,
-            generateTokenRequestDTO.getCompanyExternalId(),
+            generateTokenRequestDTO.getExternalCompanyId(),
             generateTokenRequestDTO.getUserId());
         return new ResponseEntity<>(
                 GenerateTokenResponseDTO.builder()
@@ -84,11 +84,11 @@ public class SecurityController {
     public ResponseEntity<GenerateLinkResponseDTO> generateLink(@Valid @RequestBody GenerateLinkIn generateLinkIn) {
         Map<String, String> queryParams = new HashMap<>();
 
-        if (!companyRepository.existsByExternalCompanyId(generateLinkIn.getCompanyExternalId())) {
+        if (!companyRepository.existsByExternalCompanyId(generateLinkIn.getExternalCompanyId())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Company company= companyRepository.findByExternalCompanyId(generateLinkIn.getCompanyExternalId());
+        Company company= companyRepository.findByExternalCompanyId(generateLinkIn.getExternalCompanyId());
 
         // Validate apiKey provided in the request
         if (generateLinkIn.getApiKey() == null || !generateLinkIn.getApiKey().equals(company.getApiKey())) {
@@ -101,12 +101,12 @@ public class SecurityController {
             sessionId = jwtUtil.generateSessionId();
         }
 
-        String token = jwtUtil.generateToken(generateLinkIn.getCompanyExternalId(), generateLinkIn.getUserId(), sessionId);
-        sessionRegistryService.registerSession(sessionId, generateLinkIn.getCompanyExternalId(), generateLinkIn.getUserId());
+        String token = jwtUtil.generateToken(generateLinkIn.getExternalCompanyId(), generateLinkIn.getUserId(), sessionId);
+        sessionRegistryService.registerSession(sessionId, generateLinkIn.getExternalCompanyId(), generateLinkIn.getUserId());
 
         queryParams.put("token", token);
         queryParams.put("session_id", sessionId);
-        queryParams.put("companyExternalId", String.valueOf(generateLinkIn.getCompanyExternalId()));
+        queryParams.put("externalCompanyId", String.valueOf(generateLinkIn.getExternalCompanyId()));
         // Note: do NOT include apiKey in the generated URL; it's used only for validation
         queryParams.put("mesa", generateLinkIn.getMesa());
         queryParams.put("userToken", generateLinkIn.getUserToken());

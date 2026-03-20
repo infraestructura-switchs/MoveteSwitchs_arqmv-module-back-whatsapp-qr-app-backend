@@ -63,7 +63,7 @@ class ProductoCrudControllerTest {
         request.setCategoryId(10L);
         request.setPreparationTime(15);
 
-        mockMvc.perform(post("/api/back-whatsapp-qr-app/producto/create")
+        mockMvc.perform(post("/api/back-whatsapp-qr-app/admin/product/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -72,7 +72,7 @@ class ProductoCrudControllerTest {
 
     @Test
     void createProduct_ShouldReturnBadRequest_WhenRequiredFieldsAreMissing() throws Exception {
-        mockMvc.perform(post("/api/back-whatsapp-qr-app/producto/create")
+        mockMvc.perform(post("/api/back-whatsapp-qr-app/admin/product/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
                 .andExpect(status().isBadRequest())
@@ -83,7 +83,7 @@ class ProductoCrudControllerTest {
     void getProductById_ShouldReturnOk() throws Exception {
         when(productCrudUseCase.get(1L)).thenReturn(sampleProduct);
 
-        mockMvc.perform(get("/api/back-whatsapp-qr-app/producto/1"))
+        mockMvc.perform(get("/api/back-whatsapp-qr-app/admin/product/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.productName").value("Test Product"));
     }
@@ -104,7 +104,7 @@ class ProductoCrudControllerTest {
                 }
                 """;
 
-        mockMvc.perform(put("/api/back-whatsapp-qr-app/producto/update/1")
+        mockMvc.perform(put("/api/back-whatsapp-qr-app/admin/product/update/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request))
                 .andExpect(status().isOk())
@@ -113,7 +113,7 @@ class ProductoCrudControllerTest {
 
     @Test
     void updateProduct_ShouldReturnBadRequest_WhenRequiredFieldsAreMissing() throws Exception {
-        mockMvc.perform(put("/api/back-whatsapp-qr-app/producto/update/1")
+        mockMvc.perform(put("/api/back-whatsapp-qr-app/admin/product/update/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
                 .andExpect(status().isBadRequest())
@@ -129,7 +129,7 @@ class ProductoCrudControllerTest {
         request.setCategoryId(0L);
         request.setPreparationTime(0);
 
-        mockMvc.perform(put("/api/back-whatsapp-qr-app/producto/update/1")
+        mockMvc.perform(put("/api/back-whatsapp-qr-app/admin/product/update/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -145,7 +145,7 @@ class ProductoCrudControllerTest {
         request.setCategoryId(0L);
         request.setPreparationTime(0);
 
-        mockMvc.perform(post("/api/back-whatsapp-qr-app/producto/create")
+        mockMvc.perform(post("/api/back-whatsapp-qr-app/admin/product/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -156,7 +156,7 @@ class ProductoCrudControllerTest {
     void deleteProduct_ShouldReturnNoContent() throws Exception {
         when(productCrudUseCase.delete(1L)).thenReturn(true);
 
-        mockMvc.perform(delete("/api/back-whatsapp-qr-app/producto/delete/1"))
+        mockMvc.perform(delete("/api/back-whatsapp-qr-app/admin/product/delete/1"))
                 .andExpect(status().isNoContent());
     }
 }

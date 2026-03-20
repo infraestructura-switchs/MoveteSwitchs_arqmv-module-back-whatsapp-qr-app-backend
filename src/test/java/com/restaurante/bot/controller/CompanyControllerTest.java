@@ -36,7 +36,7 @@ class CompanyControllerTest {
         mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/create")
                         .param("apiKey", ""))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: companyName, whatsappNumber, longitude, latitude, apiKey, baseValue, additionalValue, cityId"));
+            .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: companyName, longitude, latitude, apiKey, baseValue, additionalValue, cityId"));
     }
 
     @Test

@@ -59,16 +59,10 @@ public class ProductoCrudController {
         } else if (productDto.getPrice() <= 0) {
             invalidFields.add("price");
         }
-        // allow either companyId (PK) or companyExternalId (external identifier)
-        if (productDto.getCompanyId() == null && productDto.getCompanyExternalId() == null) {
-            missingFields.add("companyId or companyExternalId");
-        } else {
-            if (productDto.getCompanyId() != null && productDto.getCompanyId() <= 0) {
-                invalidFields.add("companyId");
-            }
-            if (productDto.getCompanyExternalId() != null && productDto.getCompanyExternalId() <= 0) {
-                invalidFields.add("companyExternalId");
-            }
+        if (productDto.getCompanyId() == null) {
+            missingFields.add("companyId");
+        } else if (productDto.getCompanyId() <= 0) {
+            invalidFields.add("companyId");
         }
         if (productDto.getCategoryId() == null) {
             missingFields.add("categoryId");
@@ -103,8 +97,8 @@ public class ProductoCrudController {
     @GetMapping("/get-all")
     public ResponseEntity<Page<ProductGetAllDto>> getAll(@RequestParam Map<String, String> customQuery,
             @RequestParam(value = "companyId", required = false) Long companyId,
-            @RequestParam(value = "companyExternalId", required = false) Long companyExternalId) {
-        return ResponseEntity.ok(productCrudUseCase.getAll(customQuery, companyId, companyExternalId));
+            @RequestParam(value = "externalCompanyId", required = false) Long externalCompanyId) {
+        return ResponseEntity.ok(productCrudUseCase.getAll(customQuery, companyId, externalCompanyId));
     }
 
     @GetMapping
@@ -113,21 +107,21 @@ public class ProductoCrudController {
             @RequestParam(defaultValue = "ASC") String orders,
             @RequestParam(defaultValue = "productId") String sortBy,
             @RequestParam(value = "companyId", required = false) Long companyId,
-            @RequestParam(value = "companyExternalId", required = false) Long companyExternalId) {
-        return ResponseEntity.ok(productCrudUseCase.getAll(page, size, orders, sortBy, companyId, companyExternalId));
+            @RequestParam(value = "externalCompanyId", required = false) Long externalCompanyId) {
+        return ResponseEntity.ok(productCrudUseCase.getAll(page, size, orders, sortBy, companyId, externalCompanyId));
     }
 
     @GetMapping("/get-all-without-page")
     public ResponseEntity<List<ProductGetAllDto>> getAllWithoutPage(@RequestParam Map<String, String> customQuery,
             @RequestParam(value = "companyId", required = false) Long companyId,
-            @RequestParam(value = "companyExternalId", required = false) Long companyExternalId) {
-        return ResponseEntity.ok(productCrudUseCase.getAllWithOutPage(customQuery, companyId, companyExternalId));
+            @RequestParam(value = "externalCompanyId", required = false) Long externalCompanyId) {
+        return ResponseEntity.ok(productCrudUseCase.getAllWithOutPage(customQuery, companyId, externalCompanyId));
     }
 
     @GetMapping("/search")
     public ResponseEntity<Page<ProductGetAllDto>> search(@RequestParam Map<String, String> customQuery,
                                                          @RequestParam(value = "companyId", required = false) Long companyId,
-                                                         @RequestParam(value = "companyExternalId", required = false) Long companyExternalId) {
-        return ResponseEntity.ok(productCrudUseCase.searchCustom(customQuery, companyId, companyExternalId));
+                                                         @RequestParam(value = "externalCompanyId", required = false) Long externalCompanyId) {
+        return ResponseEntity.ok(productCrudUseCase.searchCustom(customQuery, companyId, externalCompanyId));
     }
 }

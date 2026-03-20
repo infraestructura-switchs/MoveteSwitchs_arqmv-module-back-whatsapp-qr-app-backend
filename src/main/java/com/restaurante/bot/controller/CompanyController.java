@@ -29,7 +29,6 @@ public class CompanyController {
     @PostMapping("/create")
     public ResponseEntity<CompanyRequest> createCompany(
             @RequestParam(value = "companyName", required = false) String companyName,
-            @RequestParam(value = "whatsappNumber", required = false) String whatsappNumber,
             @RequestParam(value = "longitude", required = false) String longitude,
             @RequestParam(value = "latitude", required = false) String latitude,
             @RequestParam(value = "baseValue", required = false) Double baseValue,
@@ -39,11 +38,6 @@ public class CompanyController {
             @RequestParam(value = "cityId", required = false) Long cityId,
             @RequestParam(value = "apiKey", required = false) String apiKey,
             @RequestParam(value = "rappyId", required = false) String rappyId,
-            @RequestParam(value = "numberId", required = false) String numberId,
-            @RequestParam(value = "tokenMetaQr", required = false) String tokenMetaQr,
-            @RequestParam(value = "numberBotMesa", required = false) String numberBotMesa,
-            @RequestParam(value = "numberBotDelivery", required = false) String numberBotDelivery,
-            @RequestParam(value = "tokenMetaDelivery", required = false) String tokenMetaDelivery,
             @RequestParam(value = "landingTemplate", required = false) String landingTemplate,
             @RequestParam(value = "status", required = false) String status
             ) {
@@ -91,7 +85,6 @@ public class CompanyController {
     public ResponseEntity<CompanyRequest> updateCompany(
             @PathVariable Long companyId,
             @RequestParam(value = "companyName", required = false) String companyName,
-            @RequestParam(value = "whatsappNumber", required = false) String whatsappNumber,
             @RequestParam(value = "longitude", required = false) String longitude,
             @RequestParam(value = "latitude", required = false) String latitude,
             @RequestParam(value = "baseValue", required = false) Double baseValue,
@@ -101,11 +94,6 @@ public class CompanyController {
             @RequestParam(value = "cityId", required = false) Long cityId,
             @RequestParam(value = "apiKey", required = false) String apiKey,
             @RequestParam(value = "rappyId", required = false) String rappyId,
-            @RequestParam(value = "numberId", required = false) String numberId,
-            @RequestParam(value = "tokenMetaQr", required = false) String tokenMetaQr,
-            @RequestParam(value = "numberBotMesa", required = false) String numberBotMesa,
-            @RequestParam(value = "numberBotDelivery", required = false) String numberBotDelivery,
-            @RequestParam(value = "tokenMetaDelivery", required = false) String tokenMetaDelivery,
             @RequestParam(value = "landingTemplate", required = false) String landingTemplate,
             @RequestParam(value = "status", required = false) String status) {
 

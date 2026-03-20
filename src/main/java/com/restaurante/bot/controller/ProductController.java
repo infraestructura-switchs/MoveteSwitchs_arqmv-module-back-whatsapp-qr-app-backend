@@ -23,16 +23,16 @@ public class ProductController {
 
     private final ProductUseCase productInterface;
 
-    @GetMapping("/getProductByCompany/{companyExternalId}")
-    public ResponseEntity<CategorizedProductsDTO> getProductsSfotRestaurantByCompanyId(@PathVariable("companyExternalId") Long companyExternalId) {
-        return new ResponseEntity<>(productInterface.getProductsSfotRestaurantByCompanyId(companyExternalId), HttpStatus.OK) ;
+    @GetMapping("/getProductByCompany/{externalCompanyId}")
+    public ResponseEntity<CategorizedProductsDTO> getProductsSfotRestaurantByCompanyId(@PathVariable("externalCompanyId") Long externalCompanyId) {
+        return new ResponseEntity<>(productInterface.getProductsSfotRestaurantByCompanyId(externalCompanyId), HttpStatus.OK) ;
     }
 
     @PostMapping("/update-data")
-    public ResponseEntity<GenericResponse>updateOrCreateProductsWithCategory(@RequestParam("companyExternalId") Long companyExternalId){
+    public ResponseEntity<GenericResponse>updateOrCreateProductsWithCategory(@RequestParam("externalCompanyId") Long externalCompanyId){
         log.info("Se inicia el servicio que nos va a crear o " +
-                "actualizar los datos de los productos de la compañia -> {}", companyExternalId);
-        return new ResponseEntity<>(productInterface.updateOrCreateProductsWithCategory(companyExternalId), HttpStatus.OK) ;
+                "actualizar los datos de los productos de la compañia -> {}", externalCompanyId);
+        return new ResponseEntity<>(productInterface.updateOrCreateProductsWithCategory(externalCompanyId), HttpStatus.OK) ;
     }
 
 
@@ -44,22 +44,22 @@ public class ProductController {
 
     @GetMapping("/search")
     public ResponseEntity<List<ProductDto>> searchProducts(
-            @RequestParam("companyExternalId") Long companyExternalId,
+            @RequestParam("externalCompanyId") Long externalCompanyId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false, name = "category") String categoryName
     ) {
-        List<ProductDto> result = productInterface.searchProducts(companyExternalId, name, categoryName);
+        List<ProductDto> result = productInterface.searchProducts(externalCompanyId, name, categoryName);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/by-price")
     public ResponseEntity<List<ProductDto>> listByPrice(
-            @RequestParam("companyExternalId") Long companyExternalId,
+            @RequestParam("externalCompanyId") Long externalCompanyId,
             @RequestParam(required = false, name = "category") String categoryName,
             @RequestParam(required = false, name = "sort") String sort,
             @RequestParam(required = false, name = "name") String name
     ) {
-        List<ProductDto> result = productInterface.listByPrice(companyExternalId, categoryName, sort, name);
+        List<ProductDto> result = productInterface.listByPrice(externalCompanyId, categoryName, sort, name);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

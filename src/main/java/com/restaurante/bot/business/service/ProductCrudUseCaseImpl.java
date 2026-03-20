@@ -55,8 +55,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         entity.setInformation(normalizeInformation(productDto.getInformation()));
         entity.setPreparationTime(productDto.getPreparationTime());
         // resolve company id from either PK or external id
-        Long resolvedForSave = resolveCompanyId(productDto.getCompanyId(), productDto.getCompanyExternalId());
-        entity.setCompanyId(resolvedForSave);
+        entity.setCompanyId(productDto.getCompanyId());
         if (productDto.getComments() != null) {
             // persist comments in legacy JSON column for now
             try {
@@ -99,8 +98,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         }
         if (productDto.getPreparationTime() != null) entity.setPreparationTime(productDto.getPreparationTime());
         // resolve company id from either PK or external id for update
-        Long resolvedForUpdate = resolveCompanyId(productDto.getCompanyId(), productDto.getCompanyExternalId());
-        entity.setCompanyId(resolvedForUpdate);
+        entity.setCompanyId(productDto.getCompanyId());
 
         if (productDto.getComments() != null) {
             try {
@@ -142,7 +140,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public Page<ProductGetAllDto> getAll(Map<String, String> customQuery, Long companyId, Long companyExternalId) {
+    public Page<ProductGetAllDto> getAll(Map<String, String> customQuery, Long companyId, Long externalCompanyId) {
         String orders = "ASC";
         String sortBy = "productId";
         int page = 0;
@@ -152,11 +150,11 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (customQuery.containsKey("page")) page = Integer.parseInt(customQuery.get("page"));
         if (customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
 
-        Long resolvedCompanyId = resolveCompanyId(companyId, companyExternalId);
+        Long resolvedCompanyId = resolveCompanyId(companyId, externalCompanyId);
         if (resolvedCompanyId != null) {
             Map<String, String> copy = customQuery == null ? new HashMap<>() : new HashMap<>(customQuery);
             copy.put("companyId", String.valueOf(resolvedCompanyId));
-            return searchCustom(copy, companyId, companyExternalId);
+            return searchCustom(copy, companyId, externalCompanyId);
         }
 
         Sort.Direction direction = Sort.Direction.fromString(orders);
@@ -164,7 +162,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
         Page<Product> entityPage = productRepository.findAll(pagingSort);
         int total = (int) entityPage.getTotalElements();
-        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), resolveCompanyId(companyId, companyExternalId));
+        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), resolvedCompanyId);
         List<ProductGetAllDto> list = entityPage.getContent().stream()
             .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.toList());
@@ -172,8 +170,8 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public Page<ProductGetAllDto> getAll(int page, int size, String orders, String sortBy, Long companyId, Long companyExternalId) {
-        Long resolvedCompanyId = resolveCompanyId(companyId, companyExternalId);
+    public Page<ProductGetAllDto> getAll(int page, int size, String orders, String sortBy, Long companyId, Long externalCompanyId) {
+        Long resolvedCompanyId = resolveCompanyId(companyId, externalCompanyId);
         if (resolvedCompanyId != null) {
             Map<String, String> query = new HashMap<>();
             query.put("companyId", String.valueOf(resolvedCompanyId));
@@ -181,14 +179,14 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
             query.put("size", String.valueOf(size));
             query.put("orders", orders);
             query.put("sortBy", sortBy);
-            return searchCustom(query, companyId, companyExternalId);
+            return searchCustom(query, companyId, externalCompanyId);
         }
 
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
         Page<Product> entityPage = productRepository.findAll(pagingSort);
         int total = (int) entityPage.getTotalElements();
-        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), resolveCompanyId(companyId, companyExternalId));
+        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), resolvedCompanyId);
         List<ProductGetAllDto> list = entityPage.getContent().stream()
             .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.toList());
@@ -196,12 +194,12 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyId, Long companyExternalId) {
+    public List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyId, Long externalCompanyId) {
         String status = null;
         if (customQuery != null && customQuery.containsKey("status")) status = customQuery.get("status");
         else status = Constants.ACTIVE_STATUS;
 
-        Long resolvedCompanyId = resolveCompanyId(companyId, companyExternalId);
+        Long resolvedCompanyId = resolveCompanyId(companyId, externalCompanyId);
         if (resolvedCompanyId != null) {
             org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
             org.springframework.data.domain.Page<Product> found = productRepository.search(resolvedCompanyId, null, null, pageable);
@@ -222,7 +220,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public Page<ProductGetAllDto> searchCustom(Map<String, String> customQuery, Long companyId, Long companyExternalId) {
+    public Page<ProductGetAllDto> searchCustom(Map<String, String> customQuery, Long companyId, Long externalCompanyId) {
         String orders = "ASC";
         String sortBy = "productId";
         int page = 0;
@@ -238,7 +236,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (customQuery != null && customQuery.containsKey("page")) page = Integer.parseInt(customQuery.get("page"));
         if (customQuery != null && customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
 
-        Long resolvedCompanyId = resolveCompanyId(companyId, companyExternalId);
+        Long resolvedCompanyId = resolveCompanyId(companyId, externalCompanyId);
         if (resolvedCompanyId != null) {
             Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(orders), sortBy));
             org.springframework.data.domain.Page<Product> foundPage = productRepository.search(resolvedCompanyId, name, categoryId, pageable);
@@ -416,14 +414,20 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         return productDiscountSupport.findActiveDiscountsByProductIds(rcid, productIds);
     }
 
-    private Long resolveCompanyId(Long companyId, Long companyExternalId) {
-        if (companyId != null) return companyId;
-        if (companyExternalId != null) {
+    private Long resolveCompanyId(Long companyId, Long externalCompanyId) {
+        if (companyId != null) {
+            return companyId;
+        }
+        if (externalCompanyId != null) {
             try {
-                com.restaurante.bot.model.Company company = companyRepository.findByExternalCompanyId(companyExternalId);
-                if (company != null) return company.getId();
-            } catch (Exception ignored) {}
+                com.restaurante.bot.model.Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
+                if (company != null) {
+                    return company.getId();
+                }
+            } catch (Exception ignored) {
+            }
         }
         return null;
     }
+
 }
