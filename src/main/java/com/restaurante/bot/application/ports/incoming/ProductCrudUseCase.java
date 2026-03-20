@@ -17,11 +17,11 @@ public interface ProductCrudUseCase {
     ProductDto update(Long productId, ProductSaveAndUpdateDto productDto);
 
     boolean delete(Long id);
-    Page<ProductGetAllDto> getAll(Map<String, String> customQuery, Long companyId);
+    Page<ProductGetAllDto> getAll(Map<String, String> customQuery, Long companyExternalId);
 
-    Page<ProductGetAllDto> getAll(int page, int size, String orders, String sortBy, Long companyId);
+    Page<ProductGetAllDto> getAll(int page, int size, String orders, String sortBy, Long companyExternalId);
 
-    List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyId);
+    List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyExternalId);
 
-    Page<ProductGetAllDto> searchCustom(Map<String, String> customQuery, Long companyId);
+    Page<ProductGetAllDto> searchCustom(Map<String, String> customQuery, Long companyExternalId);
 }

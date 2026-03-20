@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Tag(name = "Producto", description = "APIs para la gestión de productos (CRUD)")
 @RestController
-@RequestMapping({"/${app.request.mapping}/admin/product", "/api/back-whatsapp-qr-app/producto"})
+@RequestMapping({"/${app.request.mapping}/admin/product"})
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE })
 @RequiredArgsConstructor
@@ -96,8 +96,8 @@ public class ProductoCrudController {
 
     @GetMapping("/get-all")
     public ResponseEntity<Page<ProductGetAllDto>> getAll(@RequestParam Map<String, String> customQuery,
-            @RequestParam("companyId") Long companyId) {
-        return ResponseEntity.ok(productCrudUseCase.getAll(customQuery, companyId));
+            @RequestParam("companyExternalId") Long companyExternalId) {
+        return ResponseEntity.ok(productCrudUseCase.getAll(customQuery, companyExternalId));
     }
 
     @GetMapping
@@ -105,19 +105,19 @@ public class ProductoCrudController {
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "ASC") String orders,
             @RequestParam(defaultValue = "productId") String sortBy,
-            @RequestParam("companyId") Long companyId) {
-        return ResponseEntity.ok(productCrudUseCase.getAll(page, size, orders, sortBy, companyId));
+            @RequestParam("companyExternalId") Long companyExternalId) {
+        return ResponseEntity.ok(productCrudUseCase.getAll(page, size, orders, sortBy, companyExternalId));
     }
 
     @GetMapping("/get-all-without-page")
     public ResponseEntity<List<ProductGetAllDto>> getAllWithoutPage(@RequestParam Map<String, String> customQuery,
-            @RequestParam("companyId") Long companyId) {
-        return ResponseEntity.ok(productCrudUseCase.getAllWithOutPage(customQuery, companyId));
+            @RequestParam("companyExternalId") Long companyExternalId) {
+        return ResponseEntity.ok(productCrudUseCase.getAllWithOutPage(customQuery, companyExternalId));
     }
 
     @GetMapping("/search")
     public ResponseEntity<Page<ProductGetAllDto>> search(@RequestParam Map<String, String> customQuery,
-                                                         @RequestParam("companyId") Long companyId) {
-        return ResponseEntity.ok(productCrudUseCase.searchCustom(customQuery, companyId));
+                                                         @RequestParam("companyExternalId") Long companyExternalId) {
+        return ResponseEntity.ok(productCrudUseCase.searchCustom(customQuery, companyExternalId));
     }
 }

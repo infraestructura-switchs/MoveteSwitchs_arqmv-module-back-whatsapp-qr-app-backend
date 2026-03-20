@@ -138,7 +138,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public Page<ProductGetAllDto> getAll(Map<String, String> customQuery, Long companyId) {
+    public Page<ProductGetAllDto> getAll(Map<String, String> customQuery, Long companyExternalId) {
         String orders = "ASC";
         String sortBy = "productId";
         int page = 0;
@@ -148,10 +148,10 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (customQuery.containsKey("page")) page = Integer.parseInt(customQuery.get("page"));
         if (customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
 
-        if (companyId != null) {
+        if (companyExternalId != null) {
             Map<String, String> copy = customQuery == null ? new HashMap<>() : new HashMap<>(customQuery);
-            copy.put("companyId", String.valueOf(companyId));
-            return searchCustom(copy, companyId);
+            copy.put("companyId", String.valueOf(companyExternalId));
+            return searchCustom(copy, companyExternalId);
         }
 
         Sort.Direction direction = Sort.Direction.fromString(orders);
@@ -159,7 +159,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
         Page<Product> entityPage = productRepository.findAll(pagingSort);
         int total = (int) entityPage.getTotalElements();
-        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), companyId);
+        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), companyExternalId);
         List<ProductGetAllDto> list = entityPage.getContent().stream()
             .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.toList());
@@ -167,22 +167,22 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public Page<ProductGetAllDto> getAll(int page, int size, String orders, String sortBy, Long companyId) {
-        if (companyId != null) {
+    public Page<ProductGetAllDto> getAll(int page, int size, String orders, String sortBy, Long companyExternalId) {
+        if (companyExternalId != null) {
             Map<String, String> query = new HashMap<>();
-            query.put("companyId", String.valueOf(companyId));
+            query.put("companyId", String.valueOf(companyExternalId));
             query.put("page", String.valueOf(page));
             query.put("size", String.valueOf(size));
             query.put("orders", orders);
             query.put("sortBy", sortBy);
-            return searchCustom(query, companyId);
+            return searchCustom(query, companyExternalId);
         }
 
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
         Page<Product> entityPage = productRepository.findAll(pagingSort);
         int total = (int) entityPage.getTotalElements();
-        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), companyId);
+        Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), companyExternalId);
         List<ProductGetAllDto> list = entityPage.getContent().stream()
             .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.toList());
@@ -190,14 +190,14 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyId) {
+    public List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyExternalId) {
         String status = null;
         if (customQuery != null && customQuery.containsKey("status")) status = customQuery.get("status");
         else status = Constants.ACTIVE_STATUS;
 
-        if (companyId != null) {
+        if (companyExternalId != null) {
             org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
-            org.springframework.data.domain.Page<Product> found = productRepository.search(companyId, null, null, pageable);
+            org.springframework.data.domain.Page<Product> found = productRepository.search(companyExternalId, null, null, pageable);
             String finalStatus = status;
             return found.getContent().stream()
                 .filter(p -> finalStatus == null || finalStatus.equals(p.getStatus()))
@@ -215,7 +215,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     }
 
     @Override
-    public Page<ProductGetAllDto> searchCustom(Map<String, String> customQuery, Long companyId) {
+    public Page<ProductGetAllDto> searchCustom(Map<String, String> customQuery, Long companyExternalId) {
         String orders = "ASC";
         String sortBy = "productId";
         int page = 0;
@@ -231,10 +231,10 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         if (customQuery != null && customQuery.containsKey("page")) page = Integer.parseInt(customQuery.get("page"));
         if (customQuery != null && customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
 
-        if (companyId != null) {
+        if (companyExternalId != null) {
             Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(orders), sortBy));
-            org.springframework.data.domain.Page<Product> foundPage = productRepository.search(companyId, name, categoryId, pageable);
-            Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(foundPage.getContent(), companyId);
+            org.springframework.data.domain.Page<Product> foundPage = productRepository.search(companyExternalId, name, categoryId, pageable);
+            Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(foundPage.getContent(), companyExternalId);
             java.util.List<ProductGetAllDto> content = foundPage.getContent().stream()
                     .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                     .collect(Collectors.toList());
@@ -391,7 +391,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         return dtoBuilder.build();
     }
 
-    private Map<Long, ProductDiscount> resolveActiveDiscounts(List<Product> products, Long companyId) {
+    private Map<Long, ProductDiscount> resolveActiveDiscounts(List<Product> products, Long companyExternalId) {
         List<Long> productIds = products.stream()
                 .map(Product::getProductId)
                 .filter(java.util.Objects::nonNull)
@@ -401,9 +401,9 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
             return Map.of();
         }
 
-        Long resolvedCompanyId = companyId != null
-                ? companyId
-                : products.stream().map(Product::getCompanyId).filter(java.util.Objects::nonNull).findFirst().orElse(null);
+        Long resolvedCompanyId = companyExternalId != null
+            ? companyExternalId
+            : products.stream().map(Product::getCompanyId).filter(java.util.Objects::nonNull).findFirst().orElse(null);
 
         return productDiscountSupport.findActiveDiscountsByProductIds(resolvedCompanyId, productIds);
     }
