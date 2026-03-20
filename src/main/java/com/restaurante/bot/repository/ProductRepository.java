@@ -14,7 +14,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
   List<Product> findByCompanyIdOrderByNameAsc(Long companyId);
 
-  Optional<Product> findByArqProductId(Integer productId);
+  @Query("SELECT p FROM Product p WHERE p.productIntegration.arqProductId = :productId")
+  Optional<Product> findByArqProductId(@Param("productId") Integer productId);
 
   @Query(value = """
       SELECT p FROM Product p
@@ -70,7 +71,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
       @Param("name") String name,
       org.springframework.data.domain.Pageable pageable);
 
-  Optional<Product> findByArqProductIdAndCompanyId(Integer productId, Long companyId);
+  @Query("SELECT p FROM Product p WHERE p.companyId = :companyId AND p.productIntegration.arqProductId = :productId")
+  Optional<Product> findByArqProductIdAndCompanyId(@Param("productId") Integer productId, @Param("companyId") Long companyId);
 
   // Backwards-compatible overloads that return full lists (use with care)
   default List<Product> search(Long companyId, String name, Long categoryId) {

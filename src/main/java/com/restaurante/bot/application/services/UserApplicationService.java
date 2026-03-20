@@ -194,7 +194,6 @@ public class UserApplicationService implements UserUseCase {
                 .id(company.getId())
                 .companyName(company.getName())
                 .logo(company.getLogo())
-                .whatsappNumber(company.getNumberWhatsapp())
                 .latitude(company.getLatitude())
                 .longitude(company.getLongitude())
                 .baseValue(company.getBaseValue())
@@ -204,12 +203,6 @@ public class UserApplicationService implements UserUseCase {
                 .cityId(company.getCityId())
                 .apiKey(company.getApiKey())
                 .rappyId(company.getRpIntegrationId())
-                .numberId(company.getNumberId())
-                .tokenMetaQr(company.getTokenMeta())
-                .numberBotDelivery(company.getNumberBotDelivery())
-                .numberBotMesa(company.getNumberBotMesa())
-                .statusRappy(company.getStatusIntegrationRp())
-                .tokenMetaDelivery(company.getTokenMetaDelivery())
                 .landingTemplate(company.getLandingTemplate())
                 .build();
     }

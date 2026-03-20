@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Entity
 @Data
 @AllArgsConstructor
@@ -17,9 +15,6 @@ public class Product {
     @Id
     @Column(name = "product_id")
     private Long productId;
-
-    @Column(name = "arq_product_id")
-    private Integer arqProductId;
 
     @Column(name = "name")
     private String name;
@@ -35,9 +30,6 @@ public class Product {
 
     @Column(name = "category_id")
     private Long categoryId;
-
-    @Column(name = "GRUPO_ID")
-    private Long groupId;
 
     @Column(name = "company_id")
     private Long companyId;
@@ -61,7 +53,42 @@ public class Product {
     @Column(name = "PREPARATION_TIME")
     private Integer preparationTime;
 
-    @Column(name = "soft_restaurant_id")
-    private String softRestaurantId;
+    @Column(name = "product_integration_id", insertable = false, updatable = false)
+    private Long productIntegrationId;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "product_integration_id", referencedColumnName = "product_integration_id")
+    private ProductIntegration productIntegration;
+
+    public Integer getArqProductId() {
+        return productIntegration != null ? productIntegration.getArqProductId() : null;
+    }
+
+    public void setArqProductId(Integer arqProductId) {
+        ensureIntegration().setArqProductId(arqProductId);
+    }
+
+    public Long getGroupId() {
+        return productIntegration != null ? productIntegration.getGroupId() : null;
+    }
+
+    public void setGroupId(Long groupId) {
+        ensureIntegration().setGroupId(groupId);
+    }
+
+    public String getSoftRestaurantId() {
+        return productIntegration != null ? productIntegration.getSoftRestaurantId() : null;
+    }
+
+    public void setSoftRestaurantId(String softRestaurantId) {
+        ensureIntegration().setSoftRestaurantId(softRestaurantId);
+    }
+
+    private ProductIntegration ensureIntegration() {
+        if (productIntegration == null) {
+            productIntegration = new ProductIntegration();
+        }
+        return productIntegration;
+    }
 
 }

@@ -47,7 +47,6 @@ public class CompanyService implements CompanyInterface {
 
             Company company = new Company();
             company.setName(companyRequest.getNameCompany());
-            company.setNumberWhatsapp(companyRequest.getNumberWhatsapp());
             company.setLongitude(companyRequest.getLongitude());
             company.setLatitude(companyRequest.getLatitude());
             company.setBaseValue(companyRequest.getBaseValue());
@@ -57,11 +56,6 @@ public class CompanyService implements CompanyInterface {
             company.setExternalCompanyId(companyRequest.getExternalCompanyId());
             company.setApiKey(companyRequest.getApiKey());
             company.setRpIntegrationId(companyRequest.getRpIntegrationId());
-            company.setNumberId(companyRequest.getNumberId());
-            company.setTokenMeta(companyRequest.getTokenMeta());
-            company.setNumberBotMesa(companyRequest.getNumberBotMesa());
-            company.setNumberBotDelivery(companyRequest.getNumberBotDelivery());
-            company.setTokenMetaDelivery(companyRequest.getTokenMetaDelivery());
             company.setStatus("ACTIVE");
 
             Company savedCompany = companyRepository.save(company);
@@ -84,7 +78,6 @@ public class CompanyService implements CompanyInterface {
                 .companyId(company.getId())
                 .nameCompany(company.getName())
                 .logoUrl(company.getLogo())
-                .numberWhatsapp(company.getNumberWhatsapp())
                 .longitude(company.getLongitude())
                 .latitude(company.getLatitude())
                 .baseValue(company.getBaseValue())
@@ -93,11 +86,6 @@ public class CompanyService implements CompanyInterface {
                 .cityId(company.getCityId())
                 .apiKey(company.getApiKey())
                 .rpIntegrationId(company.getRpIntegrationId())
-                .numberId(company.getNumberId())
-                .tokenMeta(company.getTokenMeta())
-                .tokenMetaDelivery(company.getTokenMetaDelivery())
-                .numberBotMesa(company.getNumberBotMesa())
-                .numberBotDelivery(company.getNumberBotDelivery())
                 .landingTemplate(company.getLandingTemplate())
                 .status(company.getStatus())
                 .build())
@@ -128,9 +116,6 @@ public class CompanyService implements CompanyInterface {
         if (companyRequest.getNameCompany() != null) {
             company.setName(companyRequest.getNameCompany());
         }
-        if (companyRequest.getNumberWhatsapp() != null) {
-            company.setNumberWhatsapp(companyRequest.getNumberWhatsapp());
-        }
         if (companyRequest.getLongitude() != null) {
             company.setLongitude(companyRequest.getLongitude());
         }
@@ -154,18 +139,6 @@ public class CompanyService implements CompanyInterface {
         }
         if (companyRequest.getRpIntegrationId() != null) {
             company.setRpIntegrationId(companyRequest.getRpIntegrationId());
-        }
-        if (companyRequest.getNumberId() != null) {
-            company.setNumberId(companyRequest.getNumberId());
-        }
-        if (companyRequest.getTokenMeta() != null) {
-            company.setTokenMeta(companyRequest.getTokenMeta());
-        }
-        if (companyRequest.getNumberBotMesa() != null) {
-            company.setNumberBotMesa(companyRequest.getNumberBotMesa());
-        }
-        if (companyRequest.getNumberBotDelivery() != null) {
-            company.setNumberBotDelivery(companyRequest.getNumberBotDelivery());
         }
 
         if (logoFile != null && !logoFile.isEmpty()) {
@@ -200,7 +173,6 @@ public class CompanyService implements CompanyInterface {
                 .id(company.getId())
                 .companyName(company.getName())
                 .logo(company.getLogo())
-                .whatsappNumber(company.getNumberWhatsapp())
                 .latitude(company.getLatitude())
                 .longitude(company.getLongitude())
                 .baseValue(company.getBaseValue())
@@ -210,12 +182,6 @@ public class CompanyService implements CompanyInterface {
                 .cityId(company.getCityId())
                 .apiKey(company.getApiKey())
                 .rappyId(company.getRpIntegrationId())
-                .numberId(company.getNumberId())
-                .tokenMetaQr(company.getTokenMeta())
-                .numberBotDelivery(company.getNumberBotDelivery())
-                .numberBotMesa(company.getNumberBotMesa())
-                .statusRappy(company.getStatusIntegrationRp())
-                .tokenMetaDelivery(company.getTokenMetaDelivery())
                 .landingTemplate(company.getLandingTemplate())
                 .build()).collect(Collectors.toList());
 

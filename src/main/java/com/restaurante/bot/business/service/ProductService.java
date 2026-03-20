@@ -316,8 +316,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
     private Product mapToProduct(ProductDTO productDTO, Long companyExternalId) {
         Product product = new Product();
 
-        product.setArqProductId(productDTO.getId().intValue());
-        product.setSoftRestaurantId(productDTO.getIdProducto());
+        product.setProductId(productDTO.getId());
         product.setName(productDTO.getData().getDescripcion());
         product.setPrice(productDTO.getData().getPrecio());
         // Prefer explicit original price from source if available (PrecioSinImpuestos), otherwise fallback to Precio
@@ -329,7 +328,6 @@ public class ProductService implements ProductInterface, ProductUseCase {
         product.setStatus("ACTIVE");
         product.setImgProduct(productDTO.getData().getImagenMenu());
         product.setCompanyId(companyExternalId);
-        product.setGroupId(Long.parseLong(productDTO.getData().getGrupo().getIdGrupo()));
 
         try {
                 if (productDTO.getData().getComentarios() != null) {
@@ -345,18 +343,16 @@ public class ProductService implements ProductInterface, ProductUseCase {
         product.setPreparationTime(productDTO.getData().getMinutosPreparacion() != null ?
                 Math.toIntExact(Math.round(productDTO.getData().getMinutosPreparacion())) : 0);
 
-        Optional<Product> existingProduct = productRepository.findByArqProductIdAndCompanyId(product.getArqProductId(), companyExternalId);
+        Optional<Product> existingProduct = productRepository.findById(product.getProductId());
 
         if (existingProduct.isPresent()) {
             Product existing = existingProduct.get();
             existing.setName(product.getName());
-            existing.setSoftRestaurantId(product.getSoftRestaurantId());
             existing.setPrice(product.getPrice());
             existing.setOriginalPrice(product.getOriginalPrice());
             existing.setStatus(product.getStatus());
             existing.setImgProduct(product.getImgProduct());
             existing.setCompanyId(product.getCompanyId());
-            existing.setGroupId(product.getGroupId());
             existing.setComments(product.getComments());
             existing.setInformation(product.getInformation());
             existing.setPreparationTime(product.getPreparationTime());

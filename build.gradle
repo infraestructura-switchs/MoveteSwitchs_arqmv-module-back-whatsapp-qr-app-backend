@@ -76,9 +76,9 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// Keep delombok available for tooling/docs, but compile from canonical sources.
 tasks.named('compileJava') {
-    dependsOn tasks.named('delombok')
-    source = fileTree("$buildDir/generated/sources/delombok/java/main")
+    options.encoding = 'UTF-8'
 }
 
 // Ensure we only produce one executable JAR and with a predictable name for Docker

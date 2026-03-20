@@ -50,7 +50,6 @@ public class CompanyController {
 
         CompanyRequest companyRequest = new CompanyRequest();
         companyRequest.setNameCompany(companyName);
-        companyRequest.setNumberWhatsapp(whatsappNumber);
         companyRequest.setLongitude(longitude);
         companyRequest.setLatitude(latitude);
         companyRequest.setBaseValue(baseValue);
@@ -59,11 +58,6 @@ public class CompanyController {
         companyRequest.setCityId(cityId);
         companyRequest.setApiKey(apiKey);
         companyRequest.setRpIntegrationId(rappyId);
-        companyRequest.setNumberId(numberId);
-        companyRequest.setTokenMeta(tokenMetaQr);
-        companyRequest.setTokenMetaDelivery(tokenMetaDelivery);
-        companyRequest.setNumberBotMesa(numberBotMesa);
-        companyRequest.setNumberBotDelivery(numberBotDelivery);
         companyRequest.setLandingTemplate(landingTemplate);
         companyRequest.setStatus(status);
 
@@ -120,7 +114,6 @@ public class CompanyController {
         CompanyRequest companyRequest = new CompanyRequest();
         companyRequest.setCompanyId(companyId);
         companyRequest.setNameCompany(companyName);
-        companyRequest.setNumberWhatsapp(whatsappNumber);
         companyRequest.setLongitude(longitude);
         companyRequest.setLatitude(latitude);
         companyRequest.setBaseValue(baseValue);
@@ -129,10 +122,6 @@ public class CompanyController {
         companyRequest.setCityId(cityId);
         companyRequest.setApiKey(apiKey);
         companyRequest.setRpIntegrationId(rappyId);
-        companyRequest.setNumberId(numberId);
-        companyRequest.setTokenMeta(tokenMetaQr);
-        companyRequest.setNumberBotMesa(numberBotMesa);
-        companyRequest.setNumberBotDelivery(numberBotDelivery);
         companyRequest.setLandingTemplate(landingTemplate);
         companyRequest.setStatus(status);
 
@@ -146,7 +135,6 @@ public class CompanyController {
         List<String> missingFields = new ArrayList<>();
 
         addMissingField(missingFields, "companyName", companyRequest.getNameCompany());
-        addMissingField(missingFields, "whatsappNumber", companyRequest.getNumberWhatsapp());
         addMissingField(missingFields, "longitude", companyRequest.getLongitude());
         addMissingField(missingFields, "latitude", companyRequest.getLatitude());
         addMissingField(missingFields, "apiKey", companyRequest.getApiKey());

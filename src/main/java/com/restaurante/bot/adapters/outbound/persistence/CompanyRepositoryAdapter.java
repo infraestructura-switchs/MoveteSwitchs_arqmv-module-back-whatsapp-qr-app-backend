@@ -45,7 +45,6 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
             dto.setCompanyId(c.getId());
             dto.setNameCompany(c.getName());
             dto.setLogoUrl(c.getLogo());
-            dto.setNumberWhatsapp(c.getNumberWhatsapp());
             dto.setLongitude(c.getLongitude());
             dto.setLatitude(c.getLatitude());
             dto.setBaseValue(c.getBaseValue());
@@ -54,11 +53,6 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
             dto.setCityId(c.getCityId());
             dto.setApiKey(c.getApiKey());
             dto.setRpIntegrationId(c.getRpIntegrationId());
-            dto.setNumberId(c.getNumberId());
-            dto.setTokenMeta(c.getTokenMeta());
-            dto.setTokenMetaDelivery(c.getTokenMetaDelivery());
-            dto.setNumberBotMesa(c.getNumberBotMesa());
-            dto.setNumberBotDelivery(c.getNumberBotDelivery());
             dto.setLandingTemplate(c.getLandingTemplate());
             dto.setStatus(c.getStatus());
             return dto;
@@ -73,7 +67,6 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
             dto.setId(c.getId());
             dto.setCompanyName(c.getName());
             dto.setLogo(c.getLogo());
-            dto.setWhatsappNumber(c.getNumberWhatsapp());
             dto.setLatitude(c.getLatitude());
             dto.setLongitude(c.getLongitude());
             dto.setBaseValue(c.getBaseValue());
@@ -83,12 +76,6 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
             dto.setCityId(c.getCityId());
             dto.setApiKey(c.getApiKey());
             dto.setRappyId(c.getRpIntegrationId());
-            dto.setNumberId(c.getNumberId());
-            dto.setTokenMetaQr(c.getTokenMeta());
-            dto.setNumberBotDelivery(c.getNumberBotDelivery());
-            dto.setNumberBotMesa(c.getNumberBotMesa());
-            dto.setStatusRappy(c.getStatusIntegrationRp());
-            dto.setTokenMetaDelivery(c.getTokenMetaDelivery());
             dto.setLandingTemplate(c.getLandingTemplate());
             dto.setCity(null);
             return dto;

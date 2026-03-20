@@ -217,7 +217,7 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
                         "WHERE r.table_number = :tableNumber", nativeQuery = true)
         List<Object[]> getOrderByTableNumber(@Param("tableNumber") Integer tableNumber);
 
-        @Query("SELECT rt.tableNumber, o.orderId, p.softRestaurantId, p.name, op.quantity, p.price, op.commentProduct, o.date " +
+        @Query("SELECT rt.tableNumber, o.orderId, null, p.name, op.quantity, p.price, op.commentProduct, o.date " +
                         "FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p " +
                         "WHERE rt.tableId = t.tableId AND t.status = ts.transactionStatusId " +
                         "AND ot.transactionId = t.transactionId AND o.orderId = ot.orderId " +

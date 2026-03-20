@@ -14,7 +14,6 @@ public class CompanyResponseDTO {
     private Long id;
     private String companyName;
     private String logo;
-    private String whatsappNumber;
     private String latitude;
     private String longitude;
     private Double baseValue;
@@ -25,11 +24,5 @@ public class CompanyResponseDTO {
     private CityResponseDTO city;
     private String apiKey;
     private String rappyId;
-    private String numberId;
-    private String tokenMetaQr;
-    private String numberBotDelivery;
-    private String numberBotMesa;
-    private String statusRappy;
-    private String tokenMetaDelivery;
     private String landingTemplate;
 }

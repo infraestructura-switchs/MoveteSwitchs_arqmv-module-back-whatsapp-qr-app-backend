@@ -45,7 +45,6 @@ public class CompanyApplicationService implements CompanyUseCase {
 
             Company company = new Company();
             company.setName(companyRequest.getNameCompany());
-            company.setNumberWhatsapp(companyRequest.getNumberWhatsapp());
             company.setLongitude(companyRequest.getLongitude());
             company.setLatitude(companyRequest.getLatitude());
             company.setBaseValue(companyRequest.getBaseValue());
@@ -55,11 +54,6 @@ public class CompanyApplicationService implements CompanyUseCase {
             company.setExternalCompanyId(companyRequest.getExternalCompanyId());
             company.setApiKey(companyRequest.getApiKey());
             company.setRpIntegrationId(companyRequest.getRpIntegrationId());
-            company.setNumberId(companyRequest.getNumberId());
-            company.setTokenMeta(companyRequest.getTokenMeta());
-            company.setNumberBotMesa(companyRequest.getNumberBotMesa());
-            company.setNumberBotDelivery(companyRequest.getNumberBotDelivery());
-            company.setTokenMetaDelivery(companyRequest.getTokenMetaDelivery());
             company.setStatus("ACTIVE");
 
             Company savedCompany = companyRepo.save(company);
@@ -68,7 +62,6 @@ public class CompanyApplicationService implements CompanyUseCase {
                     .companyId(savedCompany.getId())
                     .nameCompany(companyRequest.getNameCompany())
                     .logoUrl(savedCompany.getLogo())
-                    .numberWhatsapp(companyRequest.getNumberWhatsapp())
                     .longitude(companyRequest.getLongitude())
                     .latitude(companyRequest.getLatitude())
                     .baseValue(companyRequest.getBaseValue())
@@ -77,11 +70,6 @@ public class CompanyApplicationService implements CompanyUseCase {
                     .cityId(companyRequest.getCityId())
                     .apiKey(companyRequest.getApiKey())
                     .rpIntegrationId(companyRequest.getRpIntegrationId())
-                    .numberId(companyRequest.getNumberId())
-                    .tokenMeta(companyRequest.getTokenMeta())
-                    .numberBotMesa(companyRequest.getNumberBotMesa())
-                    .numberBotDelivery(companyRequest.getNumberBotDelivery())
-                    .tokenMetaDelivery(companyRequest.getTokenMetaDelivery())
                     .landingTemplate(companyRequest.getLandingTemplate())
                     .build();
 
@@ -119,9 +107,6 @@ public class CompanyApplicationService implements CompanyUseCase {
         if (companyRequest.getNameCompany() != null) {
             company.setName(companyRequest.getNameCompany());
         }
-        if (companyRequest.getNumberWhatsapp() != null) {
-            company.setNumberWhatsapp(companyRequest.getNumberWhatsapp());
-        }
         if (companyRequest.getLongitude() != null) {
             company.setLongitude(companyRequest.getLongitude());
         }
@@ -146,18 +131,6 @@ public class CompanyApplicationService implements CompanyUseCase {
         if (companyRequest.getRpIntegrationId() != null) {
             company.setRpIntegrationId(companyRequest.getRpIntegrationId());
         }
-        if (companyRequest.getNumberId() != null) {
-            company.setNumberId(companyRequest.getNumberId());
-        }
-        if (companyRequest.getTokenMeta() != null) {
-            company.setTokenMeta(companyRequest.getTokenMeta());
-        }
-        if (companyRequest.getNumberBotMesa() != null) {
-            company.setNumberBotMesa(companyRequest.getNumberBotMesa());
-        }
-        if (companyRequest.getNumberBotDelivery() != null) {
-            company.setNumberBotDelivery(companyRequest.getNumberBotDelivery());
-        }
 
         if (logoFile != null && !logoFile.isEmpty()) {
             try {
@@ -175,7 +148,6 @@ public class CompanyApplicationService implements CompanyUseCase {
             .companyId(updatedCompany.getId())
             .nameCompany(companyRequest.getNameCompany())
             .logoUrl(updatedCompany.getLogo())
-            .numberWhatsapp(companyRequest.getNumberWhatsapp())
             .longitude(companyRequest.getLongitude())
             .latitude(companyRequest.getLatitude())
             .baseValue(companyRequest.getBaseValue())
@@ -184,11 +156,6 @@ public class CompanyApplicationService implements CompanyUseCase {
             .cityId(companyRequest.getCityId())
             .apiKey(companyRequest.getApiKey())
             .rpIntegrationId(companyRequest.getRpIntegrationId())
-            .numberId(companyRequest.getNumberId())
-            .tokenMeta(companyRequest.getTokenMeta())
-            .numberBotMesa(companyRequest.getNumberBotMesa())
-            .numberBotDelivery(companyRequest.getNumberBotDelivery())
-            .tokenMetaDelivery(companyRequest.getTokenMetaDelivery())
             .landingTemplate(companyRequest.getLandingTemplate())
             .build();
 
@@ -211,7 +178,6 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .companyId(company.getId())
                 .nameCompany(company.getName())
                 .logoUrl(company.getLogo())
-                .numberWhatsapp(company.getNumberWhatsapp())
                 .longitude(company.getLongitude())
                 .latitude(company.getLatitude())
                 .baseValue(company.getBaseValue())
@@ -220,11 +186,6 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .cityId(company.getCityId())
                 .apiKey(company.getApiKey())
                 .rpIntegrationId(company.getRpIntegrationId())
-                .numberId(company.getNumberId())
-                .tokenMeta(company.getTokenMeta())
-                .numberBotMesa(company.getNumberBotMesa())
-                .numberBotDelivery(company.getNumberBotDelivery())
-                .tokenMetaDelivery(company.getTokenMetaDelivery())
                 .landingTemplate(company.getLandingTemplate())
                 .build();
     }
@@ -245,7 +206,6 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .id(c.getCompanyId())
                 .companyName(c.getNameCompany())
                 .logo(c.getLogoUrl())
-                .whatsappNumber(c.getNumberWhatsapp())
                 .latitude(c.getLatitude())
                 .longitude(c.getLongitude())
                 .baseValue(c.getBaseValue())
@@ -254,11 +214,6 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .cityId(c.getCityId())
                 .apiKey(c.getApiKey())
                 .rappyId(c.getRpIntegrationId())
-                .numberId(c.getNumberId())
-                .tokenMetaQr(c.getTokenMeta())
-                .numberBotDelivery(c.getNumberBotDelivery())
-                .numberBotMesa(c.getNumberBotMesa())
-                .tokenMetaDelivery(c.getTokenMetaDelivery())
                 .landingTemplate(c.getLandingTemplate())
                 .build()).toList();
     }
