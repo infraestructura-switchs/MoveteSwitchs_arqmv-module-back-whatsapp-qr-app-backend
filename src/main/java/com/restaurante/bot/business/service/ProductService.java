@@ -134,16 +134,18 @@ public class ProductService implements ProductInterface, ProductUseCase {
             throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
         }
 
-        if (!companyRepository.existsByExternalCompanyId(externalCompanyId)) { // Asume companyRepository inyectado
+        Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
+        if (company == null) {
             throw  new GenericException("La compañia no existe", HttpStatus.NOT_FOUND);
         }
+        Long companyId = company.getId();
 
-        List<Category> categories = categoryRepository.findByCompanyId(externalCompanyId);
-        List<Product> products = productRepository.findByCompanyIdOrderByNameAsc(externalCompanyId);
+        List<Category> categories = categoryRepository.findByCompanyId(companyId);
+        List<Product> products = productRepository.findByCompanyIdOrderByNameAsc(companyId);
 
         String imageByCompany = imageByCompanyId(externalCompanyId.intValue());
         Map<Long, ProductDiscount> activeDiscounts = productDiscountSupport.findActiveDiscountsByProductIds(
-            externalCompanyId,
+            companyId,
             products.stream().map(Product::getProductId).collect(Collectors.toList()));
 
         Map<Long, List<ProductDto>> categorizedProductMap = products.stream()
