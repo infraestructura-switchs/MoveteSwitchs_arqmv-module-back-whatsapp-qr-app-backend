@@ -47,9 +47,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 log.debug("Claims extracted: {}", claims);
 
                 if (jwtUtil.isTokenValid(token)) {
-                    Long companyId = jwtUtil.extractCompanyId(token);
+                    Long companyExternalId = jwtUtil.extractCompanyExternalId(token);
                     String sessionId = jwtUtil.extractSessionId(token);
-                    log.debug("Token valid, extracted companyId: {}", companyId);
+                    log.debug("Token valid, extracted companyExternalId: {}", companyExternalId);
 
                     if (sessionId == null || !sessionRegistryService.isSessionActive(sessionId)) {
                         log.warn("Inactive or missing session for token");
@@ -65,9 +65,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
                     UsernamePasswordAuthenticationToken authToken;
                     if (authorities != null && !authorities.isEmpty()) {
-                        authToken = new UsernamePasswordAuthenticationToken(companyId, null, authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+                        authToken = new UsernamePasswordAuthenticationToken(companyExternalId, null, authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
                     } else {
-                        authToken = new UsernamePasswordAuthenticationToken(companyId, null, null);  // Sin authorities si no hay
+                        authToken = new UsernamePasswordAuthenticationToken(companyExternalId, null, null);  // Sin authorities si no hay
                     }
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

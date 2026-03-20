@@ -20,16 +20,15 @@ public class SessionRegistryService {
         this.sessionExpirationMs = sessionExpirationMs;
     }
 
-    public SessionMetadata registerSession(String sessionId, Long companyId, Long userId) {
+    public SessionMetadata registerSession(String sessionId, Long companyExternalId, Long userId) {
         if (sessionId == null) {
             // Defensive: generate session id if caller provided null to avoid NPE on ConcurrentHashMap
             sessionId = UUID.randomUUID().toString().replace("-", "");
         }
-        return registerSession(sessionId, companyId, userId, Instant.now().plusMillis(sessionExpirationMs));
+        return registerSession(sessionId, companyExternalId, userId, Instant.now().plusMillis(sessionExpirationMs));
     }
-
-    public SessionMetadata registerSession(String sessionId, Long companyId, Long userId, Instant expiresAt) {
-        SessionMetadata sessionMetadata = new SessionMetadata(companyId, userId, expiresAt);
+    public SessionMetadata registerSession(String sessionId, Long companyExternalId, Long userId, Instant expiresAt) {
+        SessionMetadata sessionMetadata = new SessionMetadata(companyExternalId, userId, expiresAt);
         activeSessions.put(sessionId, sessionMetadata);
         return sessionMetadata;
     }
@@ -62,7 +61,7 @@ public class SessionRegistryService {
         return sessionExpirationMs;
     }
 
-    public record SessionMetadata(Long companyId, Long userId, Instant expiresAt) {
+    public record SessionMetadata(Long companyExternalId, Long userId, Instant expiresAt) {
     }
 
     public record SessionStatus(String sessionId, boolean active, boolean expired, Instant expiresAt,

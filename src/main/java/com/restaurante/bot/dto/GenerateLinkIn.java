@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GenerateLinkIn {
 
-    @NotNull(message = "The companyId is required.")
-    private Long companyId;
+    @NotNull(message = "The companyExternalId is required.")
+    private Long companyExternalId;
     @NotBlank(message = "The userToken is required.")
     private String userToken;
     @NotBlank(message = "The apiKey is required.")

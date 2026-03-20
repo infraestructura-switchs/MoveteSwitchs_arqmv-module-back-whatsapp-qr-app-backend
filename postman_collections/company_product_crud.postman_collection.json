@@ -15,7 +15,7 @@
     { "key": "loginPassword", "value": "123456" },
     { "key": "loginUserId", "value": "1" },
     { "key": "loginMode", "value": "GGP_LOGIN" },
-    { "key": "companyId", "value": "1" },
+    { "key": "companyExternalId", "value": "1" },
     { "key": "productId", "value": "1" },
     { "key": "categoryId", "value": "1" },
     { "key": "preparationTime", "value": "15" }
@@ -43,9 +43,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/categories/company/{{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/categories/company/{{companyExternalId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "{{appRequestMapping}}", "categories", "company", "{{companyId}}" ]
+              "path": [ "{{appRequestMapping}}", "categories", "company", "{{companyExternalId}}" ]
             }
           },
           "response": []
@@ -68,7 +68,7 @@
           "request": {
             "method": "POST",
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{ \"name\": \"Mi Categoria\", \"companyId\": {{companyId}} }", "options": { "raw": { "language": "json" } } },
+            "body": { "mode": "raw", "raw": "{ \"name\": \"Mi Categoria\", \"companyExternalId\": {{companyExternalId}} }", "options": { "raw": { "language": "json" } } },
             "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/categories", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "categories" ] }
           },
           "response": []
@@ -102,7 +102,7 @@
           "request": {
             "method": "POST",
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{ \"name\": \"Zona 1\", \"companyId\": {{companyId}} }", "options": { "raw": { "language": "json" } } },
+            "body": { "mode": "raw", "raw": "{ \"name\": \"Zona 1\", \"companyExternalId\": {{companyExternalId}} }", "options": { "raw": { "language": "json" } } },
             "url": { "raw": "{{baseUrl}}/{{appRequestMapping}}/area/create", "host": [ "{{baseUrl}}" ], "path": [ "{{appRequestMapping}}", "area", "create" ] }
           },
           "response": []
@@ -147,7 +147,7 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.token) pm.collectionVariables.set('authToken', jsonData.token);",
                   "if (jsonData.session_id) pm.collectionVariables.set('sessionId', jsonData.session_id);",
-                  "if (jsonData.companyId) pm.collectionVariables.set('companyId', String(jsonData.companyId));",
+                  "if (jsonData.companyExternalId) pm.collectionVariables.set('companyExternalId', String(jsonData.companyExternalId));",
                   "if (jsonData.userId) pm.collectionVariables.set('loginUserId', String(jsonData.userId));"
                 ]
               }
@@ -193,7 +193,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"companyId\": {{companyId}}, \"userId\": {{loginUserId}} }",
+              "raw": "{ \"companyExternalId\": {{companyExternalId}}, \"userId\": {{loginUserId}} }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -226,7 +226,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"companyId\": {{companyId}}, \"userId\": {{loginUserId}}, \"userToken\": \"{{authToken}}\", \"mesa\": \"1\", \"sessionId\": \"{{sessionId}}\" }",
+              "raw": "{ \"companyExternalId\": {{companyExternalId}}, \"userId\": {{loginUserId}}, \"userToken\": \"{{authToken}}\", \"mesa\": \"1\", \"sessionId\": \"{{sessionId}}\" }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -304,9 +304,9 @@
                   "});",
                   "",
                   "var jsonData = pm.response.json();",
-                  "var companyId = jsonData.companyId || jsonData.id;",
-                  "if (companyId) {",
-                  "    pm.collectionVariables.set('companyId', String(companyId));",
+                  "var companyExternalId = jsonData.companyExternalId || jsonData.id;",
+                  "if (companyExternalId) {",
+                  "    pm.collectionVariables.set('companyExternalId', String(companyExternalId));",
                   "}",
                   ""
                 ]
@@ -358,9 +358,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/{{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/{{companyExternalId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "{{appRequestMapping}}", "company", "{{companyId}}" ]
+              "path": [ "{{appRequestMapping}}", "company", "{{companyExternalId}}" ]
             }
           },
           "response": []
@@ -371,9 +371,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/delete/{{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/delete/{{companyExternalId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "{{appRequestMapping}}", "company", "delete", "{{companyId}}" ]
+              "path": [ "{{appRequestMapping}}", "company", "delete", "{{companyExternalId}}" ]
             }
           },
           "response": []
@@ -391,9 +391,9 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/updateByCompanynId/{{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/company/updateByCompanynId/{{companyExternalId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "{{appRequestMapping}}", "company", "updateByCompanynId", "{{companyId}}" ]
+              "path": [ "{{appRequestMapping}}", "company", "updateByCompanynId", "{{companyExternalId}}" ]
             }
           },
           "response": []
@@ -441,9 +441,9 @@
               { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
             ],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/getProductByCompany/{{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/getProductByCompany/{{companyExternalId}}",
               "host": [ "{{baseUrl}}" ],
-              "path": [ "{{appRequestMapping}}", "product", "getProductByCompany", "{{companyId}}" ]
+              "path": [ "{{appRequestMapping}}", "product", "getProductByCompany", "{{companyExternalId}}" ]
             }
           },
           "response": []
@@ -454,10 +454,10 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/update-data?companyId={{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/update-data?companyExternalId={{companyExternalId}}",
               "host": [ "{{baseUrl}}" ],
               "path": [ "{{appRequestMapping}}", "product", "update-data" ],
-              "query": [ { "key": "companyId", "value": "{{companyId}}" } ]
+              "query": [ { "key": "companyExternalId", "value": "{{companyExternalId}}" } ]
             }
           },
           "response": []
@@ -486,11 +486,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/search?companyId={{companyId}}&name=Pizza&category=Comidas",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/search?companyExternalId={{companyExternalId}}&name=Pizza&category=Comidas",
               "host": [ "{{baseUrl}}" ],
               "path": [ "{{appRequestMapping}}", "product", "search" ],
               "query": [
-                { "key": "companyId", "value": "{{companyId}}" },
+                { "key": "companyExternalId", "value": "{{companyExternalId}}" },
                 { "key": "name", "value": "Pizza" },
                 { "key": "category", "value": "Comidas" }
               ]
@@ -504,11 +504,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/by-price?companyId={{companyId}}&sort=asc",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/product/by-price?companyExternalId={{companyExternalId}}&sort=asc",
               "host": [ "{{baseUrl}}" ],
               "path": [ "{{appRequestMapping}}", "product", "by-price" ],
               "query": [
-                { "key": "companyId", "value": "{{companyId}}" },
+                { "key": "companyExternalId", "value": "{{companyExternalId}}" },
                 { "key": "sort", "value": "asc" }
               ]
             }
@@ -543,7 +543,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"productName\": \"Pizza\", \"price\": 12000, \"companyId\": {{companyId}}, \"categoryId\": {{categoryId}}, \"preparationTime\": {{preparationTime}} }",
+              "raw": "{ \"productName\": \"Pizza\", \"price\": 12000, \"companyExternalId\": {{companyExternalId}}, \"categoryId\": {{categoryId}}, \"preparationTime\": {{preparationTime}} }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -561,7 +561,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"productName\": \"Pizza invalida\", \"price\": 0, \"companyId\": {{companyId}}, \"categoryId\": 0 }",
+              "raw": "{ \"productName\": \"Pizza invalida\", \"price\": 0, \"companyExternalId\": {{companyExternalId}}, \"categoryId\": 0 }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -592,7 +592,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"productName\": \"Pizza Hawaiana\", \"price\": 13000, \"companyId\": {{companyId}}, \"categoryId\": {{categoryId}}, \"preparationTime\": {{preparationTime}} }",
+              "raw": "{ \"productName\": \"Pizza Hawaiana\", \"price\": 13000, \"companyExternalId\": {{companyExternalId}}, \"categoryId\": {{categoryId}}, \"preparationTime\": {{preparationTime}} }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -610,7 +610,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{ \"productName\": \"Pizza rota\", \"price\": -1, \"companyId\": {{companyId}}, \"preparationTime\": 0 }",
+              "raw": "{ \"productName\": \"Pizza rota\", \"price\": -1, \"companyExternalId\": {{companyExternalId}}, \"preparationTime\": 0 }",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -640,11 +640,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product?companyId={{companyId}}&page=0&size=5",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product?companyExternalId={{companyExternalId}}&page=0&size=5",
               "host": [ "{{baseUrl}}" ],
               "path": [ "{{appRequestMapping}}", "admin", "product" ],
               "query": [
-                { "key": "companyId", "value": "{{companyId}}" },
+                { "key": "companyExternalId", "value": "{{companyExternalId}}" },
                 { "key": "page", "value": "0" },
                 { "key": "size", "value": "5" }
               ]
@@ -658,10 +658,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/get-all-without-page?companyId={{companyId}}",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/get-all-without-page?companyExternalId={{companyExternalId}}",
               "host": [ "{{baseUrl}}" ],
               "path": [ "{{appRequestMapping}}", "admin", "product", "get-all-without-page" ],
-              "query": [ { "key": "companyId", "value": "{{companyId}}" } ]
+              "query": [ { "key": "companyExternalId", "value": "{{companyExternalId}}" } ]
             }
           },
           "response": []
@@ -672,11 +672,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/search?companyId={{companyId}}&name=Pizza",
+              "raw": "{{baseUrl}}/{{appRequestMapping}}/admin/product/search?companyExternalId={{companyExternalId}}&name=Pizza",
               "host": [ "{{baseUrl}}" ],
               "path": [ "{{appRequestMapping}}", "admin", "product", "search" ],
               "query": [
-                { "key": "companyId", "value": "{{companyId}}" },
+                { "key": "companyExternalId", "value": "{{companyExternalId}}" },
                 { "key": "name", "value": "Pizza" }
               ]
             }

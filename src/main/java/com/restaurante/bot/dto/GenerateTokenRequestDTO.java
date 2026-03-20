@@ -13,8 +13,8 @@ import jakarta.validation.constraints.NotNull;
 @NoArgsConstructor
 public class GenerateTokenRequestDTO {
 
-    @NotNull(message = "companyId obligatorio")
-    private Long companyId;
+    @NotNull(message = "companyExternalId obligatorio")
+    private Long companyExternalId;
 
     @NotNull(message = "userId obligatorio")
     private Long userId;

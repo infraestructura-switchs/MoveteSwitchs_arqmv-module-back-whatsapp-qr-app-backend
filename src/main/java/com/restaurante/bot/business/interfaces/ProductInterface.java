@@ -12,14 +12,14 @@ import java.util.List;
 
 public interface ProductInterface {
 
-    CategorizedProductsDTO getProductsSfotRestaurantByCompanyId(Long companyId);
+    CategorizedProductsDTO getProductsSfotRestaurantByCompanyId(Long companyExternalId);
 
-    GenericResponse updateOrCreateProductsWithCategory(Long companyId);
+    GenericResponse updateOrCreateProductsWithCategory(Long companyExternalId);
 
     ProductDto updateProductDescription(ProductUpdateDTO productUpdateDTO);
 
-    List<ProductDto> searchProducts(Long companyId, String name, String categoryName);
+    List<ProductDto> searchProducts(Long companyExternalId, String name, String categoryName);
 
-    List<ProductDto> listByPrice(Long companyId, String categoryName, String sort,String name);
+    List<ProductDto> listByPrice(Long companyExternalId, String categoryName, String sort,String name);
 
 }

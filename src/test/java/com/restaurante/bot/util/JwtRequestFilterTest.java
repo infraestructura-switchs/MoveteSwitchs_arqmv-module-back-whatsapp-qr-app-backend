@@ -38,7 +38,7 @@ class JwtRequestFilterTest {
 
         when(jwtUtil.extractAllClaims("jwt-token")).thenReturn(claims);
         when(jwtUtil.isTokenValid("jwt-token")).thenReturn(true);
-        when(jwtUtil.extractCompanyId("jwt-token")).thenReturn(273L);
+        when(jwtUtil.extractCompanyExternalId("jwt-token")).thenReturn(273L);
         when(jwtUtil.extractSessionId("jwt-token")).thenReturn("session-123");
         when(sessionRegistryService.isSessionActive("session-123")).thenReturn(false);
 
