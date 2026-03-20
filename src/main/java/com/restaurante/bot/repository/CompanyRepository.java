@@ -17,7 +17,11 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
         Boolean existsByExternalCompanyId(Long externalCompanyId);
 
+        Long countByExternalCompanyId(Long externalCompanyId);
+
         Company findByExternalCompanyId(Long externalCompanyId);
+
+        Company findFirstByExternalCompanyIdOrderByIdAsc(Long externalCompanyId);
 
         @Query("SELECT c.externalCompanyId FROM Company c WHERE c.status = 'ACTIVE'")
         List<Long> findCompanyIds();
