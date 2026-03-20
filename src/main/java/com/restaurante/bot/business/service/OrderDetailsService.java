@@ -166,45 +166,69 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     @Transactional
     public GenericResponse saveOrder(OrderDetailsDTO orderDetailsDTO) {
 
+        log.info("saveOrder - start, externalCompanyId(body)={}, phone={}, itemsCount={}, total={}, table={}",
+                orderDetailsDTO != null ? orderDetailsDTO.getExternalCompanyId() : null,
+                orderDetailsDTO != null ? orderDetailsDTO.getPhone() : null,
+                orderDetailsDTO != null && orderDetailsDTO.getItems() != null ? orderDetailsDTO.getItems().size() : null,
+                orderDetailsDTO != null ? orderDetailsDTO.getTotal() : null,
+                orderDetailsDTO != null ? orderDetailsDTO.getRestaurantTable() : null);
+
         Long tokenCompanyId = getAuthenticatedCompanyId();
+        log.info("saveOrder - authenticated externalCompanyId from token={}", tokenCompanyId);
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
+            log.warn("saveOrder - company not found by externalCompanyId={}", tokenCompanyId);
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        log.info("saveOrder - resolved internal companyId={} for externalCompanyId={}", company.getId(), tokenCompanyId);
         // Verifica la validez del request (items, campos requeridos)
         validateOrderRequest(orderDetailsDTO);
+        log.debug("saveOrder - request validation passed");
 
         // Verifica la mesa
         RestaurantTable table = findTableByNumber(orderDetailsDTO.getRestaurantTable(), company.getId());
+        log.info("saveOrder - table found, tableId={}, status={}", table.getTableId(), table.getStatus());
 
         // Verifica si la mesa está disponible
         if (table.getStatus() != null && table.getStatus() == 2) {
+            log.info("saveOrder - table is available, proceeding with order creation");
 
             // Guarda la orden
             CustomerOrder setOrder = saveCustomerOrder(orderDetailsDTO.getTotal(), orderDetailsDTO.getPhone(),
                     company.getId());
+            log.info("saveOrder - customer order created, orderId={}", setOrder.getOrderId());
 
             // Guarda los productos de la orden
             saveOrderProducts(orderDetailsDTO.getItems(), setOrder.getOrderId(), company.getId());
+            log.info("saveOrder - order products saved, orderId={}, itemsCount={}",
+                    setOrder.getOrderId(), orderDetailsDTO.getItems().size());
 
             // Crea o recupera la transacción
             Transaction transaction = createTransaction(orderDetailsDTO, table, company.getId());
+            log.info("saveOrder - transaction resolved, transactionId={}", transaction.getTransactionId());
 
             // Crea la relación entre orden y transacción
             OrderTransaction orderTransaction = createOrderTransaction(setOrder.getOrderId(),
                     transaction.getTransactionId(), company.getId());
+                log.debug("saveOrder - orderTransaction created, orderTransactionId={}", orderTransaction.getOrderTransactionId());
 
             // Actualiza el total de la transacción
             updateTransactionTotal(transaction, company.getId());
+            log.debug("saveOrder - transaction total updated, transactionId={}", transaction.getTransactionId());
 
             // Guarda el historial de la transacción
             saveTransactionHistory(transaction);
+            log.debug("saveOrder - transaction history saved, transactionId={}", transaction.getTransactionId());
+
+            log.info("saveOrder - success, orderId={}, transactionId={}",
+                    setOrder.getOrderId(), transaction.getTransactionId());
 
             return new GenericResponse("Transacción guardada con éxito", 200L);
         }
 
+        log.warn("saveOrder - invalid table status for tableId={}, status={}", table.getTableId(), table.getStatus());
         throw new GenericException("Mesa en estado inválido", HttpStatus.BAD_REQUEST);
     }
 

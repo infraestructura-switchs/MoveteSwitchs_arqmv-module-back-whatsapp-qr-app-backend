@@ -1,13 +1,21 @@
 package com.restaurante.bot.controller;
 
 import com.restaurante.bot.application.ports.incoming.RestaurantTableUseCase;
+import com.restaurante.bot.dto.ChangeStatusTableDTO;
+import com.restaurante.bot.model.RestaurantTable;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,4 +61,27 @@ class RestaurantTableControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Campos con valor invalido: tableNumber"));
     }
+
+        @Test
+        void changeStatusOcuped_ShouldAcceptExternalCompanyId() throws Exception {
+        when(restaurantTableInterface.changeStatusOcuped(any(ChangeStatusTableDTO.class)))
+            .thenReturn(new RestaurantTable(1, 1L, 2L, 10L));
+
+        String payload = """
+            {
+              "externalCompanyId": 273,
+              "tableNumber": 1
+            }
+            """;
+
+        mockMvc.perform(post("/api/back-whatsapp-qr-app/restauranttable/change/status-ocuped")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+            .andExpect(status().isOk());
+
+        ArgumentCaptor<ChangeStatusTableDTO> captor = ArgumentCaptor.forClass(ChangeStatusTableDTO.class);
+        verify(restaurantTableInterface).changeStatusOcuped(captor.capture());
+        assertEquals(273L, captor.getValue().getExternalCompanyId());
+        assertEquals(1L, captor.getValue().getTableNumber());
+        }
 }

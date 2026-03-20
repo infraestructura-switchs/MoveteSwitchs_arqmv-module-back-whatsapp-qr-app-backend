@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChangeStatusTableDTO {
 
-    private Long companyId;
+    private Long externalCompanyId;
     private Long tableNumber;
 
 }

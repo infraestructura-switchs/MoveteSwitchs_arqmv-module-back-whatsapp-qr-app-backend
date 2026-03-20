@@ -93,8 +93,8 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
         }
-        log.info("external company id: " + changeStatusTableDTO.getCompanyId());
-        Company company = companyRepository.findByExternalCompanyId(changeStatusTableDTO.getCompanyId());
+        log.info("external company id: " + changeStatusTableDTO.getExternalCompanyId());
+        Company company = companyRepository.findByExternalCompanyId(changeStatusTableDTO.getExternalCompanyId());
         log.info("company id: " + company.getId());
 
         User user = userRepository.findUserByCompany(company.getId());
