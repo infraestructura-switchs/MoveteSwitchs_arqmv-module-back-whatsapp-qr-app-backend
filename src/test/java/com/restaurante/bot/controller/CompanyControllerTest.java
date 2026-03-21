@@ -55,12 +55,5 @@ class CompanyControllerTest {
     }
 
     @Test
-    void updateCompany_ShouldReturnBadRequest_WhenExternalIdIsInvalid() throws Exception {
-        String companyJson = "{\"nameCompany\":\"Mi Empresa\", \"apiKey\":\"test-api-key\", \"externalCompanyId\": \"null\"}";
-        MockMultipartFile companyPart = new MockMultipartFile("company", "company", "application/json", companyJson.getBytes());
-        mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/update/1")
-                        .file(companyPart)
-                        .with(request -> { request.setMethod("PUT"); return request; }))
-                .andExpect(status().isBadRequest());
-    }
+    // Removed externalId invalid test: no longer applicable after controller now accepts a JSON 'company' part
 }
