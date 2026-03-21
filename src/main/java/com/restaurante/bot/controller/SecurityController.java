@@ -54,16 +54,19 @@ public class SecurityController {
     public ResponseEntity<?> generateToken(@Valid @RequestBody GenerateTokenRequestDTO generateTokenRequestDTO) {
         log.info("Se inicia el endpoint que genera un token");
         Long externalCompanyId = generateTokenRequestDTO.getExternalCompanyId();
-        long matches = companyRepository.countByExternalCompanyId(externalCompanyId);
-        if (matches == 0) {
+        boolean exists = companyRepository.existsByExternalCompanyId(externalCompanyId);
+        if (!exists) {
             return new ResponseEntity<String>("Compañía no existe", HttpStatus.NOT_FOUND);
         }
+
+        long matches = companyRepository.countByExternalCompanyId(externalCompanyId);
         if (matches > 1) {
             log.error("externalCompanyId duplicado detectado: {}", externalCompanyId);
             return new ResponseEntity<String>("externalCompanyId duplicado, contacte al administrador", HttpStatus.CONFLICT);
         }
+
         // Validate apiKey provided in the request
-        Company company = companyRepository.findFirstByExternalCompanyIdOrderByIdAsc(externalCompanyId);
+        Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
         if (company.getApiKey() == null || !company.getApiKey().equals(generateTokenRequestDTO.getApiKey())) {
             return new ResponseEntity<String>("apiKey invalido", HttpStatus.UNAUTHORIZED);
         }
@@ -91,16 +94,18 @@ public class SecurityController {
         Map<String, String> queryParams = new HashMap<>();
 
         Long externalCompanyId = generateLinkIn.getExternalCompanyId();
-        long matches = companyRepository.countByExternalCompanyId(externalCompanyId);
-        if (matches == 0) {
+        boolean exists = companyRepository.existsByExternalCompanyId(externalCompanyId);
+        if (!exists) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
+        long matches = companyRepository.countByExternalCompanyId(externalCompanyId);
         if (matches > 1) {
             log.error("externalCompanyId duplicado detectado: {}", externalCompanyId);
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        Company company= companyRepository.findFirstByExternalCompanyIdOrderByIdAsc(externalCompanyId);
+        Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
 
         // Validate apiKey provided in the request
         if (generateLinkIn.getApiKey() == null || !generateLinkIn.getApiKey().equals(company.getApiKey())) {

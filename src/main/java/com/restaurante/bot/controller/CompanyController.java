@@ -31,15 +31,33 @@ public class CompanyController {
 
     private final CompanyUseCase companyUseCase;
 
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<CompanyRequest> save(
-            @RequestPart("company") @Valid CompanyRequest companyRequest,
+        @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<CompanyRequest> save(
+            @RequestParam(value = "companyName", required = false) String companyName,
+            @RequestParam(value = "longitude", required = false) String longitude,
+            @RequestParam(value = "latitude", required = false) String latitude,
+            @RequestParam(value = "baseValue", required = false) Double baseValue,
+            @RequestParam(value = "additionalValue", required = false) Double additionalValue,
+            @RequestParam(value = "externalId", required = false) Long externalId,
+            @RequestParam(value = "cityId", required = false) Long cityId,
+            @RequestParam(value = "apiKey", required = false) String apiKey,
             @RequestPart(value = "logo", required = false) MultipartFile logo
-    ) {
+        ) {
+        CompanyRequest companyRequest = CompanyRequest.builder()
+            .nameCompany(companyName)
+            .longitude(longitude)
+            .latitude(latitude)
+            .baseValue(baseValue)
+            .additionalValue(additionalValue)
+            .externalCompanyId(externalId)
+            .cityId(cityId)
+            .apiKey(apiKey)
+            .build();
+
         validateCreateCompanyRequest(companyRequest);
         CompanyRequest savedCompany = companyUseCase.save(companyRequest, logo);
         return ResponseEntity.ok(savedCompany);
-    }
+        }
 
 
     @GetMapping("/get-company")
@@ -70,6 +88,22 @@ public class CompanyController {
                                                  @RequestPart(value = "logo", required = false) MultipartFile logo) {
         log.info("Iniciando actualización de empresa con ID: {}", companyId);
         companyRequest.setCompanyId(companyId);
+        validateUpdateCompanyRequest(companyRequest);
+        CompanyRequest updatedCompany = companyUseCase.update(companyRequest, logo);
+        return ResponseEntity.ok(updatedCompany);
+    }
+
+    @RequestMapping(value = "/updateByCompanynId/{companyId}", method = RequestMethod.PUT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CompanyRequest> updateByCompanynId(@PathVariable Long companyId,
+                                                              @RequestParam(value = "companyName", required = false) String companyName,
+                                                              @RequestParam(value = "apiKey", required = false) String apiKey,
+                                                              @RequestPart(value = "logo", required = false) MultipartFile logo) {
+        CompanyRequest companyRequest = CompanyRequest.builder()
+                .companyId(companyId)
+                .nameCompany(companyName)
+                .apiKey(apiKey)
+                .build();
+
         validateUpdateCompanyRequest(companyRequest);
         CompanyRequest updatedCompany = companyUseCase.update(companyRequest, logo);
         return ResponseEntity.ok(updatedCompany);
