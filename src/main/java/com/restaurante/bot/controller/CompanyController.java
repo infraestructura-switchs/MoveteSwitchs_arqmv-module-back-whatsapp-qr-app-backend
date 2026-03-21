@@ -4,19 +4,24 @@ package com.restaurante.bot.controller;
 import com.restaurante.bot.application.ports.incoming.CompanyUseCase;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.restaurante.bot.exception.GenericException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Company", description = "APIs para la gestión de compañías")
 @RestController
 @RequestMapping("/${app.request.mapping}/company")
 @RequiredArgsConstructor
@@ -26,39 +31,13 @@ public class CompanyController {
 
     private final CompanyUseCase companyUseCase;
 
-    @PostMapping("/create")
-    public ResponseEntity<CompanyRequest> createCompany(
-            @RequestParam(value = "companyName", required = false) String companyName,
-            @RequestParam(value = "longitude", required = false) String longitude,
-            @RequestParam(value = "latitude", required = false) String latitude,
-            @RequestParam(value = "baseValue", required = false) Double baseValue,
-            @RequestParam(value = "additionalValue", required = false) Double additionalValue,
-            @RequestParam(value = "logo", required = false) MultipartFile logo,
-            @RequestParam(value = "externalId", required = false) Long externalId,
-            @RequestParam(value = "cityId", required = false) Long cityId,
-            @RequestParam(value = "apiKey", required = false) String apiKey,
-            @RequestParam(value = "rappyId", required = false) String rappyId,
-            @RequestParam(value = "landingTemplate", required = false) String landingTemplate,
-            @RequestParam(value = "status", required = false) String status
-            ) {
-
-        CompanyRequest companyRequest = new CompanyRequest();
-        companyRequest.setNameCompany(companyName);
-        companyRequest.setLongitude(longitude);
-        companyRequest.setLatitude(latitude);
-        companyRequest.setBaseValue(baseValue);
-        companyRequest.setAdditionalValue(additionalValue);
-        companyRequest.setExternalCompanyId(externalId);
-        companyRequest.setCityId(cityId);
-        companyRequest.setApiKey(apiKey);
-        companyRequest.setRpIntegrationId(rappyId);
-        companyRequest.setLandingTemplate(landingTemplate);
-        companyRequest.setStatus(status);
-
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CompanyRequest> save(
+            @RequestPart("company") @Valid CompanyRequest companyRequest,
+            @RequestPart(value = "logo", required = false) MultipartFile logo
+    ) {
         validateCreateCompanyRequest(companyRequest);
-
         CompanyRequest savedCompany = companyUseCase.save(companyRequest, logo);
-
         return ResponseEntity.ok(savedCompany);
     }
 
@@ -76,45 +55,22 @@ public class CompanyController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteCity(@PathVariable Long id) {
-        companyUseCase.delete(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<HttpStatus> delete(@PathVariable("id") long id) {
+        Boolean result = companyUseCase.delete(id);
+        if (result != null && result) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @PutMapping("/updateByCompanynId/{companyId}")
-    public ResponseEntity<CompanyRequest> updateCompany(
-            @PathVariable Long companyId,
-            @RequestParam(value = "companyName", required = false) String companyName,
-            @RequestParam(value = "longitude", required = false) String longitude,
-            @RequestParam(value = "latitude", required = false) String latitude,
-            @RequestParam(value = "baseValue", required = false) Double baseValue,
-            @RequestParam(value = "additionalValue", required = false) Double additionalValue,
-            @RequestParam(value = "logo", required = false) MultipartFile logo,
-            @RequestParam(value = "externalId", required = false) Long externalId,
-            @RequestParam(value = "cityId", required = false) Long cityId,
-            @RequestParam(value = "apiKey", required = false) String apiKey,
-            @RequestParam(value = "rappyId", required = false) String rappyId,
-            @RequestParam(value = "landingTemplate", required = false) String landingTemplate,
-            @RequestParam(value = "status", required = false) String status) {
-
+    @PutMapping(value = "/update/{companyId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CompanyRequest> update(@PathVariable Long companyId,
+                                                 @RequestPart("company") @Valid CompanyRequest companyRequest,
+                                                 @RequestPart(value = "logo", required = false) MultipartFile logo) {
         log.info("Iniciando actualización de empresa con ID: {}", companyId);
-
-        CompanyRequest companyRequest = new CompanyRequest();
         companyRequest.setCompanyId(companyId);
-        companyRequest.setNameCompany(companyName);
-        companyRequest.setLongitude(longitude);
-        companyRequest.setLatitude(latitude);
-        companyRequest.setBaseValue(baseValue);
-        companyRequest.setAdditionalValue(additionalValue);
-        companyRequest.setExternalCompanyId(externalId);
-        companyRequest.setCityId(cityId);
-        companyRequest.setApiKey(apiKey);
-        companyRequest.setRpIntegrationId(rappyId);
-        companyRequest.setLandingTemplate(landingTemplate);
-        companyRequest.setStatus(status);
-
         validateUpdateCompanyRequest(companyRequest);
-
         CompanyRequest updatedCompany = companyUseCase.update(companyRequest, logo);
         return ResponseEntity.ok(updatedCompany);
     }
