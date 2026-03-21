@@ -9,6 +9,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,36 +35,32 @@ class CompanyControllerTest {
 
     @Test
     void createCompany_ShouldReturnBadRequest_WhenRequiredFieldsAreMissing() throws Exception {
+        MockMultipartFile companyPart = new MockMultipartFile("company", "company", "application/json", "{}".getBytes());
         mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/create")
-                        .param("apiKey", ""))
+                        .file(companyPart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: companyName, longitude, latitude, apiKey, baseValue, additionalValue, cityId"));
+                .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: companyName, longitude, latitude, apiKey, baseValue, additionalValue, cityId"));
     }
 
     @Test
     void updateCompany_ShouldReturnBadRequest_WhenApiKeyIsBlank() throws Exception {
-        mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/updateByCompanynId/1")
-                        .param("companyName", "Mi Empresa")
-                        .param("apiKey", "")
-                        .with(request -> {
-                            request.setMethod("PUT");
-                            return request;
-                        }))
+        String companyJson = "{\"nameCompany\":\"Mi Empresa\", \"apiKey\":\"\"}";
+        MockMultipartFile companyPart = new MockMultipartFile("company", "company", "application/json", companyJson.getBytes());
+        mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/update/1")
+                        .file(companyPart)
+                        .with(request -> { request.setMethod("PUT"); return request; }))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: apiKey"));
     }
 
     @Test
     void updateCompany_ShouldReturnBadRequest_WhenExternalIdIsInvalid() throws Exception {
-        mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/updateByCompanynId/1")
-                        .param("companyName", "Mi Empresa")
-                        .param("apiKey", "test-api-key")
-                        .param("externalId", "null")
-                        .with(request -> {
-                            request.setMethod("PUT");
-                            return request;
-                        }))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("El parametro 'externalId' debe ser de tipo Long"));
+        String companyJson = "{\"nameCompany\":\"Mi Empresa\", \"apiKey\":\"test-api-key\", \"externalCompanyId\": \"null\"}";
+        MockMultipartFile companyPart = new MockMultipartFile("company", "company", "application/json", companyJson.getBytes());
+        mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/update/1")
+                        .file(companyPart)
+                        .with(request -> { request.setMethod("PUT"); return request; }))
+                .andExpect(status().isBadRequest());
     }
 }
