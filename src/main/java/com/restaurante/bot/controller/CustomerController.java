@@ -4,39 +4,82 @@ import com.restaurante.bot.application.ports.incoming.CustomerUseCase;
 import com.restaurante.bot.dto.SaveFinishDataDTO;
 import com.restaurante.bot.model.Customer;
 import com.restaurante.bot.model.GenericResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 
+@Tag(name = "Customer", description = "APIs para la gestión de clientes")
 @RestController
 @RequestMapping("/${app.request.mapping}/customer")
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class CustomerController {
 
     private final CustomerUseCase customerUseCase;
 
+    @PostMapping("/create")
+    public ResponseEntity<Customer> save(@RequestBody @Valid Customer customer) {
+        return ResponseEntity.ok(customerUseCase.guardarClientes(customer));
+    }
+
+    @GetMapping("/get-all")
+    public ResponseEntity<List<Customer>> getAll() {
+        return ResponseEntity.ok(customerUseCase.listarClientes());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Customer> get(@PathVariable("id") long id) {
+        return ResponseEntity.ok(customerUseCase.get(id));
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Customer> update(@PathVariable("id") Long customerId,
+            @RequestBody @Valid Customer customer) {
+        return ResponseEntity.ok(customerUseCase.update(customerId, customer));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable("id") long id) {
+        boolean result = customerUseCase.delete(id);
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping
-    public List<Customer> listarClientes() {
-        return customerUseCase.listarClientes(); // Llama al servicio para obtener la lista de clientes
+    public ResponseEntity<Page<Customer>> getAll(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = "customer_id") String sortBy) {
+        return ResponseEntity.ok(customerUseCase.getAll(page, size, orders, sortBy));
     }
 
-    @PostMapping
-    public Customer guardarCliente(@RequestBody Customer customer) {
-        return customerUseCase.guardarClientes(customer); // Llama al servicio para guardar un cliente
+    @GetMapping("/get-all-without-page")
+    public ResponseEntity<List<Customer>> getAllWithoutPage(@RequestParam Map<String, String> customQuery) {
+        return ResponseEntity.ok(customerUseCase.getAllWithOutPage(customQuery));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<Customer>> search(@RequestParam Map<String, String> customQuery) {
+        return ResponseEntity.ok(customerUseCase.searchCustom(customQuery));
+    }
 
     @PostMapping("/update-client-qr")
     public ResponseEntity<GenericResponse> updateClientQr(@RequestBody SaveFinishDataDTO customer) {
         log.info("update-client-qr -> {}", customer);
-        return new ResponseEntity<>(customerUseCase.updateClientQr(customer), HttpStatus.OK);
+        return ResponseEntity.ok(customerUseCase.updateClientQr(customer));
     }
 
 }

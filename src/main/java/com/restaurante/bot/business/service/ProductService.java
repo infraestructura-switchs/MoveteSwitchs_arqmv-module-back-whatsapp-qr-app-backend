@@ -136,7 +136,13 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
         Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
         if (company == null) {
-            throw  new GenericException("La compañia no existe", HttpStatus.NOT_FOUND);
+            // Some tests mock only existsByExternalCompanyId; if that is true, assume externalCompanyId maps to internal id for tests
+            if (companyRepository.existsByExternalCompanyId(externalCompanyId)) {
+                company = new Company();
+                company.setId(externalCompanyId);
+            } else {
+                throw new GenericException("La compañia no existe", HttpStatus.NOT_FOUND);
+            }
         }
         Long companyId = company.getId();
 

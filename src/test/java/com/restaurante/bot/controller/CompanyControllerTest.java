@@ -54,6 +54,5 @@ class CompanyControllerTest {
                 .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: apiKey"));
     }
 
-    @Test
-    // Removed externalId invalid test: no longer applicable after controller now accepts a JSON 'company' part
+    // externalId invalid test removed: no longer applicable after refactor
 }

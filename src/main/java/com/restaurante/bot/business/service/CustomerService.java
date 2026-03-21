@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.restaurante.bot.application.ports.incoming.CustomerUseCase;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -79,5 +80,64 @@ public class CustomerService implements CustomerInterface, CustomerUseCase {
         customerRepository.save(customer1);
 
         return new GenericResponse("Actualizacion realizada con exito", 200L);
+    }
+
+    @Override
+    public Customer get(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new GenericException("cliente no encontrada", HttpStatus.BAD_REQUEST));
+    }
+
+    @Override
+    public Customer update(Long id, Customer customer) {
+        Customer existing = customerRepository.findById(id)
+                .orElseThrow(() -> new GenericException("cliente no encontrada", HttpStatus.BAD_REQUEST));
+
+        if (customer.getName() != null) existing.setName(customer.getName());
+        if (customer.getEmail() != null) existing.setEmail(customer.getEmail());
+        if (customer.getPhone() != null) existing.setPhone(customer.getPhone());
+        if (customer.getAddress() != null) existing.setAddress(customer.getAddress());
+        if (customer.getTypeIdentificationId() != null) existing.setTypeIdentificationId(customer.getTypeIdentificationId());
+        if (customer.getNumerIdentification() != null) existing.setNumerIdentification(customer.getNumerIdentification());
+
+        return customerRepository.save(existing);
+    }
+
+    @Override
+    public boolean delete(Long id) {
+        if (customerRepository.existsById(id)) {
+            customerRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Page<Customer> getAll(Map<String, String> customQuery) {
+        int page = 0;
+        int size = 5;
+        try {
+            if (customQuery.containsKey("page")) page = Integer.parseInt(customQuery.get("page"));
+            if (customQuery.containsKey("size")) size = Integer.parseInt(customQuery.get("size"));
+        } catch (NumberFormatException e) {
+            // ignore and use defaults
+        }
+        return listarClientesPaged(page, size);
+    }
+
+    @Override
+    public Page<Customer> getAll(int page, int size, String orders, String sortBy) {
+        return listarClientesPaged(page, size);
+    }
+
+    @Override
+    public List<Customer> getAllWithOutPage(Map<String, String> customQuery) {
+        return listarClientes();
+    }
+
+    @Override
+    public Page<Customer> searchCustom(Map<String, String> customQuery) {
+        // Basic placeholder: returns first page. Implement filtering as needed.
+        return listarClientesPaged(0, 5);
     }
 }
