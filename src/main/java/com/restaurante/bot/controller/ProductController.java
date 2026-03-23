@@ -7,12 +7,14 @@ import com.restaurante.bot.dto.ProductUpdateDTO;
 import com.restaurante.bot.model.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/${app.request.mapping}/product")
@@ -24,8 +26,44 @@ public class ProductController {
     private final ProductUseCase productInterface;
 
     @GetMapping("/getProductByCompany/{externalCompanyId}")
-    public ResponseEntity<CategorizedProductsDTO> getProductsSfotRestaurantByCompanyId(@PathVariable("externalCompanyId") Long externalCompanyId) {
-        return new ResponseEntity<>(productInterface.getProductsSfotRestaurantByCompanyId(externalCompanyId), HttpStatus.OK) ;
+    public ResponseEntity<Map<String, Object>> getProductsSfotRestaurantByCompanyId(
+            @PathVariable("externalCompanyId") Long externalCompanyId,
+            @RequestParam(name = "format", defaultValue = "categories") String format) {
+        CategorizedProductsDTO categorizedProducts = productInterface.getProductsSfotRestaurantByCompanyId(externalCompanyId);
+        Map<String, List<ProductDto>> productsByCategory = buildProductsByCategory(categorizedProducts);
+
+        Map<String, Object> meta = new LinkedHashMap<>();
+        meta.put("companyId", externalCompanyId);
+        meta.put("fetchedAt", Instant.now().toString());
+        meta.put("totalProducts", productsByCategory.values().stream().mapToInt(List::size).sum());
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        String normalizedFormat = format == null ? "categories" : format.trim().toLowerCase();
+
+        switch (normalizedFormat) {
+            case "map":
+                response.put("productsByCategory", productsByCategory);
+                break;
+            case "both":
+                response.put("categories", categorizedProducts.getCategories());
+                response.put("productsByCategory", productsByCategory);
+                break;
+            case "categories":
+            default:
+                response.put("categories", categorizedProducts.getCategories());
+                break;
+        }
+
+        response.put("meta", meta);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    private Map<String, List<ProductDto>> buildProductsByCategory(CategorizedProductsDTO categorizedProducts) {
+        Map<String, List<ProductDto>> productsByCategory = new LinkedHashMap<>();
+        categorizedProducts.getCategories().forEach(category ->
+            productsByCategory.put(category.getCategoryName(), category.getProducts())
+        );
+        return productsByCategory;
     }
 
     @PostMapping("/update-data")
