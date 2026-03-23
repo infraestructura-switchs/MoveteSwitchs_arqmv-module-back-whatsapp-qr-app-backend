@@ -2,6 +2,9 @@ package com.restaurante.bot.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,12 +12,16 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.JDBCConnectionException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.sql.SQLTransientConnectionException;
 
 @ControllerAdvice
+@Slf4j
 public class CustomExceptionHandler {
     /**
      * Exception handler for GenericException.
@@ -69,6 +76,21 @@ public class CustomExceptionHandler {
             message = ex.getMessage();
         }
         return buildErrorResponse(HttpStatus.BAD_REQUEST, message, request);
+    }
+
+    @ExceptionHandler({
+            CannotCreateTransactionException.class,
+            CannotGetJdbcConnectionException.class,
+            DataAccessResourceFailureException.class,
+            JDBCConnectionException.class,
+            SQLTransientConnectionException.class
+    })
+    public ResponseEntity<Object> handleDatabaseUnavailable(Exception ex, WebRequest request) {
+        log.warn("Base de datos no disponible para la solicitud {}", request.getDescription(false), ex);
+        return buildErrorResponse(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "El servicio no esta disponible temporalmente porque la base de datos no responde. Intente nuevamente en unos minutos.",
+                request);
     }
 
     private ResponseEntity<Object> buildErrorResponse(HttpStatus status, String message, WebRequest request) {

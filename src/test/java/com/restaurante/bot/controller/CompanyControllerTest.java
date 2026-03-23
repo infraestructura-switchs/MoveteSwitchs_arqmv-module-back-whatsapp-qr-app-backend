@@ -6,8 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -52,6 +57,18 @@ class CompanyControllerTest {
                         .with(request -> { request.setMethod("PUT"); return request; }))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: apiKey"));
+    }
+
+    @Test
+    void getCompanies_ShouldReturnServiceUnavailable_WhenDatabaseIsDown() throws Exception {
+        when(companyUseCase.getAllPageCompany(anyInt(), anyInt(), anyString(), anyString()))
+                .thenThrow(new CannotCreateTransactionException("Database unavailable"));
+
+        mockMvc.perform(get("/api/back-whatsapp-qr-app/company"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.status").value(503))
+                .andExpect(jsonPath("$.error").value("Service Unavailable"))
+                .andExpect(jsonPath("$.message").value("El servicio no esta disponible temporalmente porque la base de datos no responde. Intente nuevamente en unos minutos."));
     }
 
     // externalId invalid test removed: no longer applicable after refactor
