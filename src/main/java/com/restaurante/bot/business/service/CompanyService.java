@@ -184,7 +184,6 @@ public class CompanyService implements CompanyInterface {
                 .additionalValue(company.getAdditionalValue())
                 .status(company.getStatus())
                 .externalId(company.getExternalCompanyId())
-                .cityId(company.getCityId())
                 .city(mapCityResponse(company.getCityId()))
                 .apiKey(company.getApiKey())
                 .rappyId(company.getRpIntegrationId())
@@ -208,9 +207,6 @@ public class CompanyService implements CompanyInterface {
         return CityResponseDTO.builder()
                 .id(city.getId())
                 .name(city.getName())
-                .status(city.getStatus())
-                .createdAt(city.getCreatedAt())
-                .updatedAt(city.getUpdatedAt())
                 .build();
     }
 

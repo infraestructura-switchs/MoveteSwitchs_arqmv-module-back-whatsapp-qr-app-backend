@@ -90,7 +90,6 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
             dto.setAdditionalValue(c.getAdditionalValue());
             dto.setStatus(c.getStatus());
             dto.setExternalId(c.getExternalCompanyId());
-            dto.setCityId(c.getCityId());
             dto.setApiKey(c.getApiKey());
             dto.setRappyId(c.getRpIntegrationId());
             dto.setLandingTemplate(c.getLandingTemplate());
@@ -108,9 +107,6 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
         return CityResponseDTO.builder()
                 .id(city.getId())
                 .name(city.getName())
-                .status(city.getStatus())
-                .createdAt(city.getCreatedAt())
-                .updatedAt(city.getUpdatedAt())
                 .build();
     }
 }

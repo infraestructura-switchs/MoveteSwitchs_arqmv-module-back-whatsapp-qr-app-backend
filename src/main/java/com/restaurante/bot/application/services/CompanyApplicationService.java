@@ -216,7 +216,6 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .baseValue(c.getBaseValue())
                 .additionalValue(c.getAdditionalValue())
                 .externalId(c.getExternalCompanyId())
-                .cityId(c.getCityId())
                 .city(mapCityResponse(c.getCityId()))
                 .apiKey(c.getApiKey())
                 .rappyId(c.getRpIntegrationId())
@@ -243,9 +242,6 @@ public class CompanyApplicationService implements CompanyUseCase {
         return CityResponseDTO.builder()
                 .id(city.getId())
                 .name(city.getName())
-                .status(city.getStatus())
-                .createdAt(city.getCreatedAt())
-                .updatedAt(city.getUpdatedAt())
                 .build();
     }
 }

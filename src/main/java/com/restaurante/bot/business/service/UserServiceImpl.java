@@ -417,7 +417,6 @@ public class UserServiceImpl implements UserService {
                 .additionalValue(company.getAdditionalValue())
                 .status(company.getStatus())
                 .externalId(company.getExternalCompanyId())
-                .cityId(company.getCityId())
                 .apiKey(company.getApiKey())
                 .rappyId(company.getRpIntegrationId())
                 .landingTemplate(company.getLandingTemplate())

@@ -20,7 +20,6 @@ public class CompanyResponseDTO {
     private Double additionalValue;
     private String status;
     private Long externalId;
-    private Long cityId;
     private CityResponseDTO city;
     private String apiKey;
     private String rappyId;

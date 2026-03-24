@@ -1,5 +1,6 @@
 package com.restaurante.bot.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class CompanyRequest {
     private Double baseValue;
     private Double additionalValue;
     private Long externalCompanyId;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Long cityId;
     private CityResponseDTO city;
     private String apiKey;
