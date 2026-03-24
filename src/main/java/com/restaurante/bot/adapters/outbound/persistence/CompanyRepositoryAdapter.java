@@ -57,6 +57,7 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
             dto.setAdditionalValue(c.getAdditionalValue());
             dto.setExternalCompanyId(c.getExternalCompanyId());
             dto.setCityId(c.getCityId());
+            dto.setCity(mapCityResponse(c.getCityId() == null ? null : cityRepository.findById(c.getCityId()).orElse(null)));
             dto.setApiKey(c.getApiKey());
             dto.setRpIntegrationId(c.getRpIntegrationId());
             dto.setLandingTemplate(c.getLandingTemplate());

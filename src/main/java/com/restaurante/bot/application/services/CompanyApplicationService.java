@@ -188,6 +188,7 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .additionalValue(company.getAdditionalValue())
                 .externalCompanyId(company.getExternalCompanyId())
                 .cityId(company.getCityId())
+                .city(mapCityResponse(company.getCityId()))
                 .apiKey(company.getApiKey())
                 .rpIntegrationId(company.getRpIntegrationId())
                 .landingTemplate(company.getLandingTemplate())

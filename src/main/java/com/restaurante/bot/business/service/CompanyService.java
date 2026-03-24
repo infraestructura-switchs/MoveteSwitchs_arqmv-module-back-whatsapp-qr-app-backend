@@ -88,6 +88,7 @@ public class CompanyService implements CompanyInterface {
                 .additionalValue(company.getAdditionalValue())
                 .externalCompanyId(company.getExternalCompanyId())
                 .cityId(company.getCityId())
+                .city(mapCityResponse(company.getCityId()))
                 .apiKey(company.getApiKey())
                 .rpIntegrationId(company.getRpIntegrationId())
                 .landingTemplate(company.getLandingTemplate())
