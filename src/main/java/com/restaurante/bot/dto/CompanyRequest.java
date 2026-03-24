@@ -20,6 +20,7 @@ public class CompanyRequest {
     private Double additionalValue;
     private Long externalCompanyId;
     private Long cityId;
+    private CityResponseDTO city;
     private String apiKey;
     private String rpIntegrationId;
     private String landingTemplate;
