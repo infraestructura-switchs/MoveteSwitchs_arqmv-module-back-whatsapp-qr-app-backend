@@ -22,7 +22,7 @@ public class CompanyRequest {
     private Long externalCompanyId;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Long cityId;
-    private CityResponseDTO city;
+    private CitySummaryDTO city;
     private String apiKey;
     private String rpIntegrationId;
     private String landingTemplate;

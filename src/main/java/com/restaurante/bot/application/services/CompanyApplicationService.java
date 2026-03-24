@@ -2,7 +2,7 @@ package com.restaurante.bot.application.services;
 
 import com.restaurante.bot.application.ports.incoming.CompanyUseCase;
 import com.restaurante.bot.application.ports.outgoing.CompanyRepositoryPort;
-import com.restaurante.bot.dto.CityResponseDTO;
+import com.restaurante.bot.dto.CitySummaryDTO;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
 import com.restaurante.bot.exception.GenericException;
@@ -187,7 +187,6 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .baseValue(company.getBaseValue())
                 .additionalValue(company.getAdditionalValue())
                 .externalCompanyId(company.getExternalCompanyId())
-                .cityId(company.getCityId())
                 .city(mapCityResponse(company.getCityId()))
                 .apiKey(company.getApiKey())
                 .rpIntegrationId(company.getRpIntegrationId())
@@ -216,7 +215,7 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .baseValue(c.getBaseValue())
                 .additionalValue(c.getAdditionalValue())
                 .externalId(c.getExternalCompanyId())
-                .city(mapCityResponse(c.getCityId()))
+                .city(c.getCity())
                 .apiKey(c.getApiKey())
                 .rappyId(c.getRpIntegrationId())
                 .landingTemplate(c.getLandingTemplate())
@@ -229,7 +228,7 @@ public class CompanyApplicationService implements CompanyUseCase {
         return getAll(customQuery);
     }
 
-    private CityResponseDTO mapCityResponse(Long cityId) {
+    private CitySummaryDTO mapCityResponse(Long cityId) {
         if (cityId == null) {
             return null;
         }
@@ -238,8 +237,8 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .orElse(null);
     }
 
-    private CityResponseDTO toCityResponse(City city) {
-        return CityResponseDTO.builder()
+    private CitySummaryDTO toCityResponse(City city) {
+        return CitySummaryDTO.builder()
                 .id(city.getId())
                 .name(city.getName())
                 .build();

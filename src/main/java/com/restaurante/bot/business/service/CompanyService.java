@@ -3,7 +3,7 @@ package com.restaurante.bot.business.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.restaurante.bot.business.interfaces.CompanyInterface;
-import com.restaurante.bot.dto.CityResponseDTO;
+import com.restaurante.bot.dto.CitySummaryDTO;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
 import com.restaurante.bot.exception.GenericException;
@@ -87,7 +87,6 @@ public class CompanyService implements CompanyInterface {
                 .baseValue(company.getBaseValue())
                 .additionalValue(company.getAdditionalValue())
                 .externalCompanyId(company.getExternalCompanyId())
-                .cityId(company.getCityId())
                 .city(mapCityResponse(company.getCityId()))
                 .apiKey(company.getApiKey())
                 .rpIntegrationId(company.getRpIntegrationId())
@@ -194,7 +193,7 @@ public class CompanyService implements CompanyInterface {
 
     }
 
-    private CityResponseDTO mapCityResponse(Long cityId) {
+    private CitySummaryDTO mapCityResponse(Long cityId) {
         if (cityId == null) {
             return null;
         }
@@ -203,8 +202,8 @@ public class CompanyService implements CompanyInterface {
                 .orElse(null);
     }
 
-    private CityResponseDTO toCityResponse(City city) {
-        return CityResponseDTO.builder()
+    private CitySummaryDTO toCityResponse(City city) {
+        return CitySummaryDTO.builder()
                 .id(city.getId())
                 .name(city.getName())
                 .build();

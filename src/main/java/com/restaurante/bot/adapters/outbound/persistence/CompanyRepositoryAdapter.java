@@ -1,7 +1,7 @@
 package com.restaurante.bot.adapters.outbound.persistence;
 
 import com.restaurante.bot.application.ports.outgoing.CompanyRepositoryPort;
-import com.restaurante.bot.dto.CityResponseDTO;
+import com.restaurante.bot.dto.CitySummaryDTO;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
 import com.restaurante.bot.model.Company;
@@ -100,11 +100,11 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
         return new PageImpl<>(content, pageable, page.getTotalElements());
     }
 
-    private CityResponseDTO mapCityResponse(City city) {
+    private CitySummaryDTO mapCityResponse(City city) {
         if (city == null) {
             return null;
         }
-        return CityResponseDTO.builder()
+        return CitySummaryDTO.builder()
                 .id(city.getId())
                 .name(city.getName())
                 .build();
