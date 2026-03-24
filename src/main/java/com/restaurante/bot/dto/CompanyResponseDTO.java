@@ -17,7 +17,7 @@ public class CompanyResponseDTO {
     private String latitude;
     private String longitude;
     private Double baseValue;
-    private Double aditionalValue;
+    private Double additionalValue;
     private String status;
     private Long externalId;
     private Long cityId;

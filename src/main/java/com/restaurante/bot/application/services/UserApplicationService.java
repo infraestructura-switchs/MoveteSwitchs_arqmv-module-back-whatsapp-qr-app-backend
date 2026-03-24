@@ -197,7 +197,7 @@ public class UserApplicationService implements UserUseCase {
                 .latitude(company.getLatitude())
                 .longitude(company.getLongitude())
                 .baseValue(company.getBaseValue())
-                .aditionalValue(company.getAdditionalValue())
+                .additionalValue(company.getAdditionalValue())
                 .status(company.getStatus())
                 .externalId(company.getExternalCompanyId())
                 .cityId(company.getCityId())

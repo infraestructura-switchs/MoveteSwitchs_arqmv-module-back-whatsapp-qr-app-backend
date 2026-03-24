@@ -3,10 +3,13 @@ package com.restaurante.bot.business.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.restaurante.bot.business.interfaces.CompanyInterface;
+import com.restaurante.bot.dto.CityResponseDTO;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
 import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.Company;
+import com.restaurante.bot.model.City;
+import com.restaurante.bot.repository.CityRepository;
 import com.restaurante.bot.repository.CompanyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 public class CompanyService implements CompanyInterface {
 
     private final CompanyRepository companyRepository;
+    private final CityRepository cityRepository;
     private final Cloudinary cloudinary;
 
     private String uploadLogo(MultipartFile logoFile) throws IOException {
@@ -176,10 +180,11 @@ public class CompanyService implements CompanyInterface {
                 .latitude(company.getLatitude())
                 .longitude(company.getLongitude())
                 .baseValue(company.getBaseValue())
-                .aditionalValue(company.getAdditionalValue())
+                .additionalValue(company.getAdditionalValue())
                 .status(company.getStatus())
                 .externalId(company.getExternalCompanyId())
                 .cityId(company.getCityId())
+                .city(mapCityResponse(company.getCityId()))
                 .apiKey(company.getApiKey())
                 .rappyId(company.getRpIntegrationId())
                 .landingTemplate(company.getLandingTemplate())
@@ -187,6 +192,25 @@ public class CompanyService implements CompanyInterface {
 
         return new PageImpl<>(content, pagingSort, companies.getTotalElements());
 
+    }
+
+    private CityResponseDTO mapCityResponse(Long cityId) {
+        if (cityId == null) {
+            return null;
+        }
+        return cityRepository.findById(cityId)
+                .map(this::toCityResponse)
+                .orElse(null);
+    }
+
+    private CityResponseDTO toCityResponse(City city) {
+        return CityResponseDTO.builder()
+                .id(city.getId())
+                .name(city.getName())
+                .status(city.getStatus())
+                .createdAt(city.getCreatedAt())
+                .updatedAt(city.getUpdatedAt())
+                .build();
     }
 
 }

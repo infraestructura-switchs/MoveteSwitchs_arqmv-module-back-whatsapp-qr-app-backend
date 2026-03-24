@@ -2,10 +2,13 @@ package com.restaurante.bot.application.services;
 
 import com.restaurante.bot.application.ports.incoming.CompanyUseCase;
 import com.restaurante.bot.application.ports.outgoing.CompanyRepositoryPort;
+import com.restaurante.bot.dto.CityResponseDTO;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
 import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.Company;
+import com.restaurante.bot.model.City;
+import com.restaurante.bot.repository.CityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +29,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CompanyApplicationService implements CompanyUseCase {
     private final CompanyRepositoryPort companyRepo;
+    private final CityRepository cityRepository;
     private final com.cloudinary.Cloudinary cloudinary;
 
     private String uploadLogo(MultipartFile logoFile) throws IOException {
@@ -209,9 +213,10 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .latitude(c.getLatitude())
                 .longitude(c.getLongitude())
                 .baseValue(c.getBaseValue())
-                .aditionalValue(c.getAdditionalValue())
+                .additionalValue(c.getAdditionalValue())
                 .externalId(c.getExternalCompanyId())
                 .cityId(c.getCityId())
+                .city(mapCityResponse(c.getCityId()))
                 .apiKey(c.getApiKey())
                 .rappyId(c.getRpIntegrationId())
                 .landingTemplate(c.getLandingTemplate())
@@ -222,5 +227,24 @@ public class CompanyApplicationService implements CompanyUseCase {
     public Page<CompanyResponseDTO> searchCustom(Map<String, String> customQuery) {
         // Basic search behaves like getAll for now; can be extended to apply filters
         return getAll(customQuery);
+    }
+
+    private CityResponseDTO mapCityResponse(Long cityId) {
+        if (cityId == null) {
+            return null;
+        }
+        return cityRepository.findById(cityId)
+                .map(this::toCityResponse)
+                .orElse(null);
+    }
+
+    private CityResponseDTO toCityResponse(City city) {
+        return CityResponseDTO.builder()
+                .id(city.getId())
+                .name(city.getName())
+                .status(city.getStatus())
+                .createdAt(city.getCreatedAt())
+                .updatedAt(city.getUpdatedAt())
+                .build();
     }
 }
