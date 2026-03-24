@@ -73,11 +73,10 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
                 .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        Map<Long, City> citiesById = new HashMap<>();
-        if (!cityIds.isEmpty()) {
-            citiesById = cityRepository.findAllById(cityIds).stream()
-                    .collect(Collectors.toMap(City::getId, city -> city));
-        }
+        final Map<Long, City> citiesById = cityIds.isEmpty()
+            ? new HashMap<>()
+            : cityRepository.findAllById(cityIds).stream()
+                .collect(Collectors.toMap(City::getId, city -> city));
 
         List<CompanyResponseDTO> content = page.getContent().stream().map(c -> {
             CompanyResponseDTO dto = new CompanyResponseDTO();
