@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 
 @RestController
@@ -188,25 +189,20 @@ public class SecurityController {
     }
 
     private String buildUrl(String baseUrl, Map<String, String> params) {
-        StringBuilder url = new StringBuilder(baseUrl);
-
-        if (params != null && !params.isEmpty()) {
-            url.append("?");
-            params.forEach((key, value) -> {
-                if (url.charAt(url.length() - 1) != '?') {
-                    url.append("&");
-                }
-                url.append(key);
-                url.append("=");
-                // Si es el token, no lo encodees
-                if (key.equals("token")) {
-                    url.append(value);
-                } else {
-                    url.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
-                }
-            });
+        if (params == null || params.isEmpty()) {
+            return baseUrl;
         }
 
-        return url.toString();
+        String query = params.entrySet().stream()
+                .filter(e -> e.getValue() != null && !e.getValue().isBlank())
+                .map(e -> {
+                    String k = e.getKey();
+                    String v = e.getValue();
+                    String encoded = "token".equals(k) ? v : URLEncoder.encode(v, StandardCharsets.UTF_8);
+                    return k + "=" + encoded;
+                })
+                .collect(Collectors.joining("&"));
+
+        return query.isEmpty() ? baseUrl : baseUrl + "?" + query;
     }
 }
