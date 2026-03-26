@@ -99,15 +99,20 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
 
         User user = userRepository.findUserByCompany(company.getId());
 
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
 
 
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(changeStatusTableDTO.getTableNumber(), company.getId());
         table.setStatus(2L);
 
+        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
+
         String title = "Mesa " + changeStatusTableDTO.getTableNumber() + " - Estado actualizado";
         String body = "La mesa " + changeStatusTableDTO.getTableNumber() + " ha cambiado de estado. Revisa la lista de mesas.";
-        notificationService.sendNotificationToClient(subscription.getToken(), title, body);
+        if (subscription == null || subscription.getToken() == null) {
+            log.warn("No subscription/token found for user {} — skipping notification", user != null ? user.getUserId() : null);
+        } else {
+            notificationService.sendNotificationToClient(subscription.getToken(), title, body);
+        }
 
         return restaurantTableRepository.save(table);
     }
@@ -148,7 +153,6 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
 
         User user = userRepository.findUserByCompany(company.getId());
 
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
 
         if (!restaurantTableRepository.existsByTableNumberAndCompanyId(tableNumber.getTableNumber(), company.getId())) {
             throw new GenericException("Mesa no resgistrada en la base de datos", HttpStatus.BAD_REQUEST);
@@ -158,9 +162,15 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
         table.setStatus(3L);
 
         Long tn = tableNumber.getTableNumber();
+        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
+
         String titleReq = "Mesa " + tn + " - Solicitud de servicio";
         String bodyReq = "El cliente en la mesa " + tn + " ha solicitado servicio. Atiéndelo, por favor.";
-        notificationService.sendNotificationToClient(subscription.getToken(), titleReq, bodyReq);
+        if (subscription == null || subscription.getToken() == null) {
+            log.warn("No subscription/token found for user {} — skipping notification", user != null ? user.getUserId() : null);
+        } else {
+            notificationService.sendNotificationToClient(subscription.getToken(), titleReq, bodyReq);
+        }
 
         return restaurantTableRepository.save(table);
     }
@@ -192,16 +202,21 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
 
         User user = userRepository.findUserByCompany(company.getId());
 
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
 
 
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber.getTableNumber(), company.getId());
         table.setStatus(5L);
 
         Long tnPay = tableNumber.getTableNumber();
+        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
+
         String titlePay = "Mesa " + tnPay + " - Pago solicitado";
         String bodyPay = "La mesa " + tnPay + " ha solicitado pagar. Revisar y procesar pago.";
-        notificationService.sendNotificationToClient(subscription.getToken(), titlePay, bodyPay);
+        if (subscription == null || subscription.getToken() == null) {
+            log.warn("No subscription/token found for user {} — skipping notification", user != null ? user.getUserId() : null);
+        } else {
+            notificationService.sendNotificationToClient(subscription.getToken(), titlePay, bodyPay);
+        }
 
         return restaurantTableRepository.save(table);
     }

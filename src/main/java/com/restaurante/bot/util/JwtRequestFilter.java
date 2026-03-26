@@ -77,7 +77,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     log.warn("Token invalid");
                     SecurityContextHolder.clearContext();
                 }
-            } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
+            } catch (ExpiredJwtException e) {
+                log.warn("Token expired: {}", e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
+                return;
+            } catch (UnsupportedJwtException | MalformedJwtException e) {
                 log.error("Token validation error: {}", e.getMessage(), e);
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());

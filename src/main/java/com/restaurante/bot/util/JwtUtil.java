@@ -19,7 +19,8 @@ public class JwtUtil {
     @Value("${security.jwt.secret-key}")
     private String secret;
 
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60;
+    @Value("${security.jwt.expiration-ms:3600000}")
+    private long EXPIRATION_TIME;
 
     // Genera un token con externalCompanyId como claim
     public String generateToken(Long externalCompanyId, Long userId) {
@@ -52,10 +53,11 @@ public class JwtUtil {
 
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+            .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
+            .setAllowedClockSkewSeconds(60) // allow small clock skew
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
     }
 
     // Extrae externalCompanyId del token
