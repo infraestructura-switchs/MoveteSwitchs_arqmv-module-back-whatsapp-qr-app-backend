@@ -17,8 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     private static final long RESPONSE_NOT_FOUND = 404L;
 
     private static final long TRANSACTION_STATUS_ACTIVE = 1L;
+    private static final long TRANSACTION_STATUS_CLOSED = 2L;
     private static final int TABLE_STATUS_AVAILABLE = 2;
     private static final int TABLE_STATUS_DEFAULT = 1;
 
@@ -562,6 +565,26 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
             customerOrderRepository.save(order);
         }
+
+        if (!isConfirmed) {
+            Set<Long> uniqueTransactionIds = new HashSet<>(transactionIds);
+            for (Long transactionId : uniqueTransactionIds) {
+                Transaction transaction = transactionRepository.findByTransactionId(transactionId);
+                if (transaction == null) {
+                    log.warn("confirmationOrder - transacción no encontrada para cierre, transactionId={}",
+                            transactionId);
+                    continue;
+                }
+                transaction.setStatus(TRANSACTION_STATUS_CLOSED);
+                transactionRepository.save(transaction);
+                log.info("confirmationOrder - transacción cerrada por cancelación, transactionId={}, status={}",
+                        transactionId, TRANSACTION_STATUS_CLOSED);
+            }
+        } else {
+            log.debug("confirmationOrder - transacciones se mantienen activas por confirmación, transactionIds={}",
+                    transactionIds);
+        }
+
         String notifTitle = isConfirmed ? "Orden confirmada - Mesa " + tableNumber : "Orden cancelada - Mesa " + tableNumber;
         String notifBody = isConfirmed ? "La orden en la mesa " + tableNumber + " ha sido confirmada. Revisa las órdenes pendientes." :
             "La orden en la mesa " + tableNumber + " ha sido cancelada. Revisa las órdenes pendientes.";

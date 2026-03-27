@@ -128,6 +128,43 @@ class OrderDetailsServiceTest {
     }
 
     @Test
+    void confirmationOrderShouldCloseTransactionsWhenOrderIsCancelled() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(326L, null, List.of()));
+
+        Company company = new Company();
+        company.setId(45L);
+
+        User user = new User();
+        user.setUserId(100L);
+
+        CustomerOrder pendingOrder = new CustomerOrder();
+        pendingOrder.setOrderId(1L);
+        pendingOrder.setStatus(3);
+
+        com.restaurante.bot.model.Transaction tx = new com.restaurante.bot.model.Transaction();
+        tx.setTransactionId(77L);
+        tx.setStatus(1L);
+
+        when(companyRepository.existsByExternalCompanyId(326L)).thenReturn(true);
+        when(companyRepository.findByExternalCompanyId(326L)).thenReturn(company);
+        when(userRepository.findUserByCompany(45L)).thenReturn(user);
+        when(subscriptionRepository.findByUserId(100L)).thenReturn(null);
+        when(transactionRepository.getTransactionIdsByPhoneNumber("3001234567", 1L, 45L)).thenReturn(List.of(77L));
+        when(customerOrderRepository.findByTransactionIdsAndStatusNoConfirm(List.of(77L))).thenReturn(List.of(pendingOrder));
+        when(transactionRepository.findByTransactionId(77L)).thenReturn(tx);
+
+        GenericResponse response = orderDetailsService.confirmationOrder("3001234567", false, 1L);
+
+        assertEquals("Orden cancelada", response.getMessage());
+        assertEquals(200L, response.getCode());
+        assertEquals(4, pendingOrder.getStatus());
+        assertEquals(2L, tx.getStatus());
+        verify(customerOrderRepository).save(pendingOrder);
+        verify(transactionRepository).save(tx);
+    }
+
+    @Test
     void findOrCreateCustomerShouldRejectJwtValueInPhone() {
         GenericException exception = assertThrows(
                 GenericException.class,
