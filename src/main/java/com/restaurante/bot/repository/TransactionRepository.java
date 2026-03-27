@@ -1,14 +1,16 @@
 package com.restaurante.bot.repository;
 
 import com.restaurante.bot.model.Transaction;
+import com.restaurante.bot.util.OrderStatusConstants;
+import com.restaurante.bot.util.TransactionStatusConstants;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-        int STATUS_ACTIVE = 1;
-        int ORDER_STATUS_CONFIRMED = 1;
+        int STATUS_ACTIVE = TransactionStatusConstants.ACTIVE_INT;
+        int ORDER_STATUS_CONFIRMED = OrderStatusConstants.CONFIRMED;
 
         @Query("SELECT t FROM Transaction t, RestaurantTable r " +
                         "WHERE t.tableId = r.tableId AND r.tableNumber = :tableNumber AND t.status = " + STATUS_ACTIVE + " " +

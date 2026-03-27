@@ -6,6 +6,7 @@ import com.restaurante.bot.dto.*;
 import com.restaurante.bot.exception.GenericException;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
+import com.restaurante.bot.util.TransactionStatusConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,8 +33,6 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     private static final long RESPONSE_OK = 200L;
     private static final long RESPONSE_NOT_FOUND = 404L;
 
-    private static final long TRANSACTION_STATUS_ACTIVE = 1L;
-    private static final long TRANSACTION_STATUS_CLOSED = 2L;
     private static final int TABLE_STATUS_AVAILABLE = 2;
     private static final int TABLE_STATUS_DEFAULT = 1;
 
@@ -133,7 +132,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             transaction = new Transaction();
             // transaction.setCustomerId(customer.getCustomer_id());
             transaction.setTableId(table.getTableId());
-            transaction.setStatus(TRANSACTION_STATUS_ACTIVE);
+            transaction.setStatus(TransactionStatusConstants.ACTIVE);
             transaction.setCompanyId(companyId);
             Transaction newTransaction = transactionRepository.save(transaction);
 
@@ -575,10 +574,11 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
                             transactionId);
                     continue;
                 }
-                transaction.setStatus(TRANSACTION_STATUS_CLOSED);
-                transactionRepository.save(transaction);
-                log.info("confirmationOrder - transacción cerrada por cancelación, transactionId={}, status={}",
-                        transactionId, TRANSACTION_STATUS_CLOSED);
+                //TODO: Validar primero flujo antes de ambiar estado de trasaccion
+                //transaction.setStatus(TransactionStatusConstants.CLOSED);
+                //transactionRepository.save(transaction);
+                //log.info("confirmationOrder - transacción cerrada por cancelación, transactionId={}, status={}",
+                //    transactionId, TransactionStatusConstants.CLOSED);
             }
         } else {
             log.debug("confirmationOrder - transacciones se mantienen activas por confirmación, transactionIds={}",

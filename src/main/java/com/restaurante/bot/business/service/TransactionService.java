@@ -8,6 +8,7 @@ import com.restaurante.bot.model.GenericResponse;
 import com.restaurante.bot.model.RestaurantTable;
 import com.restaurante.bot.model.Transaction;
 import com.restaurante.bot.repository.*;
+import com.restaurante.bot.util.TransactionStatusConstants;
 import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class TransactionService implements TransactionInterface, TransactionUseC
             throw new GenericException("No hay transacciones abiertas en esa mesa" , HttpStatus.BAD_REQUEST);
         }
 
-        transaction2.setStatus(2L);
+        transaction2.setStatus(TransactionStatusConstants.CLOSED);
         transactionRepository.save(transaction2);
         return new GenericResponse("Transaccion finalizada con exito", 200L);
 

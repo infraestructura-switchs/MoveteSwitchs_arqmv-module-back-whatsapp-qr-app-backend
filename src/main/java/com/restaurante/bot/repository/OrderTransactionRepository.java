@@ -4,6 +4,8 @@ import com.restaurante.bot.dto.OrderResponseDTO;
 import com.restaurante.bot.dto.OrderDTO;
 import com.restaurante.bot.model.OrderTransaction;
 import com.restaurante.bot.model.Transaction;
+import com.restaurante.bot.util.OrderStatusConstants;
+import com.restaurante.bot.util.TransactionStatusConstants;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,17 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 
 public interface OrderTransactionRepository extends JpaRepository<OrderTransaction, Long> {
+
+        int ORDER_STATUS_CONFIRMED = OrderStatusConstants.CONFIRMED;
+        int ORDER_STATUS_SENT = OrderStatusConstants.SENT;
+        int ORDER_STATUS_PENDING = OrderStatusConstants.PENDING;
+        int ORDER_STATUS_CONFIRMED_ARQ = OrderStatusConstants.CONFIRMED_ARQ;
+        int TRANSACTION_STATUS_ACTIVE = TransactionStatusConstants.ACTIVE_INT;
+
+        String CONDITION_ORDER_STATUS_CONFIRMED_OR_SENT =
+                        "(o.status = " + ORDER_STATUS_CONFIRMED + " OR o.status = " + ORDER_STATUS_SENT + ")";
+        String CONDITION_ORDER_STATUS_SENT_OR_CONFIRMED_ARQ =
+                        "(o.status = " + ORDER_STATUS_SENT + " OR o.status = " + ORDER_STATUS_CONFIRMED_ARQ + ")";
 
         @Query("SELECT SUM(co.total) FROM OrderTransaction ot, CustomerOrder co " +
                         "WHERE ot.orderId = co.orderId AND ot.transactionId = :transactionId AND ot.companyId = :companyId " +
@@ -48,8 +61,8 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
                         "LEFT JOIN customer_order o ON ot.order_id = o.order_id " +
                         "LEFT JOIN order_product op ON o.order_id = op.order_id " +
                         "LEFT JOIN product p ON op.product_id = p.product_id " +
-                        "WHERE o.status IN (1, 2, 5) " +
-                        "AND t.status = 1 " +
+                        "WHERE o.status IN (" + ORDER_STATUS_CONFIRMED + ", " + ORDER_STATUS_SENT + ", " + ORDER_STATUS_CONFIRMED_ARQ + ") " +
+                        "AND t.status = " + TRANSACTION_STATUS_ACTIVE + " " +
                         "GROUP BY rt.table_number, ts.description, o.order_id, p.product_id, p.name, op.quantity, p.PRICE, o.total, t.TRANSACTION_ID, o.CUSTOMER_ORDER_DATE, o.status "
                         +
                         "ORDER BY rt.table_number, o.order_id ", nativeQuery = true)
@@ -76,8 +89,8 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
                         "LEFT JOIN customer_order o ON ot.order_id = o.order_id " +
                         "LEFT JOIN order_product op ON o.order_id = op.order_id " +
                         "LEFT JOIN product p ON op.product_id = p.product_id " +
-                        "WHERE o.status = 2 " +
-                        "AND t.status = 1 " +
+                        "WHERE o.status = " + ORDER_STATUS_SENT + " " +
+                        "AND t.status = " + TRANSACTION_STATUS_ACTIVE + " " +
                         "GROUP BY rt.table_number, ts.description, o.order_id, p.product_id, p.name, op.quantity, p.PRICE, o.total, t.TRANSACTION_ID, o.CUSTOMER_ORDER_DATE "
                         +
                         "ORDER BY rt.table_number, o.order_id ", nativeQuery = true)
@@ -102,9 +115,9 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
                         "LEFT JOIN customer_order o ON ot.order_id = o.order_id " +
                         "LEFT JOIN order_product op ON o.order_id = op.order_id " +
                         "LEFT JOIN product p ON op.product_id = p.product_id " +
-                        "WHERE (o.status = 2 OR o.status = 5) " +
+                        "WHERE " + CONDITION_ORDER_STATUS_SENT_OR_CONFIRMED_ARQ + " " +
                         "AND rt.table_number = :tableNumber " +
-                        "AND t.status = 1 " +
+                        "AND t.status = " + TRANSACTION_STATUS_ACTIVE + " " +
                         "GROUP BY rt.table_number, ts.description, o.order_id, p.product_id, p.name, op.quantity, p.PRICE, o.total, t.TRANSACTION_ID, o.CUSTOMER_ORDER_DATE "
                         +
                         "ORDER BY rt.table_number, o.order_id", nativeQuery = true)
@@ -131,9 +144,9 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
                         "LEFT JOIN order_product op ON o.order_id = op.order_id " +
                         "LEFT JOIN product p ON op.product_id = p.product_id " +
                         "LEFT JOIN customer c ON c.customer_id = o.customer_id " +
-                        "WHERE o.status = 3 " +
+                        "WHERE o.status = " + ORDER_STATUS_PENDING + " " +
                         "AND rt.table_number = :tableNumber " +
-                        "AND t.status = 1 " +
+                        "AND t.status = " + TRANSACTION_STATUS_ACTIVE + " " +
                         "AND c.phone = :phoneNumber " +
                         "AND o.company_id  = :companyId " +
                         "GROUP BY " +
@@ -173,9 +186,9 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
                         "LEFT JOIN order_product op ON o.order_id = op.order_id " +
                         "LEFT JOIN customer c ON c.customer_id = o.customer_id " +
                         "LEFT JOIN product p ON op.product_id = p.product_id " +
-                        "WHERE (o.status = 1 OR o.status = 2) " +
+                        "WHERE " + CONDITION_ORDER_STATUS_CONFIRMED_OR_SENT + " " +
                         "AND rt.table_number = :tableNumber " +
-                        "AND t.status = 1 " +
+                        "AND t.status = " + TRANSACTION_STATUS_ACTIVE + " " +
                         "AND c.phone = :phoneNumber " +
                         "AND o.company_id  = :companyId " +
                         "GROUP BY " +
@@ -222,7 +235,7 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
                         "WHERE rt.tableId = t.tableId AND t.status = ts.transactionStatusId " +
                         "AND ot.transactionId = t.transactionId AND o.orderId = ot.orderId " +
                         "AND op.orderId = o.orderId AND str(p.productId) = op.productId " +
-                        "AND (o.status = 1 OR o.status = 2) AND t.status = 1")
+                        "AND " + CONDITION_ORDER_STATUS_CONFIRMED_OR_SENT + " AND t.status = " + TRANSACTION_STATUS_ACTIVE)
         List<Object[]> findCompanyData(@Param("companyId") Long companyId);
 
         default List<OrderResponseDTO> findAllOrdersWithTableDTO() {
