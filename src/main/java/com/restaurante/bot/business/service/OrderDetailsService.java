@@ -8,22 +8,40 @@ import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderDetailsService implements OrderInterface, OrderUseCase {
+
+    private static final long RESPONSE_OK = 200L;
+    private static final long RESPONSE_NOT_FOUND = 404L;
+
+    private static final long TRANSACTION_STATUS_ACTIVE = 1L;
+    private static final int TABLE_STATUS_AVAILABLE = 2;
+    private static final int TABLE_STATUS_DEFAULT = 1;
+
+    private static final int ORDER_STATUS_PENDING = 3;
+    private static final int ORDER_STATUS_CONFIRMED = 1;
+    private static final int ORDER_STATUS_SENT = 2;
+    private static final int ORDER_STATUS_CANCELLED = 4;
+    private static final int ORDER_STATUS_CONFIRMED_ARQ = 5;
+
+    private static final int MAX_PHONE_LENGTH = 20;
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?\\d{7,20}$");
 
     private final RestaurantTableRepository restaurantTableRepository;
     private final TransactionRepository transactionRepository;
@@ -44,7 +62,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         CustomerOrder newOrder = new CustomerOrder();
         newOrder.setDate(LocalDateTime.now());
         newOrder.setTotal(total);
-        newOrder.setStatus(3);
+        newOrder.setStatus(ORDER_STATUS_PENDING);
         newOrder.setCustomerId(customer.getCustomer_id());
         newOrder.setCompanyId(companyId);
         return customerOrderRepository.save(newOrder);
@@ -55,6 +73,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber, companyId);
         if (table == null) {
+            log.warn("findTableByNumber - mesa no encontrada, tableNumber={}, companyId={}", tableNumber, companyId);
             throw new GenericException("Mesa no encontrada", HttpStatus.BAD_REQUEST);
         }
         return table;
@@ -77,11 +96,13 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
     private void validateOrderRequest(OrderDetailsDTO orderDetailsDTO) {
         if (orderDetailsDTO == null) {
+            log.warn("validateOrderRequest - request body es nulo");
             throw new GenericException("Request body is missing", HttpStatus.BAD_REQUEST);
         }
 
         List<ItemRequest> items = orderDetailsDTO.getItems();
         if (items == null || items.isEmpty()) {
+            log.warn("validateOrderRequest - la orden no contiene items, phone={}", orderDetailsDTO.getPhone());
             throw new GenericException("La orden debe contener al menos un item", HttpStatus.BAD_REQUEST);
         }
 
@@ -95,6 +116,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         }
 
         if (!missing.isEmpty()) {
+            log.warn("validateOrderRequest - campos obligatorios faltantes: {}", String.join(", ", missing));
             throw new GenericException("Campos obligatorios faltantes: " + String.join(", ", missing), HttpStatus.BAD_REQUEST);
         }
     }
@@ -108,7 +130,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             transaction = new Transaction();
             // transaction.setCustomerId(customer.getCustomer_id());
             transaction.setTableId(table.getTableId());
-            transaction.setStatus(1L);
+            transaction.setStatus(TRANSACTION_STATUS_ACTIVE);
             transaction.setCompanyId(companyId);
             Transaction newTransaction = transactionRepository.save(transaction);
 
@@ -119,13 +141,35 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
     @Transactional
     public Customer findOrCreateCustomer(String phone) {
-        Customer customer = customerRepository.findByPhone(phone);
+        String normalizedPhone = normalizeAndValidatePhone(phone);
+        Customer customer = customerRepository.findByPhone(normalizedPhone);
         if (customer == null) {
+            log.info("findOrCreateCustomer - cliente no encontrado, creando nuevo registro para phone='{}'", normalizedPhone);
             customer = new Customer();
-            customer.setPhone(phone);
+            customer.setPhone(normalizedPhone);
             customerRepository.save(customer);
+            log.info("findOrCreateCustomer - nuevo cliente creado, customerId={}", customer.getCustomer_id());
+        } else {
+            log.debug("findOrCreateCustomer - cliente existente encontrado, customerId={}", customer.getCustomer_id());
         }
         return customer;
+    }
+
+    private String normalizeAndValidatePhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            log.warn("normalizeAndValidatePhone - phone nulo o vacío");
+            throw new GenericException("El campo phone es obligatorio", HttpStatus.BAD_REQUEST);
+        }
+
+        String normalizedPhone = phone.trim().replace(" ", "").replace("-", "");
+        if (normalizedPhone.length() > MAX_PHONE_LENGTH || !PHONE_PATTERN.matcher(normalizedPhone).matches()) {
+            log.warn("normalizeAndValidatePhone - formato inválido, phone='{}', longitud={}",
+                    phone.length() > 30 ? phone.substring(0, 30) + "[truncado]" : phone, normalizedPhone.length());
+            throw new GenericException("El campo phone debe contener un numero de telefono valido", HttpStatus.BAD_REQUEST);
+        }
+
+        log.debug("normalizeAndValidatePhone - phone normalizado='{}'", normalizedPhone);
+        return normalizedPhone;
     }
 
     @Transactional
@@ -157,6 +201,8 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     private Long getAuthenticatedCompanyId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof Long tokenCompanyId)) {
+            log.warn("getAuthenticatedCompanyId - autenticación ausente o principal inválido, principal={}",
+                    authentication != null ? authentication.getPrincipal() : "null");
             throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
         }
         return tokenCompanyId;
@@ -192,7 +238,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         log.info("saveOrder - table found, tableId={}, status={}", table.getTableId(), table.getStatus());
 
         // Verifica si la mesa está disponible
-        if (table.getStatus() != null && table.getStatus() == 2) {
+        if (table.getStatus() != null && table.getStatus() == TABLE_STATUS_AVAILABLE) {
             log.info("saveOrder - table is available, proceeding with order creation");
 
             // Guarda la orden
@@ -225,7 +271,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             log.info("saveOrder - success, orderId={}, transactionId={}",
                     setOrder.getOrderId(), transaction.getTransactionId());
 
-            return new GenericResponse("Transacción guardada con éxito", 200L);
+            return new GenericResponse("Transacción guardada con éxito", RESPONSE_OK);
         }
 
         log.warn("saveOrder - invalid table status for tableId={}, status={}", table.getTableId(), table.getStatus());
@@ -256,7 +302,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
         for (RestaurantTable table : allTables) {
             Integer tableNumber = table.getTableNumber().intValue();
-            Integer tableStatus = (table.getStatus() != null) ? table.getStatus().intValue() : 1; // Estado por defecto
+            Integer tableStatus = (table.getStatus() != null) ? table.getStatus().intValue() : TABLE_STATUS_DEFAULT; // Estado por defecto
                                                                                                   // 1 si es null
             mesaMap.put(tableNumber, new OrderResponseAdminDTO(tableNumber, tableStatus, new ArrayList<>(),
                     new ArrayList<>(), 0.0, null));
@@ -295,9 +341,9 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             // Agregar a la lista correspondiente según el estado de la orden
                 OrderDTO orderDTO = new OrderDTO(orderId, productId != null ? productId.toString() : null,
                     productName, qty, unitPrice, totalPrice, date);
-            if (orderStatus != null && orderStatus == 2) {
+            if (orderStatus != null && orderStatus == ORDER_STATUS_SENT) {
                 dto.getSentOrders().add(orderDTO);
-            } else if (orderStatus != null && (orderStatus == 1 || orderStatus == 5)) {
+            } else if (orderStatus != null && (orderStatus == ORDER_STATUS_CONFIRMED || orderStatus == ORDER_STATUS_CONFIRMED_ARQ)) {
                 dto.getOrders().add(orderDTO);
             }
         }
@@ -329,15 +375,21 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
     @Override
     public GenericResponse sendOrderStatus(OrdersIdsDTO orderIds) {
+        log.info("sendOrderStatus - start, ordersCount={}", orderIds.getOrdersIds().size());
 
         for (Long orderId : orderIds.getOrdersIds()) {
             CustomerOrder order = customerOrderRepository.findById(orderId)
-                    .orElseThrow(() -> new GenericException("Orden no encontrada", HttpStatus.BAD_REQUEST));
-            order.setStatus(2);
+                    .orElseThrow(() -> {
+                        log.warn("sendOrderStatus - orden no encontrada, orderId={}", orderId);
+                        return new GenericException("Orden no encontrada", HttpStatus.BAD_REQUEST);
+                    });
+            order.setStatus(ORDER_STATUS_SENT);
             customerOrderRepository.save(order);
+            log.debug("sendOrderStatus - orden actualizada a enviada, orderId={}", orderId);
         }
 
-        return new GenericResponse("Ordenes cambiadas a estado enviada con exito", 200L);
+        log.info("sendOrderStatus - success, {} ordenes actualizadas", orderIds.getOrdersIds().size());
+        return new GenericResponse("Ordenes cambiadas a estado enviada con exito", RESPONSE_OK);
     }
     /*
      * @Override
@@ -458,34 +510,54 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
     @Override
     public GenericResponse confirmationOrder(String phoneNumber, Boolean isConfirmed, Long tableNumber) {
+        log.info("confirmationOrder - start, phone={}, tableNumber={}, isConfirmed={}", phoneNumber, tableNumber, isConfirmed);
 
         Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
+            log.warn("confirmationOrder - compañia no encontrada, externalCompanyId={}", tokenCompanyId);
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        log.debug("confirmationOrder - companyId={} resuelto para externalCompanyId={}", company.getId(), tokenCompanyId);
 
         User user = userRepository.findUserByCompany(company.getId());
+        if (user == null) {
+            log.warn("confirmationOrder - usuario no encontrado para companyId={}", company.getId());
+        }
+        Subscription subscription = null;
+        if (user != null) {
+            subscription = subscriptionRepository.findByUserId(user.getUserId());
+            if (subscription == null) {
+                log.warn("confirmationOrder - suscripción no encontrada para userId={}", user.getUserId());
+            }
+        }
 
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
-
-        Long transactionId = transactionRepository.getTransactionIdByPhoneNumber(phoneNumber, tableNumber,
+        List<Long> transactionIds = transactionRepository.getTransactionIdsByPhoneNumber(phoneNumber, tableNumber,
                 company.getId());
+        log.debug("confirmationOrder - transactionIds encontrados={}", transactionIds);
+
+        if (transactionIds == null || transactionIds.isEmpty()) {
+            log.warn("confirmationOrder - no se encontraron transacciones para phone={}, tableNumber={}, companyId={}",
+                    phoneNumber, tableNumber, company.getId());
+            return new GenericResponse("No se encontraron órdenes para esta transacción", RESPONSE_NOT_FOUND);
+        }
 
         List<CustomerOrder> customerOrders = customerOrderRepository
-                .findByTransactionIdAndStatusNoConfirm(transactionId);
+            .findByTransactionIdsAndStatusNoConfirm(transactionIds);
+        log.debug("confirmationOrder - órdenes pendientes encontradas={}", customerOrders.size());
 
         if (customerOrders.isEmpty()) {
-            return new GenericResponse("No se encontraron órdenes para esta transacción", 404L);
+            log.warn("confirmationOrder - no hay órdenes pendientes para transactionIds={}", transactionIds);
+            return new GenericResponse("No se encontraron órdenes para esta transacción", RESPONSE_NOT_FOUND);
         }
 
         for (CustomerOrder order : customerOrders) {
             if (isConfirmed) {
-                order.setStatus(1);
+                order.setStatus(ORDER_STATUS_CONFIRMED);
             } else {
-                order.setStatus(4);
+                order.setStatus(ORDER_STATUS_CANCELLED);
             }
 
             customerOrderRepository.save(order);
@@ -493,9 +565,18 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         String notifTitle = isConfirmed ? "Orden confirmada - Mesa " + tableNumber : "Orden cancelada - Mesa " + tableNumber;
         String notifBody = isConfirmed ? "La orden en la mesa " + tableNumber + " ha sido confirmada. Revisa las órdenes pendientes." :
             "La orden en la mesa " + tableNumber + " ha sido cancelada. Revisa las órdenes pendientes.";
-        notificationService.sendNotificationToClient(subscription.getToken(), notifTitle, notifBody);
+
+        if (subscription != null && subscription.getToken() != null && !subscription.getToken().isBlank()) {
+            notificationService.sendNotificationToClient(subscription.getToken(), notifTitle, notifBody);
+        } else {
+            log.warn("confirmationOrder - notificacion omitida: suscripcion/token no encontrado para companyId={}",
+                    company.getId());
+        }
+
         String message = isConfirmed ? "Orden confirmada" : "Orden cancelada";
-        return new GenericResponse(message, 200L);
+        log.info("confirmationOrder - success, {} ordenes actualizadas, isConfirmed={}, tableNumber={}, phone={}",
+                customerOrders.size(), isConfirmed, tableNumber, phoneNumber);
+        return new GenericResponse(message, RESPONSE_OK);
     }
 
     @Override
@@ -504,13 +585,12 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
+            log.warn("noConfirmationOrder - compañia no encontrada, externalCompanyId={}", tokenCompanyId);
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
-        log.info("tableNumber: " + tableNumber);
-        log.info("company id: " + company.getId());
-        log.info("phoneNumber: " + phoneNumber);
+        log.info("noConfirmationOrder - start, tableNumber={}, phone={}, companyId={}", tableNumber, phoneNumber, company.getId());
 
         List<Object[]> resultList = orderTransactionRepository.findAllOrdersNotConfirm(tableNumber, company.getId(),
                 phoneNumber);
@@ -555,10 +635,12 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
+            log.warn("confirmedOreders - compañia no encontrada, externalCompanyId={}", tokenCompanyId);
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        log.info("confirmedOreders - start, tableNumber={}, phone={}, companyId={}", tableNumber, phoneNumber, company.getId());
 
         List<Object[]> resultList = orderTransactionRepository.findAllOrdersConfirm(tableNumber, phoneNumber,
                 company.getId());
@@ -631,16 +713,21 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
     @Override
     public GenericResponse confirmOrdersArq(ConfirmOrderArq request) {
+        log.info("confirmOrdersArq - start, orderId={}, companyId={}", request.getOrderId(), request.getCompanyId());
 
         CustomerOrder order = customerOrderRepository
                 .findByOrderIdAndCompanyId(request.getOrderId(), request.getCompanyId());
 
         if (order == null) {
+            log.warn("confirmOrdersArq - orden no encontrada, orderId={}, companyId={}",
+                    request.getOrderId(), request.getCompanyId());
             throw new GenericException("Orden no encontrada", HttpStatus.BAD_REQUEST);
         }
 
-        order.setStatus(5);
+        order.setStatus(ORDER_STATUS_CONFIRMED_ARQ);
         customerOrderRepository.save(order);
-        return new GenericResponse("Se realizo el cambio de estado de la orden", 200L);
+        log.info("confirmOrdersArq - success, orderId={} actualizada a status={}",
+                order.getOrderId(), ORDER_STATUS_CONFIRMED_ARQ);
+        return new GenericResponse("Se realizo el cambio de estado de la orden", RESPONSE_OK);
     }
 }
