@@ -27,6 +27,9 @@ public class GenerateLinkIn {
 
     @NotBlank(message = "The mesa is required.")
     private String mesa;
+    @NotBlank(message = "The sourceId is required.")
+    private String sourceId;
+
     private String qr;
     private String delivery;
 

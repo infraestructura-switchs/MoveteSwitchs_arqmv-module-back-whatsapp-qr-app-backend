@@ -128,6 +128,7 @@ public class SecurityController {
         // Note: do NOT include apiKey in the generated URL; it's used only for validation
         queryParams.put("mesa", generateLinkIn.getMesa());
         queryParams.put("userToken", generateLinkIn.getUserToken());
+        queryParams.put("source_id", generateLinkIn.getSourceId());
 
         if (generateLinkIn.getQr() != null && !generateLinkIn.getQr().isEmpty()) {
             queryParams.put("qr", generateLinkIn.getQr());
