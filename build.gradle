@@ -36,6 +36,8 @@ dependencies {
     
     // MySQL Driver
     runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+    // Oracle JDBC driver for local Oracle connections
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc11:23.3.0.23.09'
 
     implementation 'com.mashape.unirest:unirest-java:1.4.9'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.4'

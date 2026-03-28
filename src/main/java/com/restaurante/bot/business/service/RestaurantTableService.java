@@ -12,7 +12,6 @@ import com.restaurante.bot.repository.SubscriptionRepository;
 import com.restaurante.bot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,30 +32,13 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
 
     @Override
     public List<RestaurantTable> ListarMesas(){
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
-
-        if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
-        }
-
-        Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
-
+        Company company = getAuthenticatedCompany();
         return restaurantTableRepository.findAllTablesAsc(company.getId());
     }
 
     @Override
     public RestaurantTable addTable(Long tableNumber) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
-
-        if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
-        }
-
-        Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        Company company = getAuthenticatedCompany();
 
         if (restaurantTableRepository.existsByTableNumberAndCompanyId(tableNumber, company.getId())) {
 
@@ -86,54 +68,23 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
 
     @Override
     public RestaurantTable changeStatusOcuped(ChangeStatusTableDTO changeStatusTableDTO) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
-
-        if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
-        }
-        log.info("external company id: " + changeStatusTableDTO.getExternalCompanyId());
-        Company company = companyRepository.findByExternalCompanyId(changeStatusTableDTO.getExternalCompanyId());
-        log.info("company id: " + company.getId());
-
-        User user = userRepository.findUserByCompany(company.getId());
-
-
-
-        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(changeStatusTableDTO.getTableNumber(), company.getId());
+        validateTableNumber(changeStatusTableDTO.getTableNumber());
+        Company company = getAuthenticatedCompany();
+        RestaurantTable table = getTableByCompanyOrThrow(changeStatusTableDTO.getTableNumber(), company.getId());
         table.setStatus(2L);
-
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
 
         String title = "Mesa " + changeStatusTableDTO.getTableNumber() + " - Estado actualizado";
         String body = "La mesa " + changeStatusTableDTO.getTableNumber() + " ha cambiado de estado. Revisa la lista de mesas.";
-        if (subscription == null || subscription.getToken() == null) {
-            log.warn("No subscription/token found for user {} — skipping notification", user != null ? user.getUserId() : null);
-        } else {
-            notificationService.sendNotificationToClient(subscription.getToken(), title, body);
-        }
+        notifyCompanyUser(company.getId(), title, body);
 
         return restaurantTableRepository.save(table);
     }
 
     @Override
     public RestaurantTable changeStatusFree(Long tableNumber) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
-
-        if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
-        }
-
-        Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
-
-        if (!restaurantTableRepository.existsByTableNumberAndCompanyId(tableNumber, company.getId())) {
-            throw new GenericException("Mesa no resgistrada en la base de datos", HttpStatus.BAD_REQUEST);
-        }
-
-        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber, company.getId());
+        validateTableNumber(tableNumber);
+        Company company = getAuthenticatedCompany();
+        RestaurantTable table = getTableByCompanyOrThrow(tableNumber, company.getId());
         table.setStatus(1L);
 
         return restaurantTableRepository.save(table);
@@ -141,36 +92,16 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
 
     @Override
     public RestaurantTable changeStatusRequestingService(NumberDTO tableNumber) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
-
-        if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
-        }
-
-        Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
-
-        User user = userRepository.findUserByCompany(company.getId());
-
-
-        if (!restaurantTableRepository.existsByTableNumberAndCompanyId(tableNumber.getTableNumber(), company.getId())) {
-            throw new GenericException("Mesa no resgistrada en la base de datos", HttpStatus.BAD_REQUEST);
-        }
-
-        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber.getTableNumber(), company.getId());
+        validateTableNumber(tableNumber.getTableNumber());
+        Company company = getAuthenticatedCompany();
+        RestaurantTable table = getTableByCompanyOrThrow(tableNumber.getTableNumber(), company.getId());
         table.setStatus(3L);
 
         Long tn = tableNumber.getTableNumber();
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
 
         String titleReq = "Mesa " + tn + " - Solicitud de servicio";
         String bodyReq = "El cliente en la mesa " + tn + " ha solicitado servicio. Atiéndelo, por favor.";
-        if (subscription == null || subscription.getToken() == null) {
-            log.warn("No subscription/token found for user {} — skipping notification", user != null ? user.getUserId() : null);
-        } else {
-            notificationService.sendNotificationToClient(subscription.getToken(), titleReq, bodyReq);
-        }
+        notifyCompanyUser(company.getId(), titleReq, bodyReq);
 
         return restaurantTableRepository.save(table);
     }
@@ -190,34 +121,64 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
 
     @Override
     public RestaurantTable changeStatusPay(NumberDTO tableNumber) {
+        validateTableNumber(tableNumber.getTableNumber());
+        Company company = getAuthenticatedCompany();
+        RestaurantTable table = getTableByCompanyOrThrow(tableNumber.getTableNumber(), company.getId());
+        table.setStatus(5L);
 
+        Long tnPay = tableNumber.getTableNumber();
+
+        String titlePay = "Mesa " + tnPay + " - Pago solicitado";
+        String bodyPay = "La mesa " + tnPay + " ha solicitado pagar. Revisar y procesar pago.";
+        notifyCompanyUser(company.getId(), titlePay, bodyPay);
+
+        return restaurantTableRepository.save(table);
+    }
+
+    private Company getAuthenticatedCompany() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long tokenCompanyId = (Long) authentication.getPrincipal();
+        if (authentication == null || !(authentication.getPrincipal() instanceof Long tokenCompanyId)) {
+            throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
+        }
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        if (company == null) {
+            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+        }
+        return company;
+    }
 
-        User user = userRepository.findUserByCompany(company.getId());
+    private RestaurantTable getTableByCompanyOrThrow(Long tableNumber, Long companyId) {
+        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber, companyId);
+        if (table == null) {
+            throw new GenericException("Mesa no resgistrada en la base de datos", HttpStatus.BAD_REQUEST);
+        }
+        return table;
+    }
 
+    private void validateTableNumber(Long tableNumber) {
+        if (tableNumber == null || tableNumber <= 0) {
+            throw new GenericException("Campos con valor invalido: tableNumber", HttpStatus.BAD_REQUEST);
+        }
+    }
 
-
-        RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber.getTableNumber(), company.getId());
-        table.setStatus(5L);
-
-        Long tnPay = tableNumber.getTableNumber();
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
-
-        String titlePay = "Mesa " + tnPay + " - Pago solicitado";
-        String bodyPay = "La mesa " + tnPay + " ha solicitado pagar. Revisar y procesar pago.";
-        if (subscription == null || subscription.getToken() == null) {
-            log.warn("No subscription/token found for user {} — skipping notification", user != null ? user.getUserId() : null);
-        } else {
-            notificationService.sendNotificationToClient(subscription.getToken(), titlePay, bodyPay);
+    private void notifyCompanyUser(Long companyId, String title, String body) {
+        User user = userRepository.findUserByCompany(companyId);
+        if (user == null) {
+            log.warn("No user found for company {} - skipping notification", companyId);
+            return;
         }
 
-        return restaurantTableRepository.save(table);
+        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
+        if (subscription == null || subscription.getToken() == null) {
+            log.warn("No subscription/token found for user {} - skipping notification", user.getUserId());
+            return;
+        }
+
+        notificationService.sendNotificationToClient(subscription.getToken(), title, body);
     }
 }

@@ -11,12 +11,12 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
     show-sql: true
 
 app:
   db:
-    type: mysql
+    type: ${DB_TYPE:mysql}
 
 logging:
   level:
