@@ -6,13 +6,13 @@ spring:
   datasource:
     # Oracle Database Connection
     # Required environment variables:
-    # SPRING_DATASOURCE_URL=jdbc:oracle:thin:@<host>:<port>:<SID>
-    # SPRING_DATASOURCE_USERNAME=<username>
-    # SPRING_DATASOURCE_PASSWORD=<password>
-    url: ${SPRING_DATASOURCE_URL}
+    # ORACLE_DATASOURCE_URL=jdbc:oracle:thin:@//<host>:<port>/<service>
+    # ORACLE_DATASOURCE_USERNAME=<username>
+    # ORACLE_DATASOURCE_PASSWORD=<password>
+    url: ${ORACLE_DATASOURCE_URL}
     driver-class-name: oracle.jdbc.OracleDriver
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    username: ${ORACLE_DATASOURCE_USERNAME}
+    password: ${ORACLE_DATASOURCE_PASSWORD}
     hikari:
       auto-commit: true
       maximum-pool-size: ${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:10}

@@ -5,11 +5,11 @@ server:
 spring:
   datasource:
     # Local Oracle Development Connection
-    # Example: jdbc:oracle:thin:@localhost:1521:XE
-    url: ${SPRING_DATASOURCE_URL:jdbc:oracle:thin:@localhost:1521:XE}
+    # Example: jdbc:oracle:thin:@//localhost:1521/XEPDB1
+    url: ${ORACLE_DATASOURCE_URL:jdbc:oracle:thin:@//localhost:1521/XEPDB1}
     driver-class-name: oracle.jdbc.OracleDriver
-    username: ${SPRING_DATASOURCE_USERNAME:system}
-    password: ${SPRING_DATASOURCE_PASSWORD:oracle}
+    username: ${ORACLE_DATASOURCE_USERNAME:system}
+    password: ${ORACLE_DATASOURCE_PASSWORD:oracle}
     hikari:
       auto-commit: true
       maximum-pool-size: ${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:5}
