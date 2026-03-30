@@ -44,7 +44,6 @@ app:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
   request:
     mapping: api/back-whatsapp-qr-app
-  version: '@version@'
   url:
     services:
       products-service: ${PRODUCTS_SERVICE_URL:https://gfvsgktksbutb3pdokevf6vhbi.apigateway.us-phoenix-1.oci.customer-oci.com/arq-prd-v3/}

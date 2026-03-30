@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.restaurante'
-version = '0.0.1'
+version = '0.0.10'
 
 java {
     toolchain {
@@ -76,6 +76,10 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+springBoot {
+    buildInfo()
 }
 
 // Keep delombok available for tooling/docs, but compile from canonical sources.
