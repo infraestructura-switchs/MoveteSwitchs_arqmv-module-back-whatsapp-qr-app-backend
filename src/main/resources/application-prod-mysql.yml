@@ -1,0 +1,37 @@
+# Production profile - MySQL Database
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    # MySQL Production Connection
+    # Required environment variables:
+    # SPRING_DATASOURCE_URL=jdbc:mysql://<host>:<port>/<database>
+    # SPRING_DATASOURCE_USERNAME=<username>
+    # SPRING_DATASOURCE_PASSWORD=<password>
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      auto-commit: true
+      maximum-pool-size: ${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:10}
+      minimum-idle: ${SPRING_DATASOURCE_MINIMUM_IDLE:2}
+      connection-timeout: ${SPRING_DATASOURCE_CONNECTION_TIMEOUT:30000}
+      idle-timeout: ${SPRING_DATASOURCE_IDLE_TIMEOUT:600000}
+      max-lifetime: ${SPRING_DATASOURCE_MAX_LIFETIME:1800000}
+
+  jpa:
+    mapping-resources: META-INF/orm-mysql.xml
+    properties:
+      hibernate:
+        dialect: ${app.db.dialect:org.hibernate.dialect.MySQL8Dialect}
+        jdbc:
+          fetch_size: 50
+          batch_size: 20
+    show-sql: false
+
+app:
+  db:
+    type: ${DB_TYPE:mysql}
+    dialect: ${DB_DIALECT:org.hibernate.dialect.MySQL8Dialect}

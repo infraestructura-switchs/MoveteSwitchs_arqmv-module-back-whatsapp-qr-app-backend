@@ -5,13 +5,13 @@ spring:
   application:
     name: bot
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}
+    active: ${SPRING_PROFILES_ACTIVE:prod-mysql}
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://72.60.173.101:33307/movetedatabase}
-    username: ${SPRING_DATASOURCE_USERNAME:mysql}
-    password: ${SPRING_DATASOURCE_PASSWORD:ltm8d5vwazdvrsbt}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/movetedatabase}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:com.mysql.cj.jdbc.Driver}
 
     hikari:
       auto-commit: true
@@ -26,6 +26,9 @@ spring:
     properties:
       hibernate:
         dialect: ${app.db.dialect:org.hibernate.dialect.MySQL8Dialect}
+        jdbc:
+          fetch_size: 50
+          batch_size: 20
     show-sql: false
 
   cache:

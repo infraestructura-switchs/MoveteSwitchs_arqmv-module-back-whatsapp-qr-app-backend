@@ -61,13 +61,30 @@ public class LoginGGPServiceImpl implements LoginGGPService {
             if (isCorrect) {
                 String sessionId = jwtUtilUser.generateSessionId();
                 objectDtoVo.setTokenDateExpired(new Date(System.currentTimeMillis() + EXPIRATION_TIME_LONG));
+                
+                // Safely retrieve company ID with error handling
+                Long externalCompanyId = null;
+                try {
+                    if (objectOptional.get().getCompany() != null) {
+                        externalCompanyId = objectOptional.get().getCompany().getExternalCompanyId();
+                    }
+                } catch (jakarta.persistence.EntityNotFoundException e) {
+                    throw new CustomErrorException(HttpStatus.BAD_REQUEST, 
+                        "Error: Company associated with user not found in database");
+                }
+                
+                if (externalCompanyId == null) {
+                    throw new CustomErrorException(HttpStatus.BAD_REQUEST, 
+                        "Error: User does not have a valid company assigned");
+                }
+                
                 token = jwtUtilUser.generateToken(
-                        objectOptional.get().getCompany().getExternalCompanyId(),
+                        externalCompanyId,
                         objectOptional.get().getUserId(),
                         sessionId);
                 sessionRegistryService.registerSession(
                     sessionId,
-                    objectOptional.get().getCompany().getExternalCompanyId(),
+                    externalCompanyId,
                     objectOptional.get().getUserId());
 
                 objectDtoVo.setToken(token);

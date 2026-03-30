@@ -1,0 +1,46 @@
+# Local development profile - Oracle Database
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    # Local Oracle Development Connection
+    # Example: jdbc:oracle:thin:@localhost:1521:XE
+    url: ${SPRING_DATASOURCE_URL:jdbc:oracle:thin:@localhost:1521:XE}
+    driver-class-name: oracle.jdbc.OracleDriver
+    username: ${SPRING_DATASOURCE_USERNAME:system}
+    password: ${SPRING_DATASOURCE_PASSWORD:oracle}
+    hikari:
+      auto-commit: true
+      maximum-pool-size: ${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:5}
+      minimum-idle: ${SPRING_DATASOURCE_MINIMUM_IDLE:2}
+      connection-timeout: ${SPRING_DATASOURCE_CONNECTION_TIMEOUT:30000}
+      idle-timeout: ${SPRING_DATASOURCE_IDLE_TIMEOUT:600000}
+      max-lifetime: ${SPRING_DATASOURCE_MAX_LIFETIME:1800000}
+
+  jpa:
+    mapping-resources: META-INF/orm-oracle.xml
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.Oracle21Dialect
+        jdbc:
+          fetch_size: 50
+          batch_size: 20
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+app:
+  db:
+    type: oracle
+    dialect: org.hibernate.dialect.Oracle21Dialect
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE

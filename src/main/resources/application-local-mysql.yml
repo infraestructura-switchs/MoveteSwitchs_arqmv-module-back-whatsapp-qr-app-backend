@@ -1,0 +1,45 @@
+# Local development profile - MySQL Database
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    # Local MySQL Development Connection
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/movetedatabase_local}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    hikari:
+      auto-commit: true
+      maximum-pool-size: ${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:5}
+      minimum-idle: ${SPRING_DATASOURCE_MINIMUM_IDLE:2}
+      connection-timeout: ${SPRING_DATASOURCE_CONNECTION_TIMEOUT:30000}
+      idle-timeout: ${SPRING_DATASOURCE_IDLE_TIMEOUT:600000}
+      max-lifetime: ${SPRING_DATASOURCE_MAX_LIFETIME:1800000}
+
+  jpa:
+    mapping-resources: META-INF/orm-mysql.xml
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc:
+          fetch_size: 50
+          batch_size: 20
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+app:
+  db:
+    type: mysql
+    dialect: org.hibernate.dialect.MySQL8Dialect
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
