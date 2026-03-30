@@ -25,7 +25,7 @@ spring:
     mapping-resources: META-INF/orm-oracle.xml
     properties:
       hibernate:
-        dialect: ${app.db.dialect:org.hibernate.dialect.Oracle21Dialect}
+        dialect: org.hibernate.dialect.OracleDialect
         jdbc:
           fetch_size: 50
           batch_size: 20
@@ -34,4 +34,4 @@ spring:
 app:
   db:
     type: ${DB_TYPE:oracle}
-    dialect: ${DB_DIALECT:org.hibernate.dialect.Oracle21Dialect}
+    dialect: org.hibernate.dialect.OracleDialect
