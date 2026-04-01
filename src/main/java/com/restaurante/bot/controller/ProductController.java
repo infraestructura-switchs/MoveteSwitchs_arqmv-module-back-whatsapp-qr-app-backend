@@ -4,9 +4,7 @@ import com.restaurante.bot.application.ports.incoming.ProductUseCase;
 import com.restaurante.bot.dto.CategorizedProductsDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductUpdateDTO;
-import com.restaurante.bot.model.GenericResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/${app.request.mapping}/product")
 @RequiredArgsConstructor
-@Slf4j
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 public class ProductController {
 
@@ -66,14 +63,6 @@ public class ProductController {
         return productsByCategory;
     }
 
-    @PostMapping("/update-data")
-    public ResponseEntity<GenericResponse>updateOrCreateProductsWithCategory(@RequestParam("externalCompanyId") Long externalCompanyId){
-        log.info("Se inicia el servicio que nos va a crear o " +
-                "actualizar los datos de los productos de la compañia -> {}", externalCompanyId);
-        return new ResponseEntity<>(productInterface.updateOrCreateProductsWithCategory(externalCompanyId), HttpStatus.OK) ;
-    }
-
-
     @PutMapping("/updateDescription")
     public ResponseEntity<ProductDto> updateProductDescription(@RequestBody ProductUpdateDTO productUpdateDTO) {
         ProductDto updatedProduct = productInterface.updateProductDescription(productUpdateDTO);
@@ -101,5 +90,5 @@ public class ProductController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-
 }
+

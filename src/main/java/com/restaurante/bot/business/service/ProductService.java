@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -174,11 +173,13 @@ public class ProductService implements ProductInterface, ProductUseCase {
     }
 
     @Transactional
-    @Scheduled(cron = "0 00 07 * * ?")
-    public void updateOrCreateProductsWithCategory() {
-        log.info("Iniciando actualización programada de productos para todas las compañías");
+    public GenericResponse updateOrCreateProductsWithCategory() {
+        log.info("Iniciando actualización de productos para todas las compañías");
 
         List<Long> companyIdsToProcess = companyRepository.findCompanyIds();
+        int totalProductsUpdated = 0;
+        int companiesProcessed = 0;
+
         for (Long companyId : companyIdsToProcess) {
             loadCategoryMapping(companyId);
 
@@ -188,15 +189,19 @@ public class ProductService implements ProductInterface, ProductUseCase {
                 continue;
             }
 
+            companiesProcessed++;
             for (ProductDTO productDTO : products) {
                 Product product = mapToProduct(productDTO, companyId);
                 Long categoryId = getOrCreateCategory(productDTO, companyId);
                 product.setCategoryId(categoryId);
                 productRepository.save(product);
+                totalProductsUpdated++;
             }
         }
 
-        log.info("Actualización de productos completada para todas las compañías");
+        String message = String.format("Actualización completada: %d compañías procesadas, %d productos actualizados", companiesProcessed, totalProductsUpdated);
+        log.info("Actualización de productos completada para todas las compañías. {}", message);
+        return new GenericResponse(message, 200L);
     }
 
     @Transactional

@@ -14,6 +14,8 @@ public interface ProductInterface {
 
     CategorizedProductsDTO getProductsSfotRestaurantByCompanyId(Long externalCompanyId);
 
+    GenericResponse updateOrCreateProductsWithCategory();
+
     GenericResponse updateOrCreateProductsWithCategory(Long externalCompanyId);
 
     ProductDto updateProductDescription(ProductUpdateDTO productUpdateDTO);
