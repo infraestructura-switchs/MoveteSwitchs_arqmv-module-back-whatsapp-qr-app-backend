@@ -1,22 +1,17 @@
 # run-local.ps1
-# Load .env file
-if (Test-Path .env) {
-    Get-Content .env | ForEach-Object {
-        if ($_ -match '^([^=]+)=(.*)$') {
-            $name = $matches[1].Trim()
-            $value = $matches[2].Trim()
-            # Remove optional quotes
-            if ($value -match "^'(.*)'$") { $value = $matches[1] }
-            elseif ($value -match '^"(.*)"$') { $value = $matches[1] }
-            [System.Environment]::SetEnvironmentVariable($name, $value, "Process")
-        }
-    }
+# Wrapper script to run profile by db and environment
+
+param(
+    [ValidateSet("mysql", "oracle")]
+    [string]$Db = "mysql",
+    [ValidateSet("local", "prod", "test")]
+    [string]$Env = "local"
+)
+
+if ($Db -eq "oracle") {
+    Write-Host "Running profile '$Env' with Oracle..."
+    & .\run-local-oracle.ps1 -Env $Env
+} else {
+    Write-Host "Running profile '$Env' with MySQL..."
+    & .\run-local-mysql.ps1 -Env $Env
 }
-
-# Force port 8081 to avoid conflict on 8080
-[System.Environment]::SetEnvironmentVariable("SERVER_PORT", "8081", "Process")
-# Activate 'local' Spring profile for local runs
-[System.Environment]::SetEnvironmentVariable("SPRING_PROFILES_ACTIVE", "prod", "Process")
-
-# Run the project
-.\gradlew.bat bootRun

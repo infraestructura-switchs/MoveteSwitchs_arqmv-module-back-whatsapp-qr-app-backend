@@ -4,8 +4,19 @@ Backend Spring Boot para el módulo de WhatsApp QR de Movete.
 
 ## Ejecutar local
 
-1. Configura variables de entorno o un archivo `.env`.
-2. Ejecuta `./run-local.ps1` o `./gradlew.bat bootRun`.
+1. Configura variables de entorno por motor/ambiente.
+	Prioridad de carga de archivos en scripts:
+	- `.env.<ambiente>.<db>` (ej: `.env.local.mysql`)
+	- `.env.<db>` (ej: `.env.mysql`)
+	- `.env.<ambiente>` (ej: `.env.local`)
+	- `.env`
+2. Ejecuta con wrapper por DB y ambiente:
+	- Default: `./run-local.ps1` (equivale a `-Db mysql -Env local`)
+	- MySQL local: `./run-local.ps1 -Db mysql -Env local`
+	- MySQL prod: `./run-local.ps1 -Db mysql -Env prod`
+	- Oracle local: `./run-local.ps1 -Db oracle -Env local`
+	- Oracle prod: `./run-local.ps1 -Db oracle -Env prod`
+	- Test (usa perfil `test`): `./run-local.ps1 -Db mysql -Env test`
 
 ### Perfil test fuera de JUnit
 
