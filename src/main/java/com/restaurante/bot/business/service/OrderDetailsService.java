@@ -571,13 +571,13 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
                 Transaction transaction = transactionRepository.findByTransactionId(transactionId);
                 if (transaction == null) {
                     log.warn("confirmationOrder - transacción no encontrada para cierre, transactionId={}",
-                            transactionId);
+                        transactionId);
                     continue;
                 }
                 //TODO: Validar primero flujo antes de ambiar estado de trasaccion
                 //transaction.setStatus(TransactionStatusConstants.CLOSED);
                 //transactionRepository.save(transaction);
-                //log.info("confirmationOrder - transacción cerrada por cancelación, transactionId={}, status={}",
+                //log.info("confirmationOrder - transacción cerrada por cancelación, transactionId={}, status=",
                 //    transactionId, TransactionStatusConstants.CLOSED);
             }
         } else {

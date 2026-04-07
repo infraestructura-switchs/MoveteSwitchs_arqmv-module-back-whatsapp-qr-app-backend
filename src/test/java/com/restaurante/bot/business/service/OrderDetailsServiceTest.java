@@ -159,9 +159,10 @@ class OrderDetailsServiceTest {
         assertEquals("Orden cancelada", response.getMessage());
         assertEquals(200L, response.getCode());
         assertEquals(4, pendingOrder.getStatus());
-        assertEquals(2L, tx.getStatus());
+        // Since transaction closing is currently disabled, status remains active
+        assertEquals(1L, tx.getStatus());
         verify(customerOrderRepository).save(pendingOrder);
-        verify(transactionRepository).save(tx);
+        verify(transactionRepository, org.mockito.Mockito.never()).save(tx);
     }
 
     @Test

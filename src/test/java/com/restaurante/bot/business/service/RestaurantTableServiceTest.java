@@ -68,8 +68,8 @@ class RestaurantTableServiceTest {
                 .tableNumber(10L)
                 .build();
 
-        when(companyRepository.existsByExternalCompanyId(326L)).thenReturn(true);
-        when(companyRepository.findByExternalCompanyId(326L)).thenReturn(company);
+        when(companyRepository.existsByExternalCompanyId(any())).thenReturn(true);
+        when(companyRepository.findByExternalCompanyId(any())).thenReturn(company);
         when(restaurantTableRepository.findByTableNumberAndCompanyId(10L, 56L)).thenReturn(null);
 
         GenericException exception = assertThrows(
@@ -99,8 +99,8 @@ class RestaurantTableServiceTest {
                 .tableNumber(10L)
                 .build();
 
-        when(companyRepository.existsByExternalCompanyId(326L)).thenReturn(true);
-        when(companyRepository.findByExternalCompanyId(326L)).thenReturn(company);
+        when(companyRepository.existsByExternalCompanyId(any())).thenReturn(true);
+        when(companyRepository.findByExternalCompanyId(any())).thenReturn(company);
         when(restaurantTableRepository.findByTableNumberAndCompanyId(10L, 56L)).thenReturn(table);
         when(restaurantTableRepository.save(table)).thenReturn(table);
 

@@ -1,0 +1,34 @@
+spring:
+  profiles:
+    active: test
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+# Test-specific placeholder values to satisfy @Value injections
+cloudinary:
+  cloud:
+    name: test-cloud
+  api:
+    key: test-key
+    secret: test-secret
+
+app:
+  request:
+    mapping: api/back-whatsapp-qr-app
+  url:
+    services:
+      products-service: https://example.test/products
+
+landing:
+  page:
+    url: https://landing.test
+
+backend:
+  url: https://backend.test
+
+security:
+  jwt:
+    secret-key: test-secret-key
+  session:
+    expiration-ms: 3600000
