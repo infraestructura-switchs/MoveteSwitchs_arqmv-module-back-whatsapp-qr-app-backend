@@ -35,6 +35,7 @@
     <entity class="com.restaurante.bot.model.City">
         <attributes>
             <id name="id">
+                <column name="CITY_ID"/>
                 <generated-value strategy="SEQUENCE" generator="CITY_SEQ"/>
                 <sequence-generator name="CITY_SEQ" sequence-name="CITY_SEQ" allocation-size="1"/>
             </id>
