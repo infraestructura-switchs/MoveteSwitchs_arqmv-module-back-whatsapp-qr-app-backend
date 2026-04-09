@@ -4,7 +4,8 @@ import com.restaurante.bot.application.ports.incoming.RestaurantTableUseCase;
 import com.restaurante.bot.business.interfaces.RestaurantTableInterface;
 import com.restaurante.bot.dto.ChangeStatusTableDTO;
 import com.restaurante.bot.dto.NumberDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.CompanyRepository;
 import com.restaurante.bot.repository.RestaurantTableRepository;
@@ -42,7 +43,7 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
 
         if (restaurantTableRepository.existsByTableNumberAndCompanyId(tableNumber, company.getId())) {
 
-            throw new GenericException("La mesa ya existe", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "La mesa ya existe");
 
         }else {
 
@@ -60,7 +61,7 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
     public GenericResponse deleteTable(Long tableId) {
 
         if (!restaurantTableRepository.existsById(tableId)) {
-            throw new GenericException("Mesa no resgistrada en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Mesa no resgistrada en la base de datos");
         }
         restaurantTableRepository.deleteById(tableId);
         return new GenericResponse("Mesa eliminada con exito", 200L);
@@ -109,7 +110,7 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
     public RestaurantTable changeStatusReserved(Long tableNumber) {
         /*
         if (!restaurantTableRepository.existsByTableNumber(tableNumber)) {
-            throw new GenericException("Mesa no resgistrada en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Mesa no resgistrada en la base de datos");
         }
         RestaurantTable table = restaurantTableRepository.findByTableNumber(tableNumber);
         table.setStatus(4L);
@@ -138,16 +139,16 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
     private Company getAuthenticatedCompany() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof Long tokenCompanyId)) {
-            throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
+            throw new DomainException(DomainErrorCode.UNAUTHORIZED, "No autenticado");
         }
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
         if (company == null) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
         return company;
     }
@@ -155,14 +156,14 @@ public class RestaurantTableService implements RestaurantTableInterface, Restaur
     private RestaurantTable getTableByCompanyOrThrow(Long tableNumber, Long companyId) {
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber, companyId);
         if (table == null) {
-            throw new GenericException("Mesa no resgistrada en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Mesa no resgistrada en la base de datos");
         }
         return table;
     }
 
     private void validateTableNumber(Long tableNumber) {
         if (tableNumber == null || tableNumber <= 0) {
-            throw new GenericException("Campos con valor invalido: tableNumber", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Campos con valor invalido: tableNumber");
         }
     }
 

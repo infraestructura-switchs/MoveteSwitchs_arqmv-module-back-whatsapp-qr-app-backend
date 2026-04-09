@@ -31,8 +31,9 @@ public class OrderDetailsDeliveryController {
             OrderDetailDelivery createdOrder = orderService.saveOrder(orderDetailsDTO);
             return ResponseEntity.status(201).body(createdOrder);
         } catch (Exception e) {
-            log.error("Error al crear la orden: {}", e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            log.error("Error al crear la orden: {}", e.getMessage(), e);
+            throw new com.restaurante.bot.exception.CustomErrorException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Ocurrió un error al crear la orden");
         }
 
     }
@@ -45,8 +46,9 @@ public class OrderDetailsDeliveryController {
             List<OrderDeliveryResponseDTO> activeOrders = orderService.getOrderDetails();
             return ResponseEntity.ok(activeOrders);
         } catch (Exception e) {
-            log.error("Error al obtener las órdenes activas: {}", e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            log.error("Error al obtener las órdenes activas: {}", e.getMessage(), e);
+            throw new com.restaurante.bot.exception.CustomErrorException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Ocurrió un error al obtener las órdenes");
         }
     }
 
@@ -58,8 +60,9 @@ public class OrderDetailsDeliveryController {
             OrderDetailDelivery updatedOrder = orderService.updateOrderStatus(orderTransactionDeliveryId, updateOrderStatusDTO);
             return ResponseEntity.ok(updatedOrder);
         } catch (Exception e) {
-            log.error("Error al actualizar el estado de la orden: {}", e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            log.error("Error al actualizar el estado de la orden: {}", e.getMessage(), e);
+            throw new com.restaurante.bot.exception.CustomErrorException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Ocurrió un error al actualizar el estado de la orden");
         }
     }
 

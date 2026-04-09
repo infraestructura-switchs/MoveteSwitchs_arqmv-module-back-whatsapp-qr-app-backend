@@ -4,7 +4,8 @@ import com.restaurante.bot.business.call.CallServiceHttp;
 import com.restaurante.bot.application.ports.incoming.OrderDetailsDeliveryUseCase;
 import com.restaurante.bot.business.interfaces.IOrderDetailBusiness;
 import com.restaurante.bot.dto.*;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -157,7 +158,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
         Long tokenCompanyId = (Long) authentication.getPrincipal();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);

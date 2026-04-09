@@ -4,7 +4,8 @@ import com.restaurante.bot.application.ports.incoming.ProductCrudUseCase;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductGetAllDto;
 import com.restaurante.bot.dto.ProductSaveAndUpdateDto;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,6 @@ public class ProductoCrudController {
 
     @PostMapping("/create")
     public ResponseEntity<ProductDto> save(@RequestBody @Valid ProductSaveAndUpdateDto productDto) {
-        validateProductRequest(productDto);
         return ResponseEntity.ok(productCrudUseCase.save(productDto));
     }
 
@@ -43,45 +43,7 @@ public class ProductoCrudController {
     @PutMapping("/update/{id}")
     public ResponseEntity<ProductDto> update(@PathVariable("id") Long productId,
             @RequestBody @Valid ProductSaveAndUpdateDto productDto) {
-        validateProductRequest(productDto);
         return ResponseEntity.ok(productCrudUseCase.update(productId, productDto));
-    }
-
-    private void validateProductRequest(ProductSaveAndUpdateDto productDto) {
-        List<String> missingFields = new ArrayList<>();
-        List<String> invalidFields = new ArrayList<>();
-
-        if (productDto.getProductName() == null || productDto.getProductName().trim().isEmpty()) {
-            missingFields.add("productName");
-        }
-        if (productDto.getPrice() == null) {
-            missingFields.add("price");
-        } else if (productDto.getPrice() <= 0) {
-            invalidFields.add("price");
-        }
-        if (productDto.getCompanyId() == null) {
-            missingFields.add("companyId");
-        } else if (productDto.getCompanyId() <= 0) {
-            invalidFields.add("companyId");
-        }
-        if (productDto.getCategoryId() == null) {
-            missingFields.add("categoryId");
-        } else if (productDto.getCategoryId() <= 0) {
-            invalidFields.add("categoryId");
-        }
-        if (productDto.getPreparationTime() == null) {
-            missingFields.add("preparationTime");
-        } else if (productDto.getPreparationTime() <= 0) {
-            invalidFields.add("preparationTime");
-        }
-
-        if (!missingFields.isEmpty()) {
-            throw new GenericException("Campos obligatorios faltantes: " + String.join(", ", missingFields), HttpStatus.BAD_REQUEST);
-        }
-
-        if (!invalidFields.isEmpty()) {
-            throw new GenericException("Campos con valor invalido: " + String.join(", ", invalidFields), HttpStatus.BAD_REQUEST);
-        }
     }
 
     @DeleteMapping("/delete/{id}")

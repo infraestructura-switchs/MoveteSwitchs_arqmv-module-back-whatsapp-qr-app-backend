@@ -3,7 +3,8 @@ package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.business.interfaces.CustomerInterface;
 import com.restaurante.bot.dto.SaveFinishDataDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Customer;
 import com.restaurante.bot.model.GenericResponse;
 import com.restaurante.bot.model.Transaction;
@@ -60,7 +61,7 @@ public class CustomerService implements CustomerInterface, CustomerUseCase {
         Transaction transaction = transactionRepository.findByTransactionId(customer.getTransactionId());
 
         if (transaction == null) {
-            throw new GenericException("transaccion no encontrada", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "transaccion no encontrada");
         }
 
         transaction.setRatingId(customer.getRatingId());
@@ -69,7 +70,7 @@ public class CustomerService implements CustomerInterface, CustomerUseCase {
         Customer customer1 = customerRepository.findByPhone(customer.getPhoneNumber());
 
         if (customer1 == null) {
-            throw new GenericException("cliente no encontrada", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "cliente no encontrada");
 
         }
 
@@ -85,13 +86,13 @@ public class CustomerService implements CustomerInterface, CustomerUseCase {
     @Override
     public Customer get(Long id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new GenericException("cliente no encontrada", HttpStatus.BAD_REQUEST));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "cliente no encontrada"));
     }
 
     @Override
     public Customer update(Long id, Customer customer) {
         Customer existing = customerRepository.findById(id)
-                .orElseThrow(() -> new GenericException("cliente no encontrada", HttpStatus.BAD_REQUEST));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "cliente no encontrada"));
 
         if (customer.getName() != null) existing.setName(customer.getName());
         if (customer.getEmail() != null) existing.setEmail(customer.getEmail());

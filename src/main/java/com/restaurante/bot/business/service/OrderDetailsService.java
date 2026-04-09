@@ -3,7 +3,8 @@ package com.restaurante.bot.business.service;
 import com.restaurante.bot.application.ports.incoming.OrderUseCase;
 import com.restaurante.bot.business.interfaces.OrderInterface;
 import com.restaurante.bot.dto.*;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
 import com.restaurante.bot.util.TransactionStatusConstants;
@@ -76,7 +77,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(tableNumber, companyId);
         if (table == null) {
             log.warn("findTableByNumber - mesa no encontrada, tableNumber={}, companyId={}", tableNumber, companyId);
-            throw new GenericException("Mesa no encontrada", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "Mesa no encontrada");
         }
         return table;
     }
@@ -99,13 +100,13 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     private void validateOrderRequest(OrderDetailsDTO orderDetailsDTO) {
         if (orderDetailsDTO == null) {
             log.warn("validateOrderRequest - request body es nulo");
-            throw new GenericException("Request body is missing", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Request body is missing");
         }
 
         List<ItemRequest> items = orderDetailsDTO.getItems();
         if (items == null || items.isEmpty()) {
             log.warn("validateOrderRequest - la orden no contiene items, phone={}", orderDetailsDTO.getPhone());
-            throw new GenericException("La orden debe contener al menos un item", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "La orden debe contener al menos un item");
         }
 
         List<String> missing = new ArrayList<>();
@@ -119,7 +120,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
         if (!missing.isEmpty()) {
             log.warn("validateOrderRequest - campos obligatorios faltantes: {}", String.join(", ", missing));
-            throw new GenericException("Campos obligatorios faltantes: " + String.join(", ", missing), HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Campos obligatorios faltantes: " + String.join(", ", missing));
         }
     }
 
@@ -160,14 +161,14 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     private String normalizeAndValidatePhone(String phone) {
         if (phone == null || phone.isBlank()) {
             log.warn("normalizeAndValidatePhone - phone nulo o vacío");
-            throw new GenericException("El campo phone es obligatorio", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "El campo phone es obligatorio");
         }
 
         String normalizedPhone = phone.trim().replace(" ", "").replace("-", "");
         if (normalizedPhone.length() > MAX_PHONE_LENGTH || !PHONE_PATTERN.matcher(normalizedPhone).matches()) {
-            log.warn("normalizeAndValidatePhone - formato inválido, phone='{}', longitud={}",
+                log.warn("normalizeAndValidatePhone - formato inválido, phone='{}', longitud={}",
                     phone.length() > 30 ? phone.substring(0, 30) + "[truncado]" : phone, normalizedPhone.length());
-            throw new GenericException("El campo phone debe contener un numero de telefono valido", HttpStatus.BAD_REQUEST);
+                throw new DomainException(DomainErrorCode.INVALID_REQUEST, "El campo phone debe contener un numero de telefono valido");
         }
 
         log.debug("normalizeAndValidatePhone - phone normalizado='{}'", normalizedPhone);
@@ -203,9 +204,9 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     private Long getAuthenticatedCompanyId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof Long tokenCompanyId)) {
-            log.warn("getAuthenticatedCompanyId - autenticación ausente o principal inválido, principal={}",
+                log.warn("getAuthenticatedCompanyId - autenticación ausente o principal inválido, principal={}",
                     authentication != null ? authentication.getPrincipal() : "null");
-            throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
+                throw new DomainException(DomainErrorCode.UNAUTHORIZED, "No autenticado");
         }
         return tokenCompanyId;
     }
@@ -226,7 +227,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             log.warn("saveOrder - company not found by externalCompanyId={}", tokenCompanyId);
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
@@ -277,7 +278,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         }
 
         log.warn("saveOrder - invalid table status for tableId={}, status={}", table.getTableId(), table.getStatus());
-        throw new GenericException("Mesa en estado inválido", HttpStatus.BAD_REQUEST);
+        throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Mesa en estado inválido");
     }
 
     @Override
@@ -286,7 +287,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         Long tokenCompanyId = getAuthenticatedCompanyId();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
@@ -382,9 +383,9 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         for (Long orderId : orderIds.getOrdersIds()) {
             CustomerOrder order = customerOrderRepository.findById(orderId)
                     .orElseThrow(() -> {
-                        log.warn("sendOrderStatus - orden no encontrada, orderId={}", orderId);
-                        return new GenericException("Orden no encontrada", HttpStatus.BAD_REQUEST);
-                    });
+                                log.warn("sendOrderStatus - orden no encontrada, orderId={}", orderId);
+                                return new DomainException(DomainErrorCode.NOT_FOUND, "Orden no encontrada");
+                            });
             order.setStatus(ORDER_STATUS_SENT);
             customerOrderRepository.save(order);
             log.debug("sendOrderStatus - orden actualizada a enviada, orderId={}", orderId);
@@ -518,7 +519,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             log.warn("confirmationOrder - compañia no encontrada, externalCompanyId={}", tokenCompanyId);
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
@@ -609,7 +610,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             log.warn("noConfirmationOrder - compañia no encontrada, externalCompanyId={}", tokenCompanyId);
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
@@ -659,7 +660,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
             log.warn("confirmedOreders - compañia no encontrada, externalCompanyId={}", tokenCompanyId);
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
@@ -744,7 +745,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         if (order == null) {
             log.warn("confirmOrdersArq - orden no encontrada, orderId={}, companyId={}",
                     request.getOrderId(), request.getCompanyId());
-            throw new GenericException("Orden no encontrada", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "Orden no encontrada");
         }
 
         order.setStatus(ORDER_STATUS_CONFIRMED_ARQ);

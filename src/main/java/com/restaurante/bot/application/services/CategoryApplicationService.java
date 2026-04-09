@@ -4,7 +4,8 @@ import com.restaurante.bot.application.ports.incoming.CategoryUseCase;
 import com.restaurante.bot.application.ports.outgoing.CategoryRepositoryPort;
 import com.restaurante.bot.dto.CategoryRequestDTO;
 import com.restaurante.bot.dto.CategoryResponseDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Category;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,21 +41,21 @@ public class CategoryApplicationService implements CategoryUseCase {
     @Override
     public CategoryResponseDTO getCategoryById(Long id) {
         Category category = categoryRepo.findById(id)
-                .orElseThrow(() -> new GenericException("Category not found", org.springframework.http.HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Category not found"));
         return mapToResponseDTO(category);
     }
 
     @Override
     public CategoryResponseDTO getCategoryByNameAndCompanyId(String name, Long companyId) {
         Category category = categoryRepo.findByNameAndCompanyId(name, companyId)
-                .orElseThrow(() -> new GenericException("Category not found", org.springframework.http.HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Category not found"));
         return mapToResponseDTO(category);
     }
 
     @Override
     public CategoryResponseDTO getCategoryByName(String name) {
         Category category = categoryRepo.findByName(name)
-                .orElseThrow(() -> new GenericException("Category not found", org.springframework.http.HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Category not found"));
         return mapToResponseDTO(category);
     }
 
@@ -62,7 +63,7 @@ public class CategoryApplicationService implements CategoryUseCase {
     @Transactional
     public CategoryResponseDTO createCategory(CategoryRequestDTO request) {
         if (categoryRepo.existsByNameAndCompanyId(request.getName(), request.getCompanyId())) {
-            throw new GenericException("Category with this name already exists", org.springframework.http.HttpStatus.CONFLICT);
+            throw new DomainException(DomainErrorCode.CONFLICT, "Category with this name already exists");
         }
 
         Category category = new Category();
@@ -79,11 +80,11 @@ public class CategoryApplicationService implements CategoryUseCase {
     @Transactional
     public CategoryResponseDTO updateCategory(Long id, CategoryRequestDTO request) {
         Category category = categoryRepo.findById(id)
-                .orElseThrow(() -> new GenericException("Category not found", org.springframework.http.HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Category not found"));
 
         if (!category.getName().equals(request.getName()) &&
             categoryRepo.existsByNameAndCompanyId(request.getName(), request.getCompanyId())) {
-            throw new GenericException("Category with this name already exists", org.springframework.http.HttpStatus.CONFLICT);
+            throw new DomainException(DomainErrorCode.CONFLICT, "Category with this name already exists");
         }
 
         category.setName(request.getName());

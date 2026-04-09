@@ -12,7 +12,8 @@ import com.restaurante.bot.dto.CategorizedProductsDTO;
 import com.restaurante.bot.dto.ProductCategoryDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductUpdateDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
 import jakarta.transaction.Transactional;
@@ -130,7 +131,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
         if (authentication == null || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
+            throw new DomainException(DomainErrorCode.UNAUTHORIZED, "No autenticado");
         }
 
         Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
@@ -140,7 +141,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
                 company = new Company();
                 company.setId(externalCompanyId);
             } else {
-                throw new GenericException("La compañia no existe", HttpStatus.NOT_FOUND);
+                throw new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no existe");
             }
         }
         Long companyId = company.getId();
@@ -281,7 +282,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
     @Override
     public ProductDto updateProductDescription(ProductUpdateDTO productUpdateDTO) {
         Product product = productRepository.findById(productUpdateDTO.getProductId())
-                .orElseThrow(() -> new GenericException("Producto no encontrado con el id: " + productUpdateDTO.getProductId(), HttpStatus.BAD_REQUEST));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Producto no encontrado con el id: " + productUpdateDTO.getProductId()));
 
         List<String> commentsList = new ArrayList<>();
         if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {

@@ -3,7 +3,8 @@ package com.restaurante.bot.controller;
 import com.restaurante.bot.application.ports.incoming.RestaurantTableUseCase;
 import com.restaurante.bot.dto.ChangeStatusTableDTO;
 import com.restaurante.bot.dto.NumberDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.GenericResponse;
 import com.restaurante.bot.model.RestaurantTable;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,6 @@ public class RestaurantTableController {
 
     @PostMapping("/createTable")
     public ResponseEntity<RestaurantTable> addTable (@RequestParam Long tableNumber) {
-        if (tableNumber <= 0) {
-            throw new GenericException("Campos con valor invalido: tableNumber", HttpStatus.BAD_REQUEST);
-        }
         return new ResponseEntity<>(restaurantTableInterface.addTable(tableNumber), HttpStatus.OK);
     }
 

@@ -27,6 +27,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final SessionRegistryService sessionRegistryService;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.restaurante.bot.exception.ErrorMessageService messageService;
 
     private final String HEADER = "Authorization";
     private final String PREFIX = "Bearer ";
@@ -55,7 +57,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         log.warn("Inactive or missing session for token");
                         SecurityContextHolder.clearContext();
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Sesion invalida o expirada");
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, messageService.getMessage("session.invalid"));
                         return;
                     }
 
@@ -80,12 +82,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             } catch (ExpiredJwtException e) {
                 log.warn("Token expired: {}", e.getMessage());
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, messageService.getMessage("token.expired"));
                 return;
             } catch (UnsupportedJwtException | MalformedJwtException e) {
                 log.error("Token validation error: {}", e.getMessage(), e);
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, messageService.getMessage("token.invalid"));
                 return;  // Detiene el filtro si hay error grave
             } catch (Exception e) {
                 log.error("Unexpected error during token processing: {}", e.getMessage(), e);

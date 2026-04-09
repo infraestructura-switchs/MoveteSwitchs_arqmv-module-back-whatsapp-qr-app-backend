@@ -5,7 +5,8 @@ import com.restaurante.bot.application.ports.outgoing.CompanyRepositoryPort;
 import com.restaurante.bot.dto.CitySummaryDTO;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.model.City;
 import com.restaurante.bot.repository.CityRepository;
@@ -79,7 +80,7 @@ public class CompanyApplicationService implements CompanyUseCase {
 
                 return response;
         } catch (IOException e) {
-            throw new GenericException("Error al subir la imagen del logo", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new DomainException(DomainErrorCode.INTERNAL_ERROR, "Error al subir la imagen del logo");
         }
     }
 
@@ -97,7 +98,7 @@ public class CompanyApplicationService implements CompanyUseCase {
             companyRepo.save(company);
             return true;
         } else {
-            throw new GenericException("La compañia no fue encontrada por el id " + id, HttpStatus.NOT_FOUND);
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no fue encontrada por el id " + id);
         }
     }
 
@@ -105,7 +106,7 @@ public class CompanyApplicationService implements CompanyUseCase {
     @Transactional
     public CompanyRequest update(CompanyRequest companyRequest, MultipartFile logoFile) {
         Company company = companyRepo.findById(companyRequest.getCompanyId())
-                .orElseThrow(() -> new GenericException("Empresa con ID " + companyRequest.getCompanyId() + " no existe", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Empresa con ID " + companyRequest.getCompanyId() + " no existe"));
 
         // update fields if present
         if (companyRequest.getNameCompany() != null) {
@@ -141,7 +142,7 @@ public class CompanyApplicationService implements CompanyUseCase {
                 String logoUrl = uploadLogo(logoFile);
                 company.setLogo(logoUrl);
             } catch (IOException e) {
-                throw new GenericException("Error al subir la imagen del logo", HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new DomainException(DomainErrorCode.INTERNAL_ERROR, "Error al subir la imagen del logo");
             }
         }
 
@@ -177,7 +178,7 @@ public class CompanyApplicationService implements CompanyUseCase {
     @Override
     public CompanyRequest get(Long id) {
         Company company = companyRepo.findById(id)
-            .orElseThrow(() -> new GenericException("Empresa no encontrada con id " + id, HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Empresa no encontrada con id " + id));
         return CompanyRequest.builder()
                 .companyId(company.getId())
                 .nameCompany(company.getName())

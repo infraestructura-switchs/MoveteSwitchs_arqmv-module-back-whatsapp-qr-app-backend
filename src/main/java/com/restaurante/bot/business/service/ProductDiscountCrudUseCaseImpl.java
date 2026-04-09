@@ -3,7 +3,8 @@ package com.restaurante.bot.business.service;
 import com.restaurante.bot.application.ports.incoming.ProductDiscountCrudUseCase;
 import com.restaurante.bot.dto.ProductDiscountDto;
 import com.restaurante.bot.dto.ProductDiscountSaveAndUpdateDto;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Product;
 import com.restaurante.bot.model.ProductDiscount;
 import com.restaurante.bot.repository.ProductDiscountRepository;
@@ -52,7 +53,7 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     @Override
     public ProductDiscountDto get(Long id, Long companyId) {
         ProductDiscount discount = productDiscountRepository.findByProductDiscountIdAndCompanyId(id, companyId)
-                .orElseThrow(() -> new GenericException("Descuento no encontrado", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Descuento no encontrado"));
         return productDiscountSupport.toDto(discount);
     }
 
@@ -60,7 +61,7 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     @Transactional
     public ProductDiscountDto update(Long id, ProductDiscountSaveAndUpdateDto productDiscountDto) {
         ProductDiscount existingDiscount = productDiscountRepository.findByProductDiscountIdAndCompanyId(id, productDiscountDto.getCompanyId())
-                .orElseThrow(() -> new GenericException("Descuento no encontrado", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Descuento no encontrado"));
 
         Product product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
         validateDiscountDates(productDiscountDto);
@@ -106,10 +107,10 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
 
     private Product validateProduct(Long productId, Long companyId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new GenericException("Producto no encontrado", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Producto no encontrado"));
 
         if (!companyId.equals(product.getCompanyId())) {
-            throw new GenericException("El producto no pertenece a la compania indicada", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "El producto no pertenece a la compania indicada");
         }
 
         return product;
@@ -117,17 +118,17 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
 
     private void validateDiscountDates(ProductDiscountSaveAndUpdateDto dto) {
         if (dto.getEndAt().isBefore(dto.getStartAt())) {
-            throw new GenericException("La vigencia del descuento es invalida: endAt debe ser mayor o igual a startAt", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "La vigencia del descuento es invalida: endAt debe ser mayor o igual a startAt");
         }
     }
 
     private void validateDiscountAmount(Double discountAmount, Double productPrice) {
         if (productPrice == null || productPrice <= 0) {
-            throw new GenericException("El producto debe tener un precio base valido para aplicar descuento", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "El producto debe tener un precio base valido para aplicar descuento");
         }
 
         if (discountAmount > productPrice) {
-            throw new GenericException("El descuento no puede ser mayor al precio base del producto", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "El descuento no puede ser mayor al precio base del producto");
         }
     }
 

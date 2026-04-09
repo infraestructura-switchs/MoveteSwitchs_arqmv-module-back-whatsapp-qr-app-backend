@@ -5,7 +5,8 @@ import com.restaurante.bot.application.ports.outgoing.RestaurantTableLookupPort;
 import com.restaurante.bot.application.ports.outgoing.WaiterCallRepositoryPort;
 import com.restaurante.bot.business.interfaces.WaiterCallInterface;
 import com.restaurante.bot.dto.WaiterCallRequest;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.RestaurantTable;
 import com.restaurante.bot.model.WaiterCall;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class WaiterCallService implements WaiterCallInterface, WaiterCallUseCase
         Optional<RestaurantTable> tableOpt = restaurantTableRepository.findByTableId(waiterCallRequest.getTableId());
 
         if (tableOpt.isEmpty()) {
-            throw new GenericException("No se encontró mesa", HttpStatus.NOT_FOUND);
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "No se encontró mesa");
         }
 
         WaiterCall call = new WaiterCall();
@@ -52,7 +53,7 @@ public class WaiterCallService implements WaiterCallInterface, WaiterCallUseCase
         WaiterCall waiterCall = waiterCallRepository.findWaiterCallByTableId(waiterCallRequest.getTableId());
 
         if (waiterCall == null) {
-            throw new GenericException("No se encontro mesa", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "No se encontro mesa");
         }
 
         waiterCall.setStatus(waiterCallRequest.getStatus());
