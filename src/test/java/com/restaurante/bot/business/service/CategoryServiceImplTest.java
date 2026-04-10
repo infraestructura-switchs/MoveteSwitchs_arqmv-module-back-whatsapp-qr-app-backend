@@ -2,7 +2,7 @@ package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.CategoryRequestDTO;
 import com.restaurante.bot.dto.CategoryResponseDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
 import com.restaurante.bot.model.Category;
 import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.ParameterRepository;
@@ -80,12 +80,11 @@ class CategoryServiceImplTest {
     void getCategoryById_WhenNotFound_ShouldThrowException() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
 
-        GenericException exception = assertThrows(GenericException.class, () -> 
+        DomainException exception = assertThrows(DomainException.class, () -> 
             categoryService.getCategoryById(1L)
         );
 
         assertEquals("Category not found", exception.getMessage());
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
 
     @Test
@@ -104,12 +103,11 @@ class CategoryServiceImplTest {
     void createCategory_WhenExists_ShouldThrowException() {
         when(categoryRepository.existsByNameAndCompanyId(anyString(), anyLong())).thenReturn(true);
 
-        GenericException exception = assertThrows(GenericException.class, () -> 
+        DomainException exception = assertThrows(DomainException.class, () -> 
             categoryService.createCategory(categoryRequestDTO)
         );
 
         assertEquals("Category with this name already exists", exception.getMessage());
-        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
     }
 
     @Test

@@ -13,6 +13,7 @@ import com.restaurante.bot.model.RestaurantTable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.List;
  * - Makes business rules explicit
  * - Easier to maintain and extend
  */
+@Primary
 @Service("restaurantTableApplicationService")
 @Transactional(readOnly = true)
 @Slf4j
