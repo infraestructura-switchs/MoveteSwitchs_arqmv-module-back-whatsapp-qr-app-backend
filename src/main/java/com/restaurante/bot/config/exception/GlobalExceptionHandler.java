@@ -11,6 +11,8 @@ import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -175,6 +177,39 @@ public class GlobalExceptionHandler {
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
         
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMissingParam(MissingServletRequestParameterException ex, WebRequest request) {
+        log.warn("Missing request parameter: {}", ex.getParameterName());
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("Falta el parametro obligatorio: " + ex.getParameterName())
+                .errorCode(DomainErrorCode.INVALID_REQUEST.name())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(MethodArgumentTypeMismatchException ex, WebRequest request) {
+        log.warn("Type mismatch for parameter {}: expected {}", ex.getName(), ex.getRequiredType());
+
+        String typeName = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "";
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("El parametro '" + ex.getName() + "' debe ser de tipo " + typeName)
+                .errorCode(DomainErrorCode.INVALID_REQUEST.name())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 

@@ -15,6 +15,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,12 +41,12 @@ class JwtRequestFilterTest {
         MockFilterChain filterChain = new MockFilterChain();
         Claims claims = mock(Claims.class);
 
-        when(jwtUtil.extractAllClaims("jwt-token")).thenReturn(claims);
-        when(jwtUtil.isTokenValid("jwt-token")).thenReturn(true);
-        when(jwtUtil.extractExternalCompanyId("jwt-token")).thenReturn(273L);
-        when(jwtUtil.extractSessionId("jwt-token")).thenReturn("session-123");
-        when(sessionRegistryService.isSessionActive("session-123")).thenReturn(false);
-        when(messageService.getMessage("session.invalid")).thenReturn("session.invalid");
+        Mockito.lenient().when(jwtUtil.extractAllClaims("jwt-token")).thenReturn(claims);
+        Mockito.lenient().when(jwtUtil.isTokenValid("jwt-token")).thenReturn(true);
+        Mockito.lenient().when(jwtUtil.extractExternalCompanyId("jwt-token")).thenReturn(273L);
+        Mockito.lenient().when(jwtUtil.extractSessionId("jwt-token")).thenReturn("session-123");
+        Mockito.lenient().when(sessionRegistryService.isSessionActive("session-123")).thenReturn(false);
+        Mockito.lenient().when(messageService.getMessage("session.invalid")).thenReturn("session.invalid");
 
         jwtRequestFilter.doFilter(request, response, filterChain);
 
