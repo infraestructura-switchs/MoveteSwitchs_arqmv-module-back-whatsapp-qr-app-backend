@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.restaurante.bot.exception.ErrorMessageService;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -25,6 +26,9 @@ class JwtRequestFilterTest {
     @Mock
     private SessionRegistryService sessionRegistryService;
 
+    @Mock
+    private ErrorMessageService messageService;
+
     @InjectMocks
     private JwtRequestFilter jwtRequestFilter;
 
@@ -41,6 +45,7 @@ class JwtRequestFilterTest {
         when(jwtUtil.extractExternalCompanyId("jwt-token")).thenReturn(273L);
         when(jwtUtil.extractSessionId("jwt-token")).thenReturn("session-123");
         when(sessionRegistryService.isSessionActive("session-123")).thenReturn(false);
+        when(messageService.getMessage("session.invalid")).thenReturn("session.invalid");
 
         jwtRequestFilter.doFilter(request, response, filterChain);
 

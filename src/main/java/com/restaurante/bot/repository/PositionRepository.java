@@ -10,30 +10,41 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository for Position entity
+ * Queries are compatible with both MySQL and Oracle databases
+ */
 public interface PositionRepository extends JpaRepository<Position, Long> {
 
-        Optional<Position> findByDescription(String description);
+	Optional<Position> findByDescription(String description);
 
-        @Override
-        Page<Position> findAll(Pageable pageable);
+	@Override
+	Page<Position> findAll(Pageable pageable);
 
-        List<Position> findByStatus(String status);
+	List<Position> findByStatus(String status);
 
-        Page<Position> findByStatus(String status, Pageable pageable);
+	Page<Position> findByStatus(String status, Pageable pageable);
 
-        @Query(value = "SELECT p FROM Position p " +
-                        "WHERE (:id IS NULL OR str(p.positionId) LIKE CONCAT(:id, '%')) " +
-                        "AND (:description IS NULL OR UPPER(p.description) LIKE UPPER(CONCAT('%', :description, '%'))) " +
-                        "AND (:status IS NULL OR UPPER(p.status) = UPPER(:status) OR p.status = 'ACTIVE') " +
-                        "ORDER BY p.positionId ASC",
-                countQuery = "SELECT COUNT(p) FROM Position p " +
-                        "WHERE (:id IS NULL OR str(p.positionId) LIKE CONCAT(:id, '%')) " +
-                        "AND (:description IS NULL OR UPPER(p.description) LIKE UPPER(CONCAT('%', :description, '%'))) " +
-                        "AND (:status IS NULL OR UPPER(p.status) = UPPER(:status) OR p.status = 'ACTIVE')")
-        Page<Position> findByIdOrDescriptionContainingIgnoreCaseAndStatus(
-                        @Param("id") String id,
-                        @Param("description") String description,
-                        @Param("status") String status,
-                        Pageable pageable);
+	/**
+	 * Search Position by ID, description and status
+	 * @param id Position ID (null for no filter on ID)
+	 * @param description Position description pattern (null for no filter)
+	 * @param status Position status (null for no filter)
+	 * @param pageable Pagination and sorting information
+	 * @return Page of positions matching the criteria
+	 */
+	@Query(value = "SELECT p FROM Position p " +
+			"WHERE (:id IS NULL OR p.positionId = CAST(:id AS LONG)) " +
+			"AND (:description IS NULL OR LOWER(p.description) LIKE LOWER(CONCAT('%', :description, '%'))) " +
+			"AND (:status IS NULL OR p.status = :status)",
+		countQuery = "SELECT COUNT(p) FROM Position p " +
+			"WHERE (:id IS NULL OR p.positionId = CAST(:id AS LONG)) " +
+			"AND (:description IS NULL OR LOWER(p.description) LIKE LOWER(CONCAT('%', :description, '%'))) " +
+			"AND (:status IS NULL OR p.status = :status)")
+	Page<Position> findByIdOrDescriptionContainingIgnoreCaseAndStatus(
+			@Param("id") String id,
+			@Param("description") String description,
+			@Param("status") String status,
+			Pageable pageable);
 
 }

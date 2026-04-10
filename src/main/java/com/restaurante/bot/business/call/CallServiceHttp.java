@@ -3,8 +3,9 @@ package com.restaurante.bot.business.call;
 import com.restaurante.bot.api.definition.ServiceCallProductsApi;
 import com.restaurante.bot.api.dto.ProductDTO;
 import com.restaurante.bot.config.ApiConfig;
-import com.restaurante.bot.domain.exception.DomainException;
 import com.restaurante.bot.domain.exception.DomainErrorCode;
+import com.restaurante.bot.exception.GenericException;
+import org.springframework.http.HttpStatus;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,9 +50,9 @@ public class CallServiceHttp {
                 return Collections.emptyList(); // Retorna lista vacía para cualquier error HTTP
             }
         } catch (IOException e) {
-                log.error("Error de conexión al llamar al servicio para companyId {} -> {}", companyId, e.getMessage());
-                throw new DomainException(DomainErrorCode.INVALID_REQUEST,
-                    "Ocurrió un error de conexión al consultar los productos para companyId " + companyId);
+            log.error("Error de conexión al llamar al servicio para companyId {} -> {}", companyId, e.getMessage());
+            throw new GenericException("Ocurrió un error de conexión al consultar los productos para companyId " + companyId,
+                HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

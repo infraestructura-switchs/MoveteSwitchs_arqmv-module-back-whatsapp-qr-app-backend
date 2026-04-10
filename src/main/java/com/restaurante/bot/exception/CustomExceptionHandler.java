@@ -26,10 +26,18 @@ import com.restaurante.bot.domain.exception.DomainException;
 import com.restaurante.bot.domain.exception.DomainErrorCode;
 
 @ControllerAdvice
-@RequiredArgsConstructor
 @Slf4j
 public class CustomExceptionHandler {
-    private final ErrorMessageService messageService;
+    private ErrorMessageService messageService;
+
+    // Allow ErrorMessageService to be absent in sliced test contexts (e.g. @WebMvcTest)
+    public CustomExceptionHandler(@org.springframework.beans.factory.annotation.Autowired(required = false) ErrorMessageService messageService) {
+        if (messageService == null) {
+            this.messageService = new ErrorMessageService(null);
+        } else {
+            this.messageService = messageService;
+        }
+    }
     /**
      * Exception handler for GenericException.
      * <p>

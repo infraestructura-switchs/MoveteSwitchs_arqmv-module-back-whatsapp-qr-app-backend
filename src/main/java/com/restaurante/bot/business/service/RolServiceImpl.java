@@ -8,6 +8,8 @@ import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.Rol;
 import com.restaurante.bot.repository.RolRepository;
 import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.SearchDTOConverter;
+import com.restaurante.bot.dto.RolSearchDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,40 +138,23 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
 
     @Override
     public Page<RolGetAllDto> searchCustom(Map<String, String> customQuery) {
-        String orders = "ASC";
-        String sortBy = "rolId";
-        int page = 0;
-        int size = 5;
-        Long id = null;
-        String name = null;
+        // Convert Map parameters to RolSearchDTO for type-safe access
+        RolSearchDTO searchRequest = SearchDTOConverter.toRolSearch(customQuery);
+        searchRequest.validate();
 
-        if (customQuery.containsKey("rolId")) {
-            id = Long.valueOf(customQuery.get("rolId"));
-        }
-        if (customQuery.containsKey("name")) {
-            name = customQuery.get("name");
-        }
+        Sort.Direction direction = Sort.Direction.fromString(searchRequest.getOrders());
+        Pageable pageable = PageRequest.of(
+            searchRequest.getPage(), 
+            searchRequest.getSize(), 
+            Sort.by(direction, searchRequest.getSortBy()));
 
-        if (customQuery.containsKey("orders")) {
-            orders = customQuery.get("orders");
-        }
-        if (customQuery.containsKey("sortBy")) {
-            sortBy = customQuery.get("sortBy");
-        }
-        if (customQuery.containsKey("page")) {
-            page = Integer.parseInt(customQuery.get("page"));
-        }
-        if (customQuery.containsKey("size")) {
-            size = Integer.parseInt(customQuery.get("size"));
-        }
-
-        Sort.Direction direction = Sort.Direction.fromString(orders);
-        Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
+        // Use the refactored repository method
         return mapPageRolDto(
-                rolRepository.findByIdOrNameContainingIgnoreCaseAndStatus(
-                        id, name, pagingSort),
-                pagingSort);
+            rolRepository.findByIdOrNameContainingIgnoreCaseAndStatus(
+                searchRequest.getRolId(),
+                searchRequest.getName(),
+                pageable),
+            pageable);
     }
 
     private RolDto mapRolDto(Rol Rol) {
