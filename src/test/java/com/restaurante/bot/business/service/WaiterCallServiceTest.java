@@ -98,7 +98,7 @@ class WaiterCallServiceTest {
         DomainException ex = assertThrows(DomainException.class, () -> {
             waiterCallService.createWaiterCall(mockRequest);
         });
-        assertEquals(DomainErrorCode.INVALID_REQUEST, ex.getCode());
+        assertEquals(DomainErrorCode.NOT_FOUND, ex.getCode());
         
         verify(restaurantTableRepository, times(1)).findByTableId(1);
         verify(waiterCallRepository, never()).save(any());

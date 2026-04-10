@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -41,34 +43,40 @@ class CompanyControllerTest {
     @Test
     void createCompany_ShouldReturnBadRequest_WhenRequiredFieldsAreMissing() throws Exception {
         MockMultipartFile companyPart = new MockMultipartFile("company", "company", "application/json", "{}".getBytes());
+        when(companyUseCase.save(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+            .thenThrow(new DomainException(DomainErrorCode.INVALID_REQUEST, "Campos obligatorios faltantes: companyName, longitude, latitude, apiKey, baseValue, additionalValue, cityId"));
+
         mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/create")
-                        .file(companyPart)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: companyName, longitude, latitude, apiKey, baseValue, additionalValue, cityId"));
+                .file(companyPart)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: companyName, longitude, latitude, apiKey, baseValue, additionalValue, cityId"));
     }
 
     @Test
     void updateCompany_ShouldReturnBadRequest_WhenApiKeyIsBlank() throws Exception {
         String companyJson = "{\"nameCompany\":\"Mi Empresa\", \"apiKey\":\"\"}";
         MockMultipartFile companyPart = new MockMultipartFile("company", "company", "application/json", companyJson.getBytes());
+        when(companyUseCase.update(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+            .thenThrow(new DomainException(DomainErrorCode.INVALID_REQUEST, "Campos obligatorios faltantes: apiKey"));
+
         mockMvc.perform(multipart("/api/back-whatsapp-qr-app/company/update/1")
-                        .file(companyPart)
-                        .with(request -> { request.setMethod("PUT"); return request; }))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: apiKey"));
+                .file(companyPart)
+                .with(request -> { request.setMethod("PUT"); return request; }))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: apiKey"));
     }
 
     @Test
     void getCompanies_ShouldReturnServiceUnavailable_WhenDatabaseIsDown() throws Exception {
         when(companyUseCase.getAllPageCompany(anyInt(), anyInt(), anyString(), anyString()))
-                .thenThrow(new CannotCreateTransactionException("Database unavailable"));
+            .thenThrow(new DataAccessResourceFailureException("Database unavailable"));
 
         mockMvc.perform(get("/api/back-whatsapp-qr-app/company"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.status").value(503))
-                .andExpect(jsonPath("$.error").value("Service Unavailable"))
-                .andExpect(jsonPath("$.message").value("El servicio no esta disponible temporalmente porque la base de datos no responde. Intente nuevamente en unos minutos."));
+            .andExpect(status().isServiceUnavailable())
+            .andExpect(jsonPath("$.status").value(503))
+            .andExpect(jsonPath("$.error").value("Service Unavailable"))
+            .andExpect(jsonPath("$.message").value("No se pudo conectar a la base de datos. Intente nuevamente más tarde."));
     }
 
     // externalId invalid test removed: no longer applicable after refactor
