@@ -7,11 +7,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import java.sql.SQLException;
+import java.sql.SQLTransientConnectionException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -104,6 +108,51 @@ public class GlobalExceptionHandler {
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
         
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Handle database connectivity / datasource failures (Hikari/SQL exceptions)
+     */
+    @ExceptionHandler({DataAccessResourceFailureException.class, SQLTransientConnectionException.class, SQLException.class})
+    public ResponseEntity<ErrorResponseDTO> handleDatabaseException(
+            Exception exception,
+            WebRequest request) {
+
+        log.warn("Database connectivity error: {}", exception.getMessage());
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
+                .message("No se pudo conectar a la base de datos. Intente nuevamente más tarde.")
+                .errorCode(DomainErrorCode.SERVICE_UNAVAILABLE.name())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .details(exception.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    /**
+     * Improve message for bean wiring errors where multiple candidates exist
+     */
+    @ExceptionHandler(NoUniqueBeanDefinitionException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNoUniqueBean(NoUniqueBeanDefinitionException ex, WebRequest request) {
+        log.error("Bean wiring ambiguity: {}", ex.getMessage());
+
+        String msg = "Conflicto en la configuración de beans: existen múltiples implementaciones para una dependencia. Marcar una con @Primary o usar @Qualifier.";
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(msg)
+                .errorCode(DomainErrorCode.INTERNAL_ERROR.name())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .details(ex.getMessage())
+                .build();
+
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
