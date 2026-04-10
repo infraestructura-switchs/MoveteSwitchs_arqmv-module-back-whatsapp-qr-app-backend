@@ -8,7 +8,7 @@ import com.restaurante.bot.model.Company;
 import com.restaurante.bot.model.City;
 import com.restaurante.bot.repository.CityRepository;
 import com.restaurante.bot.repository.CompanyRepository;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -45,7 +45,7 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
 
     @Override
     public List<CompanyRequest> getAllCompany() {
-        List<Company> companies = companyRepository.findByStatus(Constants.ACTIVE_STATUS);
+        List<Company> companies = companyRepository.findByStatus(StatusConstants.ACTIVE_STATUS);
         return companies.stream().map(c -> {
             CompanyRequest dto = new CompanyRequest();
             dto.setCompanyId(c.getId());
@@ -68,7 +68,7 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
 
     @Override
     public Page<CompanyResponseDTO> getAllPageCompany(Pageable pageable) {
-        Page<Company> page = companyRepository.findByStatus(Constants.ACTIVE_STATUS, pageable);
+        Page<Company> page = companyRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pageable);
         Set<Long> cityIds = page.getContent().stream()
                 .map(Company::getCityId)
                 .filter(java.util.Objects::nonNull)

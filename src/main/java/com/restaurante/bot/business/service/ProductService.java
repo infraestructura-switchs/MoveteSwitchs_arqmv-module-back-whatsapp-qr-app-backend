@@ -27,7 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import java.util.stream.Collectors;
@@ -233,7 +233,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
     private void loadCategoryMapping(Long externalCompanyId) {
         dynamicCategoryMapping.computeIfAbsent(externalCompanyId, k -> {
             Map<String, Long> mapping = new HashMap<>();
-            List<CategoryMapping> mappings = categoryMappingRepository.findByCompanyIdAndStatus(externalCompanyId, Constants.ACTIVE_STATUS);
+            List<CategoryMapping> mappings = categoryMappingRepository.findByCompanyIdAndStatus(externalCompanyId, StatusConstants.ACTIVE_STATUS);
             for (CategoryMapping cm : mappings) {
                 mapping.put(cm.getGroupId().toString(), cm.getCategoryId());
             }
@@ -258,7 +258,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             Category category = new Category();
             category.setName(groupDescription);
             category.setExternalId(Long.parseLong(groupId));
-            category.setStatus(Constants.ACTIVE_STATUS);
+            category.setStatus(StatusConstants.ACTIVE_STATUS);
             category.setCompanyId(externalCompanyId);
             category = categoryRepository.save(category);
             categoryId = category.getCategoryId();
@@ -272,7 +272,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             mapping.setGroupId(Long.parseLong(groupId));
             mapping.setCategoryId(categoryId);
             mapping.setCompanyId(externalCompanyId);
-            mapping.setStatus(Constants.ACTIVE_STATUS);
+            mapping.setStatus(StatusConstants.ACTIVE_STATUS);
             categoryMappingRepository.save(mapping);
             log.info("Nueva categoría creada para groupId {}: {}", groupId, categoryId);
         }
@@ -340,7 +340,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
         } else {
             product.setOriginalPrice(productDTO.getData().getPrecio());
         }
-        product.setStatus(Constants.ACTIVE_STATUS);
+        product.setStatus(StatusConstants.ACTIVE_STATUS);
         product.setImgProduct(productDTO.getData().getImagenMenu());
         product.setCompanyId(externalCompanyId);
 

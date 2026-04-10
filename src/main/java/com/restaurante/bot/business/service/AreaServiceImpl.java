@@ -8,7 +8,7 @@ import com.restaurante.bot.dto.AreaSaveAndUpdateDto;
 import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.Area;
 import com.restaurante.bot.repository.AreaRepository;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import com.restaurante.bot.util.SearchDTOConverter;
 import com.restaurante.bot.dto.AreaSearchDTO;
 import lombok.RequiredArgsConstructor;
@@ -68,7 +68,7 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
         Optional<Area> areaOptional = areaRepository.findById(areaId);
         if (areaOptional.isPresent()) {
             Area entityArea = areaOptional.get();
-            entityArea.setStatus(Constants.INACTIVE_STATUS);
+            entityArea.setStatus(StatusConstants.INACTIVE);
             areaRepository.save(entityArea);
             return true;
         }
@@ -91,7 +91,7 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
         String sortBy = "areaId";
         int page = 0;
         int size = 5;
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE;
 
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
@@ -120,12 +120,12 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        return mapPageAreaDto(areaRepository.findByStatus(Constants.ACTIVE_STATUS, pagingSort), pagingSort);
+        return mapPageAreaDto(areaRepository.findByStatus(StatusConstants.ACTIVE, pagingSort), pagingSort);
     }
 
     @Override
     public List<AreaGetAllDto> getAllWithOutPage(Map<String, String> customQuery) {
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE;
 
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");

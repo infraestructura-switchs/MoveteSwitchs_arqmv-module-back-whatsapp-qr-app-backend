@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +29,7 @@ public class LandingTemplateApplicationService implements LandingTemplateUseCase
     public LandingTemplateRequest save(LandingTemplateRequest request) {
         LandingTemplate entity = new LandingTemplate();
         entity.setName(request.getName());
-        entity.setStatus(request.getStatus() == null ? Constants.ACTIVE_STATUS : request.getStatus());
+        entity.setStatus(request.getStatus() == null ? StatusConstants.ACTIVE_STATUS : request.getStatus());
         LandingTemplate saved = repository.save(entity);
 
         return LandingTemplateRequest.builder()
@@ -49,7 +49,7 @@ public class LandingTemplateApplicationService implements LandingTemplateUseCase
     public Boolean delete(Long id) {
         if (repository.existsById(id)) {
             LandingTemplate lt = repository.findById(id).orElseThrow();
-            lt.setStatus(Constants.INACTIVE_STATUS);
+            lt.setStatus(StatusConstants.INACTIVE_STATUS);
             repository.save(lt);
             return true;
         }

@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
+import com.restaurante.bot.util.OrderConstants;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +67,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
         orderDetail.setTotal(orderDetailsDTO.getTotal());
         orderDetail.setStatusOrder("SIN CONFIRMAR");
         orderDetail.setMethod(orderDetailsDTO.getMethod());
-        orderDetail.setStatus(Constants.ACTIVE_STATUS);
+        orderDetail.setStatus(StatusConstants.ACTIVE_STATUS);
         orderDetail.setPaymentId(orderDetailsDTO.getPaymentId());
         orderDetail.setCustomerId(customer.getCustomer_id());
 
@@ -93,7 +94,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
     }
     @Override
     public List<OrderDeliveryResponseDTO> getOrderDetails() {
-        List<OrderDetailDelivery> orderDetails = orderRepository.findByStatusAndStatusOrder(Constants.ACTIVE_STATUS, "PENDIENTE");
+        List<OrderDetailDelivery> orderDetails = orderRepository.findByStatusAndStatusOrder(StatusConstants.ACTIVE_STATUS, OrderConstants.PENDIENTE);
 
         List<Long> orderIds = orderDetails.stream()
                 .map(OrderDetailDelivery::getOrderTransactionDeliveryId)

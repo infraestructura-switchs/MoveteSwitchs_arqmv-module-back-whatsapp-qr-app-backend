@@ -7,7 +7,7 @@ import com.restaurante.bot.dto.RolSaveAndUpdateDto;
 import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.Rol;
 import com.restaurante.bot.repository.RolRepository;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import com.restaurante.bot.util.SearchDTOConverter;
 import com.restaurante.bot.dto.RolSearchDTO;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
 
         Rol Rol = new Rol();
         BeanUtils.copyProperties(rolDto, Rol);
-        Rol.setStatus(Constants.ACTIVE_STATUS);
+        Rol.setStatus(StatusConstants.ACTIVE_STATUS);
 
         Rol newRol = rolRepository.save(Rol);
         return mapRolDto(newRol);
@@ -69,7 +69,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
         Optional<Rol> rolOptional = rolRepository.findById(rolId);
         if (rolOptional.isPresent()) {
             Rol Rol = rolOptional.get();
-            Rol.setStatus(Constants.INACTIVE_STATUS);
+            Rol.setStatus(StatusConstants.INACTIVE_STATUS);
             rolRepository.save(Rol);
             return true;
         }
@@ -92,7 +92,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
         String sortBy = "rolId";
         int page = 0;
         int size = 5;
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE_STATUS;
 
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
@@ -121,13 +121,13 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        return mapPageRolDto(rolRepository.findByStatus(Constants.ACTIVE_STATUS, pagingSort), pagingSort);
+        return mapPageRolDto(rolRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pagingSort), pagingSort);
     }
 
     @Override
     public List<RolGetAllDto> getAllWithOutPage() {
 
-        return rolRepository.findByStatus(Constants.ACTIVE_STATUS).stream()
+        return rolRepository.findByStatus(StatusConstants.ACTIVE_STATUS).stream()
                 .map(rol -> RolGetAllDto.builder()
                         .id(rol.getRolId())
                         .name(rol.getName())

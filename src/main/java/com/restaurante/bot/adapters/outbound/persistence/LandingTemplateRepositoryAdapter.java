@@ -5,7 +5,7 @@ import com.restaurante.bot.dto.LandingTemplateRequest;
 import com.restaurante.bot.dto.LandingTemplateResponseDTO;
 import com.restaurante.bot.model.LandingTemplate;
 import com.restaurante.bot.repository.LandingTemplateRepository;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -38,7 +38,7 @@ public class LandingTemplateRepositoryAdapter implements LandingTemplateReposito
 
     @Override
     public List<LandingTemplateRequest> getAllLandingTemplate() {
-        return landingTemplateRepository.findByStatus(Constants.ACTIVE_STATUS).stream()
+        return landingTemplateRepository.findByStatus(StatusConstants.ACTIVE_STATUS).stream()
                 .map(l -> LandingTemplateRequest.builder()
                         .landingTemplateId(l.getLandingTemplateId())
                         .name(l.getName())
@@ -49,7 +49,7 @@ public class LandingTemplateRepositoryAdapter implements LandingTemplateReposito
 
     @Override
     public Page<LandingTemplateResponseDTO> getAllPageLandingTemplate(Pageable pageable) {
-        Page<LandingTemplate> page = landingTemplateRepository.findByStatus(Constants.ACTIVE_STATUS, pageable);
+        Page<LandingTemplate> page = landingTemplateRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pageable);
         List<LandingTemplateResponseDTO> content = page.getContent().stream()
                 .map(l -> LandingTemplateResponseDTO.builder()
                         .landingTemplateId(l.getLandingTemplateId())

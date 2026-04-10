@@ -3,6 +3,8 @@ package com.restaurante.bot.util;
 import com.restaurante.bot.dto.*;
 import com.restaurante.bot.util.Constants;
 import com.restaurante.bot.util.SortConstants;
+import com.restaurante.bot.util.StatusConstants;
+import com.restaurante.bot.util.SortConstants;
 
 import java.util.Map;
 
@@ -27,7 +29,7 @@ public class SearchDTOConverter {
         dto.setSize(getInt(queryParams, "size", 5));
         dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "positionId"));
-        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
+        dto.setStatus(getString(queryParams, "status", StatusConstants.ACTIVE));
         dto.setId(getLong(queryParams, "id", null));
         dto.setDescription(getString(queryParams, "description", null));
         dto.validate();
@@ -49,7 +51,7 @@ public class SearchDTOConverter {
         dto.setSize(getInt(queryParams, "size", 5));
         dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "rolId"));
-        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
+        dto.setStatus(getString(queryParams, "status", StatusConstants.ACTIVE));
         dto.setRolId(getLong(queryParams, "rolId", null));
         dto.setName(getString(queryParams, "name", null));
         dto.validate();
@@ -71,7 +73,7 @@ public class SearchDTOConverter {
         dto.setSize(getInt(queryParams, "size", 5));
         dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "areaId"));
-        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
+        dto.setStatus(getString(queryParams, "status", StatusConstants.ACTIVE));
         dto.setAreaId(getLong(queryParams, "areaId", null));
         dto.setDescription(getString(queryParams, "description", null));
         dto.validate();
@@ -93,7 +95,7 @@ public class SearchDTOConverter {
         dto.setSize(getInt(queryParams, "size", 5));
         dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "userId"));
-        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
+        dto.setStatus(getString(queryParams, "status", StatusConstants.ACTIVE));
         dto.setUserId(getLong(queryParams, "userId", null));
         dto.setName(getString(queryParams, "name", null));
         dto.setEmail(getString(queryParams, "email", null));
@@ -120,7 +122,7 @@ public class SearchDTOConverter {
         dto.setSize(getInt(queryParams, "size", 5));
         dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "productId"));
-        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
+        dto.setStatus(getString(queryParams, "status", StatusConstants.ACTIVE));
         dto.setCompanyId(getLong(queryParams, "companyId", null));
         dto.setExternalCompanyId(getLong(queryParams, "externalCompanyId", null));
         dto.setName(getString(queryParams, "name", null));

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 
 @Service
 @Slf4j
@@ -102,7 +102,7 @@ public class ProductIntegrationSyncService {
         integration.setDescription(productDTO.getData().getDescripcion());
         integration.setGroupId(parseGroupId(productDTO));
         integration.setCompanyId(externalCompanyId);
-        integration.setStatus(Constants.ACTIVE_STATUS);
+        integration.setStatus(StatusConstants.ACTIVE_STATUS);
         integration.setImgProduct(productDTO.getData().getImagenMenu());
         integration.setCategoryId(categoryId);
         integration.setComments(serializeComments(productDTO));
@@ -139,7 +139,7 @@ public class ProductIntegrationSyncService {
     private void loadCategoryMapping(Long externalCompanyId) {
         dynamicCategoryMapping.computeIfAbsent(externalCompanyId, k -> {
             Map<String, Long> mapping = new HashMap<>();
-            List<CategoryMapping> mappings = categoryMappingRepository.findByCompanyIdAndStatus(externalCompanyId, Constants.ACTIVE_STATUS);
+            List<CategoryMapping> mappings = categoryMappingRepository.findByCompanyIdAndStatus(externalCompanyId, StatusConstants.ACTIVE_STATUS);
             for (CategoryMapping cm : mappings) {
                 mapping.put(cm.getGroupId().toString(), cm.getCategoryId());
             }
@@ -162,7 +162,7 @@ public class ProductIntegrationSyncService {
             Category category = new Category();
             category.setName(groupDescription);
             category.setExternalId(Long.parseLong(groupId));
-            category.setStatus(Constants.ACTIVE_STATUS);
+            category.setStatus(StatusConstants.ACTIVE_STATUS);
             category.setCompanyId(externalCompanyId);
             category = categoryRepository.save(category);
             categoryId = category.getCategoryId();
@@ -174,7 +174,7 @@ public class ProductIntegrationSyncService {
             mapping.setGroupId(Long.parseLong(groupId));
             mapping.setCategoryId(categoryId);
             mapping.setCompanyId(externalCompanyId);
-            mapping.setStatus(Constants.ACTIVE_STATUS);
+            mapping.setStatus(StatusConstants.ACTIVE_STATUS);
             categoryMappingRepository.save(mapping);
             log.info("Nueva categoria creada para groupId {}: {}", groupId, categoryId);
         }

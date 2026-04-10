@@ -9,7 +9,7 @@ import com.restaurante.bot.model.Product;
 import com.restaurante.bot.model.ProductDiscount;
 import com.restaurante.bot.repository.ProductDiscountRepository;
 import com.restaurante.bot.repository.ProductRepository;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -37,7 +37,7 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
         validateDiscountDates(productDiscountDto);
         validateDiscountAmount(productDiscountDto.getDiscountAmount(), product.getPrice());
 
-        ProductDiscount entity = ProductDiscount.builder()
+            ProductDiscount entity = ProductDiscount.builder()
                 .productId(productDiscountDto.getProductId())
                 .companyId(productDiscountDto.getCompanyId())
                 .description(productDiscountDto.getDescription())
@@ -83,7 +83,7 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     public boolean delete(Long id, Long companyId) {
         return productDiscountRepository.findByProductDiscountIdAndCompanyId(id, companyId)
                 .map(discount -> {
-                    discount.setStatus(Constants.INACTIVE_STATUS);
+                    discount.setStatus(StatusConstants.INACTIVE_STATUS);
                     productDiscountRepository.save(discount);
                     return true;
                 })
@@ -133,6 +133,6 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     }
 
     private String resolveStatus(String status) {
-        return status == null || status.isBlank() ? Constants.ACTIVE_STATUS : status.trim().toUpperCase();
+        return status == null || status.isBlank() ? StatusConstants.ACTIVE_STATUS : status.trim().toUpperCase();
     }
 }

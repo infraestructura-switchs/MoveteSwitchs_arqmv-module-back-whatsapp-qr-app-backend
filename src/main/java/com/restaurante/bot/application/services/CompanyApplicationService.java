@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import java.util.Map;
 
 @Service("companyApplicationService")
@@ -60,7 +60,7 @@ public class CompanyApplicationService implements CompanyUseCase {
             company.setExternalCompanyId(companyRequest.getExternalCompanyId());
             company.setApiKey(companyRequest.getApiKey());
             company.setRpIntegrationId(companyRequest.getRpIntegrationId());
-            company.setStatus(Constants.ACTIVE_STATUS);
+            company.setStatus(StatusConstants.ACTIVE_STATUS);
 
             Company savedCompany = companyRepo.save(company);
 
@@ -95,7 +95,7 @@ public class CompanyApplicationService implements CompanyUseCase {
     public Boolean delete(Long id) {
         if (companyRepo.existsById(id)) {
             Company company = companyRepo.findById(id).orElseThrow();
-            company.setStatus(Constants.INACTIVE_STATUS);
+            company.setStatus(StatusConstants.INACTIVE_STATUS);
             companyRepo.save(company);
             return true;
         } else {

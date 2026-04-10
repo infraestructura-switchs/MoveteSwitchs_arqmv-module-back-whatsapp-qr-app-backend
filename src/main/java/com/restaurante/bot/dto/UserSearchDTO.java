@@ -39,7 +39,7 @@ public class UserSearchDTO extends PaginationSearchDTO {
         }
         
         if (this.getStatus() == null || this.getStatus().isEmpty()) {
-            this.setStatus(com.restaurante.bot.util.Constants.ACTIVE_STATUS);
+            this.setStatus(com.restaurante.bot.util.StatusConstants.ACTIVE_STATUS);
         }
     }
 }

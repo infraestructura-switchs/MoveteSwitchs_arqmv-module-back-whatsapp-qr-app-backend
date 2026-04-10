@@ -5,7 +5,8 @@ import com.restaurante.bot.dto.*;
 import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
+import com.restaurante.bot.util.SecurityConstants;
 import com.restaurante.bot.util.ObjectMapperUtils;
 import com.restaurante.bot.util.SearchDTOConverter;
 import com.restaurante.bot.util.Utils;
@@ -80,7 +81,7 @@ public class UserServiceImpl implements UserService {
         entityUserRepo.setName(userDto.getName());
         entityUserRepo.setEmail(userDto.getEmail());
         entityUserRepo.setLogin(userDto.getLogin());
-        entityUserRepo.setStatus(Constants.ACTIVE_STATUS);
+        entityUserRepo.setStatus(StatusConstants.ACTIVE_STATUS);
         entityUserRepo.setRol(ggpRolRepo);
         entityUserRepo.setPosition(ggpPositionRepo);
         entityUserRepo.setCompany(ggpCompanyRepo);
@@ -90,7 +91,7 @@ public class UserServiceImpl implements UserService {
             String encodedPassword = utils.bcryptEncryptor(userDto.getPassword());
             entityUserRepo.setPassword(encodedPassword);
         } else {
-            entityUserRepo.setPassword(utils.bcryptEncryptor(Constants.DEFAULT_PASSWORD));
+            entityUserRepo.setPassword(utils.bcryptEncryptor(SecurityConstants.DEFAULT_PASSWORD));
         }
 
         User newEntityUserRepo = iRepository.save(entityUserRepo);
@@ -159,7 +160,7 @@ public class UserServiceImpl implements UserService {
                 objectDtoVo = new UserDto();
                 BeanUtils.copyProperties(objectOptional.get(), objectDtoVo);
                 User objectTmp = objectOptional.get();
-                objectTmp.setStatus(Constants.INACTIVE_STATUS);
+                objectTmp.setStatus(StatusConstants.INACTIVE_STATUS);
                 iRepository.save(objectTmp);
                 return true;
             }
@@ -186,7 +187,7 @@ public class UserServiceImpl implements UserService {
         String sortBy = "userId";
         int page = 0;
         int size = 5;
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE_STATUS;
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
         }
@@ -219,12 +220,12 @@ public class UserServiceImpl implements UserService {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pagingSort = PageRequest.of(page, size, sort);
 
-        return mapPageUserDto(iRepository.findByStatus(Constants.ACTIVE_STATUS, pagingSort), pagingSort);
+        return mapPageUserDto(iRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pagingSort), pagingSort);
     }
 
     @Override
     public List<GgpUserGetAllDto> getAllWithOutPage(Map<String, String> customQuery) {
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE_STATUS;
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
         }
@@ -290,7 +291,7 @@ public class UserServiceImpl implements UserService {
 
         Random random = new Random();
         User entityUser = objectOptional.get();
-        String password = Constants.PASSWORD_DEFUULT_PREFIX + "+" + random.nextInt(10);
+        String password = SecurityConstants.PASSWORD_DEFAULT_PREFIX + "+" + random.nextInt(10);
         String encodedPassword = utils.bcryptEncryptor(password);
         entityUser.setPassword(encodedPassword);
 

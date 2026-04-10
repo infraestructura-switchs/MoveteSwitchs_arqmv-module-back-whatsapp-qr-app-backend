@@ -15,7 +15,7 @@ import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.CommentRepository;
 import com.restaurante.bot.repository.ProductCommentRepository;
 import com.restaurante.bot.repository.ProductRepository;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -51,7 +51,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         entity.setPrice(productDto.getPrice());
         if (productDto.getOriginalPrice() != null) entity.setOriginalPrice(productDto.getOriginalPrice());
         entity.setDescription(productDto.getDescription());
-        entity.setStatus(productDto.getStatus() == null ? Constants.ACTIVE_STATUS : productDto.getStatus());
+        entity.setStatus(productDto.getStatus() == null ? StatusConstants.ACTIVE_STATUS : productDto.getStatus());
         entity.setImgProduct(productDto.getImage());
         entity.setCategoryId(productDto.getCategoryId());
         entity.setInformation(normalizeInformation(productDto.getInformation()));
@@ -176,7 +176,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         Optional<Product> opt = productRepository.findById(id);
         if (opt.isPresent()) {
             Product p = opt.get();
-            p.setStatus(Constants.INACTIVE_STATUS);
+            p.setStatus(StatusConstants.INACTIVE_STATUS);
             productRepository.save(p);
             return true;
         }
@@ -241,7 +241,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     public List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyId, Long externalCompanyId) {
         String status = null;
         if (customQuery != null && customQuery.containsKey("status")) status = customQuery.get("status");
-        else status = Constants.ACTIVE_STATUS;
+        else status = StatusConstants.ACTIVE_STATUS;
 
         Long resolvedCompanyId = resolveCompanyId(companyId, externalCompanyId);
         if (resolvedCompanyId != null) {
