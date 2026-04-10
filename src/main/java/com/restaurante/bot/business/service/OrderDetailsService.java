@@ -618,6 +618,11 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        if (company == null) {
+            log.warn("noConfirmationOrder - Company not found for externalCompanyId={}", tokenCompanyId);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañía no encontrada en la base de datos");
+        }
+        
         log.info("noConfirmationOrder - start, tableNumber={}, phone={}, companyId={}", tableNumber, phoneNumber, company.getId());
 
         List<Object[]> resultList = orderTransactionRepository.findAllOrdersNotConfirmJPQL(tableNumber, company.getId(),
@@ -668,6 +673,11 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
+        if (company == null) {
+            log.warn("confirmedOreders - Company not found for externalCompanyId={}", tokenCompanyId);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañía no encontrada en la base de datos");
+        }
+        
         log.info("confirmedOreders - start, tableNumber={}, phone={}, companyId={}", tableNumber, phoneNumber, company.getId());
 
         List<Object[]> resultList = orderTransactionRepository.findAllOrdersConfirmJPQL(tableNumber, phoneNumber,

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import com.restaurante.bot.util.Constants;
 import java.util.stream.Collectors;
 
 @Service
@@ -65,7 +66,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
         orderDetail.setTotal(orderDetailsDTO.getTotal());
         orderDetail.setStatusOrder("SIN CONFIRMAR");
         orderDetail.setMethod(orderDetailsDTO.getMethod());
-        orderDetail.setStatus("ACTIVE");
+        orderDetail.setStatus(Constants.ACTIVE_STATUS);
         orderDetail.setPaymentId(orderDetailsDTO.getPaymentId());
         orderDetail.setCustomerId(customer.getCustomer_id());
 
@@ -92,7 +93,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
     }
     @Override
     public List<OrderDeliveryResponseDTO> getOrderDetails() {
-        List<OrderDetailDelivery> orderDetails = orderRepository.findByStatusAndStatusOrder("ACTIVE", "PENDIENTE");
+        List<OrderDetailDelivery> orderDetails = orderRepository.findByStatusAndStatusOrder(Constants.ACTIVE_STATUS, "PENDIENTE");
 
         List<Long> orderIds = orderDetails.stream()
                 .map(OrderDetailDelivery::getOrderTransactionDeliveryId)
@@ -176,6 +177,14 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
         orderRepository.save(orderDetailDelivery);
 
         Customer customer = customerRepository.findByPhone(orderDetailsDeliveryDTO.getPhone());
+        if (customer == null) {
+            log.warn("updateOrder - Customer not found for phone: {}", orderDetailsDeliveryDTO.getPhone());
+            throw new DomainException(
+                DomainErrorCode.INVALID_REQUEST,
+                "Cliente no encontrado para el teléfono: " + orderDetailsDeliveryDTO.getPhone()
+            );
+        }
+        
         customer.setTypeIdentificationId(orderDetailsDeliveryDTO.getTypeIdentificationId());
         customer.setNumerIdentification(orderDetailsDeliveryDTO.getNameIdentification());
         customer.setName(orderDetailsDeliveryDTO.getNameClient());

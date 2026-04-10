@@ -61,7 +61,7 @@ public class CustomerController {
     @GetMapping
     public ResponseEntity<Page<Customer>> getAll(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = com.restaurante.bot.util.SortConstants.ASC) String orders,
             @RequestParam(defaultValue = "customer_id") String sortBy) {
         return ResponseEntity.ok(customerUseCase.getAll(page, size, orders, sortBy));
     }

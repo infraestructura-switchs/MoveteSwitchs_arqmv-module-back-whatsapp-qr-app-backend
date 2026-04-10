@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.restaurante.bot.util.Constants;
 import java.util.Map;
 
 @Service("companyApplicationService")
@@ -59,7 +60,7 @@ public class CompanyApplicationService implements CompanyUseCase {
             company.setExternalCompanyId(companyRequest.getExternalCompanyId());
             company.setApiKey(companyRequest.getApiKey());
             company.setRpIntegrationId(companyRequest.getRpIntegrationId());
-            company.setStatus("ACTIVE");
+            company.setStatus(Constants.ACTIVE_STATUS);
 
             Company savedCompany = companyRepo.save(company);
 
@@ -94,7 +95,7 @@ public class CompanyApplicationService implements CompanyUseCase {
     public Boolean delete(Long id) {
         if (companyRepo.existsById(id)) {
             Company company = companyRepo.findById(id).orElseThrow();
-            company.setStatus("INACTIVE");
+            company.setStatus(Constants.INACTIVE_STATUS);
             companyRepo.save(company);
             return true;
         } else {
@@ -199,7 +200,7 @@ public class CompanyApplicationService implements CompanyUseCase {
     public Page<CompanyResponseDTO> getAll(Map<String, String> customQuery) {
         int page = Integer.parseInt(customQuery.getOrDefault("page", "0"));
         int size = Integer.parseInt(customQuery.getOrDefault("size", "10"));
-        String orders = customQuery.getOrDefault("orders", "ASC");
+        String orders = customQuery.getOrDefault("orders", com.restaurante.bot.util.SortConstants.ASC);
         String sortBy = customQuery.getOrDefault("sortBy", "id");
         return getAllPageCompany(page, size, orders, sortBy);
     }

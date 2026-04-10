@@ -42,7 +42,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
 
         Rol Rol = new Rol();
         BeanUtils.copyProperties(rolDto, Rol);
-        Rol.setStatus("ACTIVE");
+        Rol.setStatus(Constants.ACTIVE_STATUS);
 
         Rol newRol = rolRepository.save(Rol);
         return mapRolDto(newRol);
@@ -88,7 +88,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
 
     @Override
     public Page<RolGetAllDto> getAll(Map<String, String> customQuery) {
-        String orders = "ASC";
+        String orders = com.restaurante.bot.util.SortConstants.ASC;
         String sortBy = "rolId";
         int page = 0;
         int size = 5;
@@ -127,7 +127,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
     @Override
     public List<RolGetAllDto> getAllWithOutPage() {
 
-        return rolRepository.findByStatus("ACTIVE").stream()
+        return rolRepository.findByStatus(Constants.ACTIVE_STATUS).stream()
                 .map(rol -> RolGetAllDto.builder()
                         .id(rol.getRolId())
                         .name(rol.getName())

@@ -85,7 +85,7 @@ public class PositionServiceImpl implements IPositionService, PositionUseCase {
 
     @Override
     public Page<PositionGetAllDto> getAll(Map<String, String> customQuery) {
-        String orders = "ASC";
+        String orders = com.restaurante.bot.util.SortConstants.ASC;
         String sortBy = "positionId";
         int page = 0;
         int size = 5;

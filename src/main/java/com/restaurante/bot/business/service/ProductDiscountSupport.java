@@ -70,7 +70,7 @@ public class ProductDiscountSupport {
 
         LocalDateTime now = LocalDateTime.now();
         boolean active = discount.getStatus() != null
-                && "ACTIVE".equalsIgnoreCase(discount.getStatus())
+            && com.restaurante.bot.util.Constants.ACTIVE_STATUS.equalsIgnoreCase(discount.getStatus())
                 && !discount.getStartAt().isAfter(now)
                 && !discount.getEndAt().isBefore(now);
 

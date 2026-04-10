@@ -1,6 +1,8 @@
 package com.restaurante.bot.util;
 
 import com.restaurante.bot.dto.*;
+import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.SortConstants;
 
 import java.util.Map;
 
@@ -23,9 +25,9 @@ public class SearchDTOConverter {
         PositionSearchDTO dto = new PositionSearchDTO();
         dto.setPage(getInt(queryParams, "page", 0));
         dto.setSize(getInt(queryParams, "size", 5));
-        dto.setOrders(getString(queryParams, "orders", "ASC"));
+        dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "positionId"));
-        dto.setStatus(getString(queryParams, "status", "ACTIVE"));
+        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
         dto.setId(getLong(queryParams, "id", null));
         dto.setDescription(getString(queryParams, "description", null));
         dto.validate();
@@ -45,9 +47,9 @@ public class SearchDTOConverter {
         RolSearchDTO dto = new RolSearchDTO();
         dto.setPage(getInt(queryParams, "page", 0));
         dto.setSize(getInt(queryParams, "size", 5));
-        dto.setOrders(getString(queryParams, "orders", "ASC"));
+        dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "rolId"));
-        dto.setStatus(getString(queryParams, "status", "ACTIVE"));
+        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
         dto.setRolId(getLong(queryParams, "rolId", null));
         dto.setName(getString(queryParams, "name", null));
         dto.validate();
@@ -67,9 +69,9 @@ public class SearchDTOConverter {
         AreaSearchDTO dto = new AreaSearchDTO();
         dto.setPage(getInt(queryParams, "page", 0));
         dto.setSize(getInt(queryParams, "size", 5));
-        dto.setOrders(getString(queryParams, "orders", "ASC"));
+        dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "areaId"));
-        dto.setStatus(getString(queryParams, "status", "ACTIVE"));
+        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
         dto.setAreaId(getLong(queryParams, "areaId", null));
         dto.setDescription(getString(queryParams, "description", null));
         dto.validate();
@@ -89,9 +91,9 @@ public class SearchDTOConverter {
         UserSearchDTO dto = new UserSearchDTO();
         dto.setPage(getInt(queryParams, "page", 0));
         dto.setSize(getInt(queryParams, "size", 5));
-        dto.setOrders(getString(queryParams, "orders", "ASC"));
+        dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "userId"));
-        dto.setStatus(getString(queryParams, "status", "ACTIVE"));
+        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
         dto.setUserId(getLong(queryParams, "userId", null));
         dto.setName(getString(queryParams, "name", null));
         dto.setEmail(getString(queryParams, "email", null));
@@ -116,8 +118,9 @@ public class SearchDTOConverter {
         ProductSearchDTO dto = new ProductSearchDTO();
         dto.setPage(getInt(queryParams, "page", 0));
         dto.setSize(getInt(queryParams, "size", 5));
-        dto.setOrders(getString(queryParams, "orders", "ASC"));
+        dto.setOrders(getString(queryParams, "orders", SortConstants.ASC));
         dto.setSortBy(getString(queryParams, "sortBy", "productId"));
+        dto.setStatus(getString(queryParams, "status", Constants.ACTIVE_STATUS));
         dto.setCompanyId(getLong(queryParams, "companyId", null));
         dto.setExternalCompanyId(getLong(queryParams, "externalCompanyId", null));
         dto.setName(getString(queryParams, "name", null));
@@ -139,8 +142,12 @@ public class SearchDTOConverter {
         if (map == null || !map.containsKey(key)) {
             return defaultValue;
         }
+        String value = map.get(key);
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
         try {
-            return Integer.parseInt(map.get(key));
+            return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             return defaultValue;
         }
@@ -150,8 +157,12 @@ public class SearchDTOConverter {
         if (map == null || !map.containsKey(key)) {
             return defaultValue;
         }
+        String value = map.get(key);
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
         try {
-            return Long.parseLong(map.get(key));
+            return Long.parseLong(value);
         } catch (NumberFormatException e) {
             return defaultValue;
         }

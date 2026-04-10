@@ -117,7 +117,7 @@ public class CompanyController {
     @GetMapping
     public ResponseEntity<Page<CompanyResponseDTO>> getAll(@RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size,
-                                                           @RequestParam(defaultValue = "ASC") String orders,
+                                                           @RequestParam(defaultValue = com.restaurante.bot.util.SortConstants.ASC) String orders,
                                                            @RequestParam(defaultValue = "id") String sortBy) {
         return new ResponseEntity<>(companyUseCase.getAllPageCompany(page, size, orders, sortBy), HttpStatus.OK);
     }

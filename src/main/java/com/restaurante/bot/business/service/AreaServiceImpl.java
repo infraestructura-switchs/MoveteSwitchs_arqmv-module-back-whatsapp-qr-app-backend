@@ -87,7 +87,7 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
 
     @Override
     public Page<AreaGetAllDto> getAll(Map<String, String> customQuery) {
-        String orders = "ASC";
+        String orders = com.restaurante.bot.util.SortConstants.ASC;
         String sortBy = "areaId";
         int page = 0;
         int size = 5;

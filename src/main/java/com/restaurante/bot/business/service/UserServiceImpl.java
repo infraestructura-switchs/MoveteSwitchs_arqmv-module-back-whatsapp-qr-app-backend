@@ -182,7 +182,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<GgpUserGetAllDto> getAll(Map<String, String> customQuery) {
-        String orders = "ASC";
+        String orders = com.restaurante.bot.util.SortConstants.ASC;
         String sortBy = "userId";
         int page = 0;
         int size = 5;

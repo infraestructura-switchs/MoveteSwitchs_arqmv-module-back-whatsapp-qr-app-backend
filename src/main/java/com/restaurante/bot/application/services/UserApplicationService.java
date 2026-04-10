@@ -116,7 +116,7 @@ public class UserApplicationService implements UserUseCase {
         // transform filters to page request and delegate
         int page = Integer.parseInt(filters.getOrDefault("page", "0"));
         int size = Integer.parseInt(filters.getOrDefault("size", "5"));
-        String orders = filters.getOrDefault("orders", "ASC");
+        String orders = filters.getOrDefault("orders", com.restaurante.bot.util.SortConstants.ASC);
         String sortBy = filters.getOrDefault("sortBy", "userId");
         org.springframework.data.domain.Sort.Direction direction = org.springframework.data.domain.Sort.Direction.fromString(orders);
         org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(direction, sortBy);

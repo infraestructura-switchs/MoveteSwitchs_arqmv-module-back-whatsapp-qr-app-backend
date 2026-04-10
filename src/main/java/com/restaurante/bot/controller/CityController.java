@@ -59,7 +59,7 @@ public class CityController {
     @GetMapping
     public ResponseEntity<Page<City>> getAll(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = com.restaurante.bot.util.SortConstants.ASC) String orders,
             @RequestParam(defaultValue = "id") String sortBy) {
         return ResponseEntity.ok(cityUseCase.getAll(page, size, orders, sortBy));
     }

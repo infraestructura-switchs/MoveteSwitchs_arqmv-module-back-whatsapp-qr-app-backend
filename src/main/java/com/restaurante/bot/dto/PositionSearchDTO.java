@@ -26,7 +26,7 @@ public class PositionSearchDTO extends PaginationSearchDTO {
         if (this.getSize() > 100) this.setSize(100);
         
         if (this.getOrders() == null || this.getOrders().isEmpty()) {
-            this.setOrders("ASC");
+            this.setOrders(com.restaurante.bot.util.SortConstants.ASC);
         }
         
         if (this.getSortBy() == null || this.getSortBy().isEmpty()) {

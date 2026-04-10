@@ -61,7 +61,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     @Override
     public Page<User> customSearch(Map<String, String> filters, Pageable pageable) {
         // delegate to repository query method or implement dynamic criteria
-        String orders = filters.getOrDefault("orders", "ASC");
+        String orders = filters.getOrDefault("orders", com.restaurante.bot.util.SortConstants.ASC);
         String sortBy = filters.getOrDefault("sortBy", "userId");
         // for simplicity reusing existing repository method via criteria-building
         return userRepository.findByUserIdOrNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrLoginContainingIgnoreCaseOrCompany_CompanyNameContainingIgnoreCaseOrPosition_DescriptionContainingIgnoreCaseOrArea_DescriptionContainingIgnoreCaseOrAndStatus(
