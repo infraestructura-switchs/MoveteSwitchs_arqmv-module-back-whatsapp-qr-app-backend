@@ -2,6 +2,7 @@ package com.restaurante.bot.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * ProductDiscount Entity
+ * ID Generation Strategy is configured externally in:
+ * - orm-mysql.xml: IDENTITY (auto-increment)
+ * - orm-oracle.xml: SEQUENCE (sequence generator)
+ * This ensures seamless compatibility with both MySQL and Oracle databases.
+ */
 @Entity
 @Data
 @Builder
@@ -22,6 +30,7 @@ import java.time.LocalDateTime;
 public class ProductDiscount {
 
     @Id
+    @GeneratedValue
     @Column(name = "product_discount_id")
     private Long productDiscountId;
 

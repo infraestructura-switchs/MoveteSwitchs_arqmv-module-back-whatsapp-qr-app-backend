@@ -1,6 +1,7 @@
 package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.application.ports.incoming.ProductDiscountCrudUseCase;
+import com.restaurante.bot.dto.ProductDiscountCreateDto;
 import com.restaurante.bot.dto.ProductDiscountDto;
 import com.restaurante.bot.dto.ProductDiscountSaveAndUpdateDto;
 import com.restaurante.bot.domain.exception.DomainException;
@@ -32,7 +33,7 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
 
     @Override
     @Transactional
-    public ProductDiscountDto save(ProductDiscountSaveAndUpdateDto productDiscountDto) {
+    public ProductDiscountDto save(ProductDiscountCreateDto productDiscountDto) {
         Product product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
         validateDiscountDates(productDiscountDto);
         validateDiscountAmount(productDiscountDto.getDiscountAmount(), product.getPrice());
