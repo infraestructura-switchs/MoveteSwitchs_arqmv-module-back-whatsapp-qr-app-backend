@@ -1,7 +1,7 @@
 package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.ProductDiscountDto;
-import com.restaurante.bot.dto.ProductDiscountSaveAndUpdateDto;
+import com.restaurante.bot.dto.ProductDiscountCreateDto;
 import com.restaurante.bot.domain.exception.DomainException;
 import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Product;
@@ -45,7 +45,7 @@ class ProductDiscountCrudUseCaseImplTest {
         product.setCompanyId(273L);
         product.setPrice(25000.0);
 
-        ProductDiscountSaveAndUpdateDto request = ProductDiscountSaveAndUpdateDto.builder()
+        ProductDiscountCreateDto request = ProductDiscountCreateDto.builder()
                 .productId(8L)
                 .companyId(273L)
                 .description("Promo almuerzo")
@@ -91,7 +91,7 @@ class ProductDiscountCrudUseCaseImplTest {
         product.setCompanyId(273L);
         product.setPrice(4000.0);
 
-        ProductDiscountSaveAndUpdateDto request = ProductDiscountSaveAndUpdateDto.builder()
+        ProductDiscountCreateDto request = ProductDiscountCreateDto.builder()
                 .productId(8L)
                 .companyId(273L)
                 .discountAmount(5000.0)
