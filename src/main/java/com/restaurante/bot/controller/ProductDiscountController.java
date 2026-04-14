@@ -1,6 +1,7 @@
 package com.restaurante.bot.controller;
 
 import com.restaurante.bot.application.ports.incoming.ProductDiscountCrudUseCase;
+import com.restaurante.bot.dto.ProductDiscountCreateDto;
 import com.restaurante.bot.dto.ProductDiscountDto;
 import com.restaurante.bot.dto.ProductDiscountSaveAndUpdateDto;
 import com.restaurante.bot.domain.exception.DomainException;
@@ -38,7 +39,7 @@ public class ProductDiscountController {
     private final ProductDiscountCrudUseCase productDiscountCrudUseCase;
 
     @PostMapping("/create")
-    public ResponseEntity<ProductDiscountDto> save(@RequestBody @Valid ProductDiscountSaveAndUpdateDto request) {
+    public ResponseEntity<ProductDiscountDto> save(@RequestBody @Valid ProductDiscountCreateDto request) {
         return ResponseEntity.ok(productDiscountCrudUseCase.save(request));
     }
 
