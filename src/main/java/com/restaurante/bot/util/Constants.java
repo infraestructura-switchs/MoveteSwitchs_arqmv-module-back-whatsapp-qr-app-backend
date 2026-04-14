@@ -19,4 +19,9 @@ public class Constants {
     public static final String COMPANY = CompanyConstants.COMPANY;
 
     public static final String ENVIRONTMENT_NAME = EnvConstants.ENVIRONMENT_NAME;
+
+    // Authentication Messages
+    public static final String INVALID_CREDENTIALS = AuthenticationMessages.INVALID_CREDENTIALS;
+    public static final String AUTHENTICATION_FAILED = AuthenticationMessages.AUTHENTICATION_FAILED;
+    public static final String LOGIN_SUCCESS = AuthenticationMessages.LOGIN_SUCCESS;
 }

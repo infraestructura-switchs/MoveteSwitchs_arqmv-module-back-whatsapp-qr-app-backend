@@ -10,6 +10,7 @@ import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.User;
 import com.restaurante.bot.repository.UserRepository;
 import com.restaurante.bot.security.SessionRegistryService;
+import com.restaurante.bot.util.AuthenticationMessages;
 import com.restaurante.bot.util.JwtUtil;
 import com.restaurante.bot.util.Utils;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,11 @@ public class LoginGGPServiceImpl implements LoginGGPService {
         String token = "";
 
         Optional<User> objectOptional = iRepository.findByLogin(loginIn.getUsername());
+        if (objectOptional.isEmpty()) {
+            throw new CustomErrorException(HttpStatus.UNAUTHORIZED, 
+                AuthenticationMessages.INVALID_CREDENTIALS);
+        }
+        
         UserDto objectDtoVo = null;
         if (objectOptional.isPresent()) {
             objectDtoVo = mapUserDto(objectOptional);
@@ -69,13 +75,13 @@ public class LoginGGPServiceImpl implements LoginGGPService {
                         externalCompanyId = objectOptional.get().getCompany().getExternalCompanyId();
                     }
                 } catch (jakarta.persistence.EntityNotFoundException e) {
-                    throw new CustomErrorException(HttpStatus.BAD_REQUEST, 
-                        "Error: Company associated with user not found in database");
+                    throw new CustomErrorException(HttpStatus.UNAUTHORIZED, 
+                        AuthenticationMessages.AUTHENTICATION_FAILED);
                 }
                 
                 if (externalCompanyId == null) {
-                    throw new CustomErrorException(HttpStatus.BAD_REQUEST, 
-                        "Error: User does not have a valid company assigned");
+                    throw new CustomErrorException(HttpStatus.UNAUTHORIZED, 
+                        AuthenticationMessages.AUTHENTICATION_FAILED);
                 }
                 
                 token = jwtUtilUser.generateToken(
@@ -94,9 +100,9 @@ public class LoginGGPServiceImpl implements LoginGGPService {
 
                 loginOut.setData(objectDtoVo);
                 loginOut.setStatusCode(HttpStatus.OK.value());
-                loginOut.setMessage("success");
+                loginOut.setMessage(AuthenticationMessages.LOGIN_SUCCESS);
             } else {
-                throw new CustomErrorException(HttpStatus.BAD_REQUEST, "Error[Credenciales incorrectas]");
+                throw new CustomErrorException(HttpStatus.UNAUTHORIZED, AuthenticationMessages.INVALID_CREDENTIALS);
             }
         }
 

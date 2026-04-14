@@ -3,10 +3,12 @@ package com.restaurante.bot.config.exception;
 import com.restaurante.bot.domain.exception.DomainException;
 import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.dto.ErrorResponseDTO;
+import com.restaurante.bot.exception.CustomErrorException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.validation.FieldError;
@@ -92,20 +94,78 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle CustomErrorException - application-specific errors with custom HTTP status
+     */
+    @ExceptionHandler(CustomErrorException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCustomErrorException(
+            CustomErrorException customException,
+            WebRequest request) {
+        
+        HttpStatus status = customException.getStatus() != null ? 
+            customException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        
+        log.warn("Custom error occurred [{}]: {}", status.value(), customException.getMessage());
+        
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(customException.getMessage())
+                .errorCode(status.name())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    /**     * Handle JSON parsing errors and invalid enum values
+     * Returns 400 Bad Request with user-friendly message
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            WebRequest request) {
+        
+        log.warn("Invalid request format: {}", ex.getMessage());
+        
+        String message = "Formato de solicitud inválido. Verifique los datos enviados.";
+        
+        // Check for enum deserialization errors
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            String cause = ex.getCause().getMessage();
+            if (cause.contains("not one of the values accepted for Enum")) {
+                message = "Valor inválido. Verifique los parámetros de la solicitud.";
+            }
+        }
+        
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(message)
+                .errorCode(DomainErrorCode.INVALID_REQUEST.name())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Handle generic exceptions - catch-all for unexpected errors
+     * Logs detailed stack trace but returns generic message to client for security
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGenericException(
             Exception exception,
             WebRequest request) {
         
-        log.error("Unexpected exception occurred", exception);
+        log.error("Unexpected exception occurred - Technical details:", exception);
         
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("An unexpected error occurred")
+                .message("Ocurrió un error interno del servidor. Intente nuevamente más tarde.")
                 .errorCode(DomainErrorCode.INTERNAL_ERROR.name())
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
@@ -115,22 +175,22 @@ public class GlobalExceptionHandler {
 
     /**
      * Handle database connectivity / datasource failures (Hikari/SQL exceptions)
+     * Logs detailed error for debugging but returns generic message to client
      */
     @ExceptionHandler({DataAccessResourceFailureException.class, SQLTransientConnectionException.class, SQLException.class})
     public ResponseEntity<ErrorResponseDTO> handleDatabaseException(
             Exception exception,
             WebRequest request) {
 
-        log.warn("Database connectivity error: {}", exception.getMessage());
+        log.error("Database connectivity error - Technical details: {}", exception.getMessage(), exception);
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.SERVICE_UNAVAILABLE.value())
                 .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
-                .message("No se pudo conectar a la base de datos. Intente nuevamente más tarde.")
+                .message("El servicio no está disponible en este momento. Intente nuevamente más tarde.")
                 .errorCode(DomainErrorCode.SERVICE_UNAVAILABLE.name())
                 .path(request.getDescription(false).replace("uri=", ""))
-                .details(exception.getMessage())
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
@@ -138,21 +198,19 @@ public class GlobalExceptionHandler {
 
     /**
      * Improve message for bean wiring errors where multiple candidates exist
+     * Logs technical details but returns generic message to client
      */
     @ExceptionHandler(NoUniqueBeanDefinitionException.class)
     public ResponseEntity<ErrorResponseDTO> handleNoUniqueBean(NoUniqueBeanDefinitionException ex, WebRequest request) {
-        log.error("Bean wiring ambiguity: {}", ex.getMessage());
-
-        String msg = "Conflicto en la configuración de beans: existen múltiples implementaciones para una dependencia. Marcar una con @Primary o usar @Qualifier.";
+        log.error("Bean wiring configuration error - Technical details: {}", ex.getMessage(), ex);
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message(msg)
+                .message("Error de configuración del servidor. Contacte al administrador.")
                 .errorCode(DomainErrorCode.INTERNAL_ERROR.name())
                 .path(request.getDescription(false).replace("uri=", ""))
-                .details(ex.getMessage())
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
