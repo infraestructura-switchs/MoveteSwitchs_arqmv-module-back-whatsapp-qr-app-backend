@@ -2,7 +2,8 @@ package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.ProductDiscountDto;
 import com.restaurante.bot.dto.ProductDiscountSaveAndUpdateDto;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Product;
 import com.restaurante.bot.model.ProductDiscount;
 import com.restaurante.bot.repository.ProductDiscountRepository;
@@ -100,9 +101,9 @@ class ProductDiscountCrudUseCaseImplTest {
 
         when(productRepository.findById(8L)).thenReturn(Optional.of(product));
 
-        GenericException exception = assertThrows(GenericException.class, () -> productDiscountCrudUseCase.save(request));
+        DomainException exception = assertThrows(DomainException.class, () -> productDiscountCrudUseCase.save(request));
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(DomainErrorCode.INVALID_REQUEST, exception.getCode());
         assertEquals("El descuento no puede ser mayor al precio base del producto", exception.getMessage());
     }
 }

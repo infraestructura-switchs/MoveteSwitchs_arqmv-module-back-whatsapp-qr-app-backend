@@ -22,7 +22,7 @@ public class OrderProduct {
     private Long orderId;
 
     @Column(name = "product_id")
-    private String productId;
+    private Long productId;
 
     @Column(name = "quantity")
     private Integer quantity;

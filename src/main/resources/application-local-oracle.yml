@@ -16,7 +16,14 @@ spring:
       minimum-idle: ${SPRING_DATASOURCE_MINIMUM_IDLE:2}
       connection-timeout: ${SPRING_DATASOURCE_CONNECTION_TIMEOUT:30000}
       idle-timeout: ${SPRING_DATASOURCE_IDLE_TIMEOUT:600000}
-      max-lifetime: ${SPRING_DATASOURCE_MAX_LIFETIME:1800000}
+      # Shorten max lifetime to avoid using stale/closed connections
+      max-lifetime: ${SPRING_DATASOURCE_MAX_LIFETIME:300000}
+      # If DB is not reachable during startup, do not fail the entire app (-1 disables fail fast)
+      initialization-fail-timeout: ${SPRING_DATASOURCE_INITIALIZATION_FAIL_TIMEOUT:-1}
+      # Validation timeout when checking connections
+      validation-timeout: ${SPRING_DATASOURCE_VALIDATION_TIMEOUT:5000}
+      # Simple lightweight validation query for Oracle
+      connection-test-query: SELECT 1 FROM DUAL
 
   jpa:
     mapping-resources: META-INF/orm-oracle.xml

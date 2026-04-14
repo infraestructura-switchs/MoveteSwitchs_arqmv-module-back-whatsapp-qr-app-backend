@@ -4,10 +4,8 @@ import com.restaurante.bot.model.LandingTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-
 public interface LandingTemplateRepository extends JpaRepository<LandingTemplate, Long> {
 
     List<LandingTemplate> findByStatus(String status);

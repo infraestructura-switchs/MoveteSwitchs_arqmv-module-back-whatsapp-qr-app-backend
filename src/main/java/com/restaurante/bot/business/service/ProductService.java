@@ -12,7 +12,8 @@ import com.restaurante.bot.dto.CategorizedProductsDTO;
 import com.restaurante.bot.dto.ProductCategoryDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductUpdateDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
 import jakarta.transaction.Transactional;
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import com.restaurante.bot.util.StatusConstants;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import java.util.stream.Collectors;
@@ -130,7 +132,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
 
         if (authentication == null || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new GenericException("No autenticado", HttpStatus.UNAUTHORIZED);
+            throw new DomainException(DomainErrorCode.UNAUTHORIZED, "No autenticado");
         }
 
         Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
@@ -140,7 +142,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
                 company = new Company();
                 company.setId(externalCompanyId);
             } else {
-                throw new GenericException("La compañia no existe", HttpStatus.NOT_FOUND);
+                throw new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no existe");
             }
         }
         Long companyId = company.getId();
@@ -231,7 +233,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
     private void loadCategoryMapping(Long externalCompanyId) {
         dynamicCategoryMapping.computeIfAbsent(externalCompanyId, k -> {
             Map<String, Long> mapping = new HashMap<>();
-            List<CategoryMapping> mappings = categoryMappingRepository.findByCompanyIdAndStatus(externalCompanyId, "ACTIVE");
+            List<CategoryMapping> mappings = categoryMappingRepository.findByCompanyIdAndStatus(externalCompanyId, StatusConstants.ACTIVE_STATUS);
             for (CategoryMapping cm : mappings) {
                 mapping.put(cm.getGroupId().toString(), cm.getCategoryId());
             }
@@ -256,7 +258,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             Category category = new Category();
             category.setName(groupDescription);
             category.setExternalId(Long.parseLong(groupId));
-            category.setStatus("ACTIVE");
+            category.setStatus(StatusConstants.ACTIVE_STATUS);
             category.setCompanyId(externalCompanyId);
             category = categoryRepository.save(category);
             categoryId = category.getCategoryId();
@@ -270,7 +272,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             mapping.setGroupId(Long.parseLong(groupId));
             mapping.setCategoryId(categoryId);
             mapping.setCompanyId(externalCompanyId);
-            mapping.setStatus("ACTIVE");
+            mapping.setStatus(StatusConstants.ACTIVE_STATUS);
             categoryMappingRepository.save(mapping);
             log.info("Nueva categoría creada para groupId {}: {}", groupId, categoryId);
         }
@@ -281,7 +283,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
     @Override
     public ProductDto updateProductDescription(ProductUpdateDTO productUpdateDTO) {
         Product product = productRepository.findById(productUpdateDTO.getProductId())
-                .orElseThrow(() -> new GenericException("Producto no encontrado con el id: " + productUpdateDTO.getProductId(), HttpStatus.BAD_REQUEST));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Producto no encontrado con el id: " + productUpdateDTO.getProductId()));
 
         List<String> commentsList = new ArrayList<>();
         if (product.getProductComments() != null && !product.getProductComments().isEmpty()) {
@@ -338,7 +340,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
         } else {
             product.setOriginalPrice(productDTO.getData().getPrecio());
         }
-        product.setStatus("ACTIVE");
+        product.setStatus(StatusConstants.ACTIVE_STATUS);
         product.setImgProduct(productDTO.getData().getImagenMenu());
         product.setCompanyId(externalCompanyId);
 
@@ -410,7 +412,7 @@ public class ProductService implements ProductInterface, ProductUseCase {
             String s = sort.trim().toUpperCase();
             if ("ASC".equals(s) || "DESC".equals(s)) order = s;
         }
-        if (order == null) order = "ASC";
+        if (order == null) order = com.restaurante.bot.util.SortConstants.ASC;
 
         Long categoryId = null;
         if (categoryName != null && !categoryName.isBlank()) {

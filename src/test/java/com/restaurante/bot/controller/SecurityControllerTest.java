@@ -2,6 +2,7 @@ package com.restaurante.bot.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurante.bot.application.ports.incoming.ShortLinkUseCase;
+import com.restaurante.bot.application.ports.incoming.SecurityUseCase;
 import com.restaurante.bot.dto.GenerateTokenRequestDTO;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.dto.SessionValidationRequestDTO;
@@ -48,6 +49,8 @@ class SecurityControllerTest {
     @MockBean
     private JwtUtil jwtUtil;
 
+        @MockBean
+        private SecurityUseCase securityUseCase;
     @MockBean
     private CompanyRepository companyRepository;
 
@@ -71,12 +74,12 @@ class SecurityControllerTest {
                 .apiKey("valid-key")
                 .build();
 
-        when(companyRepository.existsByExternalCompanyId(273L)).thenReturn(true);
-        Company company = Company.builder().id(1L).externalCompanyId(273L).apiKey("valid-key").build();
-        when(companyRepository.findByExternalCompanyId(273L)).thenReturn(company);
-        when(jwtUtil.generateSessionId()).thenReturn("9ba2153735304a0eb1b0ba67e9823e54");
-        when(jwtUtil.generateToken(eq(273L), eq(9L), anyString()))
-                .thenAnswer(invocation -> "jwt-" + invocation.getArgument(2, String.class));
+        com.restaurante.bot.dto.GenerateTokenResponseDTO response = com.restaurante.bot.dto.GenerateTokenResponseDTO.builder()
+                .token("jwt-abc")
+                .sessionId("9ba2153735304a0eb1b0ba67e9823e54")
+                .build();
+
+        when(securityUseCase.generateToken(org.mockito.ArgumentMatchers.any())).thenReturn(response);
 
         mockMvc.perform(post("/api/back-whatsapp-qr-app/security/generateToken")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +88,7 @@ class SecurityControllerTest {
                 .andExpect(jsonPath("$.token", startsWith("jwt-")))
                 .andExpect(jsonPath("$.session_id", matchesPattern("^[a-f0-9]{32}$")));
 
-        verify(sessionRegistryService).registerSession(org.mockito.ArgumentMatchers.anyString(), eq(273L), eq(9L));
+        verify(securityUseCase).generateToken(org.mockito.ArgumentMatchers.any());
     }
 
     @Test
@@ -99,17 +102,20 @@ class SecurityControllerTest {
         Company company = Company.builder().id(1L).externalCompanyId(273L).apiKey("valid-key").build();
         when(companyRepository.findByExternalCompanyId(273L)).thenReturn(company);
 
+        // Controller delegates validation to SecurityUseCase; simulate BAD_REQUEST via SecurityUseCase
+        when(securityUseCase.generateToken(org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new com.restaurante.bot.domain.exception.DomainException(
+                        com.restaurante.bot.domain.exception.DomainErrorCode.INVALID_REQUEST,
+                        "apiKey obligatorio"));
+
         var result = mockMvc.perform(post("/api/back-whatsapp-qr-app/security/generateToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
         int status = result.getResponse().getStatus();
-        // Depending on test context validation may or may not run. Accept 400 (validation) or 401 (controller apiKey check)
-        org.junit.jupiter.api.Assertions.assertTrue(status == 400 || status == 401);
-        if (status == 400) {
-            org.skyscreamer.jsonassert.JSONAssert.assertEquals("{\"apiKey\":\"apiKey obligatorio\"}", result.getResponse().getContentAsString(), false);
-        }
+        org.junit.jupiter.api.Assertions.assertEquals(400, status);
+        org.skyscreamer.jsonassert.JSONAssert.assertEquals("{\"message\":\"apiKey obligatorio\"}", result.getResponse().getContentAsString(), false);
     }
 
     @Test
@@ -120,29 +126,28 @@ class SecurityControllerTest {
                 .apiKey("invalid-key")
                 .build();
 
-        when(companyRepository.existsByExternalCompanyId(273L)).thenReturn(true);
-        Company company = Company.builder().id(1L).externalCompanyId(273L).apiKey("valid-key").build();
-        when(companyRepository.findByExternalCompanyId(273L)).thenReturn(company);
+        when(securityUseCase.generateToken(org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new com.restaurante.bot.domain.exception.DomainException(
+                        com.restaurante.bot.domain.exception.DomainErrorCode.UNAUTHORIZED,
+                        "apiKey invalido"));
 
         mockMvc.perform(post("/api/back-whatsapp-qr-app/security/generateToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$").value("apiKey invalido"));
+                .andExpect(jsonPath("$.message").value("apiKey invalido"));
     }
 
     @Test
     void logoutShouldInvalidateSession() throws Exception {
-        when(jwtUtil.isTokenValid("jwt-token")).thenReturn(true);
-        when(jwtUtil.extractSessionId("jwt-token")).thenReturn("session-123");
+        org.mockito.Mockito.doNothing().when(securityUseCase).logout(org.mockito.ArgumentMatchers.anyString());
 
         mockMvc.perform(post("/api/back-whatsapp-qr-app/security/logout")
                         .header("Authorization", "Bearer jwt-token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Sesion cerrada correctamente"))
-                .andExpect(jsonPath("$.session_id").value("session-123"));
+                .andExpect(jsonPath("$.message").value("Session closed successfully"));
 
-        verify(sessionRegistryService).invalidateSession("session-123");
+        verify(securityUseCase).logout(org.mockito.ArgumentMatchers.anyString());
     }
 
         @Test
@@ -151,13 +156,16 @@ class SecurityControllerTest {
                                 .sessionId("session-123")
                                 .build();
 
-                when(sessionRegistryService.getSessionStatus("session-123"))
-                                .thenReturn(new SessionRegistryService.SessionStatus(
-                                                "session-123",
-                                                true,
-                                                false,
-                                                java.time.Instant.parse("2026-03-18T12:00:00Z"),
-                                                900000L));
+                com.restaurante.bot.dto.SessionValidationResponseDTO resp = com.restaurante.bot.dto.SessionValidationResponseDTO.builder()
+                                .sessionId("session-123")
+                                .active(true)
+                                .expired(false)
+                                .expiresAt(java.time.Instant.parse("2026-03-18T12:00:00Z"))
+                                .remainingMs(900000L)
+                                .build();
+
+                when(securityUseCase.validateSession(org.mockito.ArgumentMatchers.any()))
+                                .thenReturn(resp);
 
                 mockMvc.perform(post("/api/back-whatsapp-qr-app/security/validateSession")
                                                 .contentType(MediaType.APPLICATION_JSON)

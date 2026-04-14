@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.JwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtUtil {
 
     @Value("${security.jwt.secret-key}")
@@ -62,15 +65,30 @@ public class JwtUtil {
 
     // Extrae externalCompanyId del token
     public Long extractExternalCompanyId(String token) {
-        return extractClaim(token, claims -> claims.get("externalCompanyId", Long.class));
+        Long companyId = extractClaim(token, claims -> claims.get("externalCompanyId", Long.class));
+        if (companyId == null) {
+            log.warn("Token missing required claim: externalCompanyId");
+            throw new JwtException("Token must contain externalCompanyId claim");
+        }
+        return companyId;
     }
 
     public String extractSessionId(String token) {
-        return extractClaim(token, claims -> claims.get("sessionId", String.class));
+        String sessionId = extractClaim(token, claims -> claims.get("sessionId", String.class));
+        if (sessionId == null || sessionId.isEmpty()) {
+            log.warn("Token missing or empty sessionId claim");
+            throw new JwtException("Token must contain valid sessionId claim");
+        }
+        return sessionId;
     }
 
     public Long extractUserId(String token) {
-        return extractClaim(token, claims -> claims.get("userId", Long.class));
+        Long userId = extractClaim(token, claims -> claims.get("userId", Long.class));
+        if (userId == null) {
+            log.warn("Token missing required claim: userId");
+            throw new JwtException("Token must contain userId claim");
+        }
+        return userId;
     }
 
     public Date extractExpiration(String token) {

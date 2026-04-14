@@ -2,7 +2,8 @@ package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.application.ports.incoming.TransactionUseCase;
 import com.restaurante.bot.business.interfaces.TransactionInterface;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.model.GenericResponse;
 import com.restaurante.bot.model.RestaurantTable;
@@ -37,14 +38,14 @@ public class TransactionService implements TransactionInterface, TransactionUseC
         Long tokenCompanyId = (Long) authentication.getPrincipal();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
 
         Transaction transaction = transactionRepository.getTransactionByTableAndStatus(tableNumber, company.getId());
         if (transaction != null) {
-            throw new GenericException("hay ordenes por enviar en esta mesa", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "hay ordenes por enviar en esta mesa");
         }
         RestaurantTable table = restaurantTableRepository.findByTableNumberAndCompanyId(
                 tableNumber.longValue(), company.getId());
@@ -54,7 +55,7 @@ public class TransactionService implements TransactionInterface, TransactionUseC
         Transaction transaction2 = transactionRepository.getTransactionByTableAndStatusSend(tableNumber, company.getId());
 
         if (transaction2 == null) {
-            throw new GenericException("No hay transacciones abiertas en esa mesa" , HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "No hay transacciones abiertas en esa mesa");
         }
 
         transaction2.setStatus(TransactionStatusConstants.CLOSED);

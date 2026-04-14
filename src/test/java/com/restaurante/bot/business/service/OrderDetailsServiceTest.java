@@ -1,7 +1,8 @@
 package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.OrderDetailsDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.model.Customer;
 import com.restaurante.bot.model.CustomerOrder;
@@ -87,11 +88,11 @@ class OrderDetailsServiceTest {
     void saveOrderShouldReturnUnauthorizedWhenAuthenticationIsMissing() {
         SecurityContextHolder.clearContext();
 
-        GenericException exception = assertThrows(
-                GenericException.class,
-                () -> orderDetailsService.saveOrder(new OrderDetailsDTO()));
+        DomainException exception = assertThrows(
+            DomainException.class,
+            () -> orderDetailsService.saveOrder(new OrderDetailsDTO()));
 
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals(DomainErrorCode.UNAUTHORIZED, exception.getCode());
         assertEquals("No autenticado", exception.getMessage());
     }
 
@@ -167,11 +168,11 @@ class OrderDetailsServiceTest {
 
     @Test
     void findOrCreateCustomerShouldRejectJwtValueInPhone() {
-        GenericException exception = assertThrows(
-                GenericException.class,
-                () -> orderDetailsService.findOrCreateCustomer("eyJhbGciOiJIUzUxMiJ9.abc.def"));
+        DomainException exception = assertThrows(
+            DomainException.class,
+            () -> orderDetailsService.findOrCreateCustomer("eyJhbGciOiJIUzUxMiJ9.abc.def"));
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(DomainErrorCode.INVALID_REQUEST, exception.getCode());
         assertEquals("El campo phone debe contener un numero de telefono valido", exception.getMessage());
         verify(customerRepository, never()).save(org.mockito.ArgumentMatchers.any(Customer.class));
     }

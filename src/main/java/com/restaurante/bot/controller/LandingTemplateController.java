@@ -46,7 +46,7 @@ public class LandingTemplateController {
     public ResponseEntity<Page<LandingTemplateResponseDTO>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = com.restaurante.bot.util.SortConstants.ASC) String orders,
             @RequestParam(defaultValue = "landingTemplateId") String sortBy) {
         return new ResponseEntity<>(landingTemplateUseCase.getAllPageLandingTemplate(page, size, orders, sortBy), HttpStatus.OK);
     }

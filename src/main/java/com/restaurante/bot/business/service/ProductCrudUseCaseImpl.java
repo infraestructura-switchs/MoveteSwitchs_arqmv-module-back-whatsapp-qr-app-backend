@@ -7,14 +7,15 @@ import com.restaurante.bot.dto.CategoryResponseDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductGetAllDto;
 import com.restaurante.bot.dto.ProductSaveAndUpdateDto;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Product;
 import com.restaurante.bot.model.ProductDiscount;
 import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.CommentRepository;
 import com.restaurante.bot.repository.ProductCommentRepository;
 import com.restaurante.bot.repository.ProductRepository;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -43,13 +44,14 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     @Override
     @Transactional
     public ProductDto save(ProductSaveAndUpdateDto productDto) {
+        validateProductDtoForSave(productDto);
         Product entity = new Product();
         // productId left null to allow DB to generate if applicable
         entity.setName(productDto.getProductName());
         entity.setPrice(productDto.getPrice());
         if (productDto.getOriginalPrice() != null) entity.setOriginalPrice(productDto.getOriginalPrice());
         entity.setDescription(productDto.getDescription());
-        entity.setStatus(productDto.getStatus() == null ? Constants.ACTIVE_STATUS : productDto.getStatus());
+        entity.setStatus(productDto.getStatus() == null ? StatusConstants.ACTIVE_STATUS : productDto.getStatus());
         entity.setImgProduct(productDto.getImage());
         entity.setCategoryId(productDto.getCategoryId());
         entity.setInformation(normalizeInformation(productDto.getInformation()));
@@ -74,14 +76,15 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     public ProductDto get(Long id) {
         Optional<Product> opt = productRepository.findById(id);
         if (opt.isPresent()) return mapToDto(opt.get());
-        throw new GenericException("Producto no encontrado", HttpStatus.NOT_FOUND);
+        throw new DomainException(DomainErrorCode.NOT_FOUND, "Producto no encontrado");
     }
 
     @Override
     @Transactional
     public ProductDto update(Long productId, ProductSaveAndUpdateDto productDto) {
+        validateProductDtoForUpdate(productDto);
         Optional<Product> opt = productRepository.findById(productId);
-        if (!opt.isPresent()) throw new GenericException("Producto no existe", HttpStatus.NOT_FOUND);
+        if (!opt.isPresent()) throw new DomainException(DomainErrorCode.NOT_FOUND, "Producto no existe");
         Product entity = opt.get();
         if (productDto.getProductName() != null) entity.setName(productDto.getProductName());
         if (productDto.getPrice() != null) entity.setPrice(productDto.getPrice());
@@ -113,6 +116,47 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         return mapToDto(updated);
     }
 
+    private void validateProductDtoForSave(ProductSaveAndUpdateDto productDto) {
+        java.util.List<String> missingFields = new java.util.ArrayList<>();
+        java.util.List<String> invalidFields = new java.util.ArrayList<>();
+
+        if (productDto.getProductName() == null || productDto.getProductName().trim().isEmpty()) {
+            missingFields.add("productName");
+        }
+        if (productDto.getPrice() == null) {
+            missingFields.add("price");
+        } else if (productDto.getPrice() <= 0) {
+            invalidFields.add("price");
+        }
+        if (productDto.getCompanyId() == null) {
+            missingFields.add("companyId");
+        } else if (productDto.getCompanyId() <= 0) {
+            invalidFields.add("companyId");
+        }
+        if (productDto.getCategoryId() == null) {
+            missingFields.add("categoryId");
+        } else if (productDto.getCategoryId() <= 0) {
+            invalidFields.add("categoryId");
+        }
+        if (productDto.getPreparationTime() == null) {
+            missingFields.add("preparationTime");
+        } else if (productDto.getPreparationTime() <= 0) {
+            invalidFields.add("preparationTime");
+        }
+
+        if (!missingFields.isEmpty()) {
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Campos obligatorios faltantes: " + String.join(", ", missingFields));
+        }
+        if (!invalidFields.isEmpty()) {
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Campos con valor invalido: " + String.join(", ", invalidFields));
+        }
+    }
+
+    private void validateProductDtoForUpdate(ProductSaveAndUpdateDto productDto) {
+        // For update we enforce same validation as before the controller removed it
+        validateProductDtoForSave(productDto);
+    }
+
     private String normalizeInformation(String information) {
         if (information == null) {
             return null;
@@ -132,7 +176,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         Optional<Product> opt = productRepository.findById(id);
         if (opt.isPresent()) {
             Product p = opt.get();
-            p.setStatus(Constants.INACTIVE_STATUS);
+            p.setStatus(StatusConstants.INACTIVE_STATUS);
             productRepository.save(p);
             return true;
         }
@@ -197,7 +241,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     public List<ProductGetAllDto> getAllWithOutPage(Map<String, String> customQuery, Long companyId, Long externalCompanyId) {
         String status = null;
         if (customQuery != null && customQuery.containsKey("status")) status = customQuery.get("status");
-        else status = Constants.ACTIVE_STATUS;
+        else status = StatusConstants.ACTIVE_STATUS;
 
         Long resolvedCompanyId = resolveCompanyId(companyId, externalCompanyId);
         if (resolvedCompanyId != null) {

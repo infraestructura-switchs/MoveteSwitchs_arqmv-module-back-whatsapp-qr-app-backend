@@ -8,7 +8,9 @@ import com.restaurante.bot.dto.AreaSaveAndUpdateDto;
 import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.Area;
 import com.restaurante.bot.repository.AreaRepository;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
+import com.restaurante.bot.util.SearchDTOConverter;
+import com.restaurante.bot.dto.AreaSearchDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
@@ -66,7 +68,7 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
         Optional<Area> areaOptional = areaRepository.findById(areaId);
         if (areaOptional.isPresent()) {
             Area entityArea = areaOptional.get();
-            entityArea.setStatus(Constants.INACTIVE_STATUS);
+            entityArea.setStatus(StatusConstants.INACTIVE);
             areaRepository.save(entityArea);
             return true;
         }
@@ -85,11 +87,11 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
 
     @Override
     public Page<AreaGetAllDto> getAll(Map<String, String> customQuery) {
-        String orders = "ASC";
+        String orders = com.restaurante.bot.util.SortConstants.ASC;
         String sortBy = "areaId";
         int page = 0;
         int size = 5;
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE;
 
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
@@ -118,12 +120,12 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        return mapPageAreaDto(areaRepository.findByStatus(Constants.ACTIVE_STATUS, pagingSort), pagingSort);
+        return mapPageAreaDto(areaRepository.findByStatus(StatusConstants.ACTIVE, pagingSort), pagingSort);
     }
 
     @Override
     public List<AreaGetAllDto> getAllWithOutPage(Map<String, String> customQuery) {
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE;
 
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
@@ -140,42 +142,24 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
 
     @Override
     public Page<AreaGetAllDto> searchCustom(Map<String, String> customQuery) {
-        String orders = "ASC";
-        String sortBy = "areaId";
-        int page = 0;
-        int size = 5;
-        Long id = null;
-        String description = null;
-        String status = Constants.ACTIVE_STATUS;
+        // Convert Map parameters to AreaSearchDTO for type-safe access
+        AreaSearchDTO searchRequest = SearchDTOConverter.toAreaSearch(customQuery);
+        searchRequest.validate();
 
-        if (customQuery.containsKey("areaId")) {
-            id = Long.valueOf(customQuery.get("areaId"));
-        }
-        if (customQuery.containsKey("description")) {
-            description = customQuery.get("description");
-        }
-        if (customQuery.containsKey("status")) {
-            status = customQuery.get("status");
-        }
-        if (customQuery.containsKey("orders")) {
-            orders = customQuery.get("orders");
-        }
-        if (customQuery.containsKey("sortBy")) {
-            sortBy = customQuery.get("sortBy");
-        }
-        if (customQuery.containsKey("page")) {
-            page = Integer.parseInt(customQuery.get("page"));
-        }
-        if (customQuery.containsKey("size")) {
-            size = Integer.parseInt(customQuery.get("size"));
-        }
+        Sort.Direction direction = Sort.Direction.fromString(searchRequest.getOrders());
+        Pageable pageable = PageRequest.of(
+            searchRequest.getPage(), 
+            searchRequest.getSize(), 
+            Sort.by(direction, searchRequest.getSortBy()));
 
-        Sort.Direction direction = Sort.Direction.fromString(orders);
-        Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
+        // Use the refactored repository method
         return mapPageAreaDto(
-                areaRepository.findByIdOrDescriptionContainingIgnoreCaseAndStatus(
-                        id, description, status, pagingSort), pagingSort);
+            areaRepository.findByIdOrDescriptionContainingIgnoreCaseAndStatus(
+                searchRequest.getAreaId(),
+                searchRequest.getDescription(),
+                searchRequest.getStatus(),
+                pageable),
+            pageable);
     }
 
     private AreaDto mapAreaDto(Area entityArea) {

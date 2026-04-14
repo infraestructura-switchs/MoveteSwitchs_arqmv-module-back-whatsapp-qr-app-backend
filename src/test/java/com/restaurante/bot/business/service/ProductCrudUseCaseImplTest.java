@@ -51,11 +51,13 @@ class ProductCrudUseCaseImplTest {
     @Test
     void save_ShouldStoreNullInformation_WhenPayloadContainsEmptyArrayString() {
         ProductSaveAndUpdateDto request = ProductSaveAndUpdateDto.builder()
-                .productName("Carne Asadaa")
-                .price(34000.0)
-                .companyId(273L)
-                .information("[]")
-                .build();
+            .productName("Carne Asadaa")
+            .price(34000.0)
+            .companyId(273L)
+            .categoryId(1L)
+            .preparationTime(10)
+            .information("[]")
+            .build();
 
         Product persistedProduct = new Product();
         persistedProduct.setProductId(649L);
@@ -89,11 +91,13 @@ class ProductCrudUseCaseImplTest {
         existingProduct.setInformation("valor anterior");
 
         ProductSaveAndUpdateDto request = ProductSaveAndUpdateDto.builder()
-                .productName("Carne Asadaa")
-                .price(34000.0)
-                .companyId(273L)
-                .information("[]")
-                .build();
+            .productName("Carne Asadaa")
+            .price(34000.0)
+            .companyId(273L)
+            .categoryId(1L)
+            .preparationTime(10)
+            .information("[]")
+            .build();
 
         Product updatedProduct = new Product();
         updatedProduct.setProductId(649L);

@@ -7,6 +7,8 @@ import com.restaurante.bot.model.Position;
 import com.restaurante.bot.repository.PositionRepository;
 import com.restaurante.bot.business.interfaces.IPositionService;
 import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.SearchDTOConverter;
+import com.restaurante.bot.dto.PositionSearchDTO;
 import com.restaurante.bot.exception.CustomErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -83,7 +85,7 @@ public class PositionServiceImpl implements IPositionService, PositionUseCase {
 
     @Override
     public Page<PositionGetAllDto> getAll(Map<String, String> customQuery) {
-        String orders = "ASC";
+        String orders = com.restaurante.bot.util.SortConstants.ASC;
         String sortBy = "positionId";
         int page = 0;
         int size = 5;
@@ -132,40 +134,24 @@ public class PositionServiceImpl implements IPositionService, PositionUseCase {
 
     @Override
     public Page<PositionGetAllDto> searchCustom(Map<String, String> customQuery) {
-        String orders = "ASC";
-        String sortBy = "positionId";
-        int page = 0;
-        int size = 5;
-        String id = null;
-        String description = null;
-        String status = Constants.ACTIVE_STATUS;
-        if (customQuery.containsKey("id")) {
-            id = customQuery.get("id");
-        }
-        if (customQuery.containsKey("description")) {
-            description = customQuery.get("description");
-        }
-        if (customQuery.containsKey("status")) {
-            status = customQuery.get("status");
-        }
-        if (customQuery.containsKey("orders")) {
-            orders = customQuery.get("orders");
-        }
-        if (customQuery.containsKey("sortBy")) {
-            sortBy = customQuery.get("sortBy");
-        }
-        if (customQuery.containsKey("page")) {
-            page = Integer.parseInt(customQuery.get("page"));
-        }
-        if (customQuery.containsKey("size")) {
-            size = Integer.parseInt(customQuery.get("size"));
-        }
-        Sort.Direction direction = Sort.Direction.fromString(orders);
-        Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        // Convert Map parameters to PositionSearchDTO for type-safe access
+        PositionSearchDTO searchRequest = SearchDTOConverter.toPositionSearch(customQuery);
+        searchRequest.validate();
+
+        Sort.Direction direction = Sort.Direction.fromString(searchRequest.getOrders());
+        Pageable pageable = PageRequest.of(
+            searchRequest.getPage(), 
+            searchRequest.getSize(), 
+            Sort.by(direction, searchRequest.getSortBy()));
+
+        // Use the refactored repository method
         return mapPagePositionDto(
-                positionRepository.findByIdOrDescriptionContainingIgnoreCaseAndStatus(
-                        id, description, status, pagingSort),
-                pagingSort);
+            positionRepository.findByIdOrDescriptionContainingIgnoreCaseAndStatus(
+                searchRequest.getId() != null ? searchRequest.getId().toString() : null,
+                searchRequest.getDescription(),
+                searchRequest.getStatus(),
+                pageable),
+            pageable);
     }
 
     private PositionDto mapPositionDto(Position entityPosition) {

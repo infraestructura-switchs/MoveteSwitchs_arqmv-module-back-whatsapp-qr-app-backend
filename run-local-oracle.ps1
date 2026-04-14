@@ -36,7 +36,12 @@ if ($envFile) {
     Write-Host "No .env.oracle or .env file found. Using current shell environment values."
 }
 
-[System.Environment]::SetEnvironmentVariable("SERVER_PORT", "8081", "Process")
+
+$serverPort = [System.Environment]::GetEnvironmentVariable("SERVER_PORT", "Process")  
+if ([string]::IsNullOrWhiteSpace($serverPort)) {
+[System.Environment]::SetEnvironmentVariable("SERVER_PORT", "8081", "Process") 
+}
+
 $activeProfile = if ($Env -eq "test") { "test" } else { "$Env-oracle" }
 [System.Environment]::SetEnvironmentVariable("SPRING_PROFILES_ACTIVE", $activeProfile, "Process")
 

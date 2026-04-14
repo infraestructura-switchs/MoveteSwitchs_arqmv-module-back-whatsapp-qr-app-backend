@@ -4,7 +4,8 @@ import com.restaurante.bot.business.call.CallServiceHttp;
 import com.restaurante.bot.application.ports.incoming.OrderDetailsDeliveryUseCase;
 import com.restaurante.bot.business.interfaces.IOrderDetailBusiness;
 import com.restaurante.bot.dto.*;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import com.restaurante.bot.util.StatusConstants;
+import com.restaurante.bot.util.OrderConstants;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,7 +67,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
         orderDetail.setTotal(orderDetailsDTO.getTotal());
         orderDetail.setStatusOrder("SIN CONFIRMAR");
         orderDetail.setMethod(orderDetailsDTO.getMethod());
-        orderDetail.setStatus("ACTIVE");
+        orderDetail.setStatus(StatusConstants.ACTIVE_STATUS);
         orderDetail.setPaymentId(orderDetailsDTO.getPaymentId());
         orderDetail.setCustomerId(customer.getCustomer_id());
 
@@ -91,7 +94,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
     }
     @Override
     public List<OrderDeliveryResponseDTO> getOrderDetails() {
-        List<OrderDetailDelivery> orderDetails = orderRepository.findByStatusAndStatusOrder("ACTIVE", "PENDIENTE");
+        List<OrderDetailDelivery> orderDetails = orderRepository.findByStatusAndStatusOrder(StatusConstants.ACTIVE_STATUS, OrderConstants.PENDIENTE);
 
         List<Long> orderIds = orderDetails.stream()
                 .map(OrderDetailDelivery::getOrderTransactionDeliveryId)
@@ -157,7 +160,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
         Long tokenCompanyId = (Long) authentication.getPrincipal();
 
         if (!companyRepository.existsByExternalCompanyId(tokenCompanyId)) {
-            throw new GenericException("Compañia no recnocida en la base de datos", HttpStatus.BAD_REQUEST);
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Compañia no recnocida en la base de datos");
         }
 
         Company company = companyRepository.findByExternalCompanyId(tokenCompanyId);
@@ -175,6 +178,14 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
         orderRepository.save(orderDetailDelivery);
 
         Customer customer = customerRepository.findByPhone(orderDetailsDeliveryDTO.getPhone());
+        if (customer == null) {
+            log.warn("updateOrder - Customer not found for phone: {}", orderDetailsDeliveryDTO.getPhone());
+            throw new DomainException(
+                DomainErrorCode.INVALID_REQUEST,
+                "Cliente no encontrado para el teléfono: " + orderDetailsDeliveryDTO.getPhone()
+            );
+        }
+        
         customer.setTypeIdentificationId(orderDetailsDeliveryDTO.getTypeIdentificationId());
         customer.setNumerIdentification(orderDetailsDeliveryDTO.getNameIdentification());
         customer.setName(orderDetailsDeliveryDTO.getNameClient());

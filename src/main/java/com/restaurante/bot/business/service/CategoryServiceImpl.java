@@ -3,7 +3,8 @@ package com.restaurante.bot.business.service;
 import com.restaurante.bot.business.interfaces.CategoryService;
 import com.restaurante.bot.dto.CategoryRequestDTO;
 import com.restaurante.bot.dto.CategoryResponseDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Category;
 import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.ParameterRepository;
@@ -38,28 +39,28 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponseDTO getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new GenericException("Category not found", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Category not found"));
         return mapToResponseDTO(category);
     }
 
     @Override
     public CategoryResponseDTO getCategoryByName(String name) {
         Category category = categoryRepository.findByName(name)
-                .orElseThrow(() -> new GenericException("Category not found", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Category not found"));
         return mapToResponseDTO(category);
     }
 
     @Override
     public CategoryResponseDTO getCategoryByNameAndCompanyId(String name, Long companyId) {
         Category category = categoryRepository.findByNameAndCompanyId(name, companyId)
-                .orElseThrow(() -> new GenericException("Category not found", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Category not found"));
         return mapToResponseDTO(category);
     }
 
     @Override
     public CategoryResponseDTO createCategory(CategoryRequestDTO request) {
         if (categoryRepository.existsByNameAndCompanyId(request.getName(), request.getCompanyId())) {
-            throw new GenericException("Category with this name already exists", HttpStatus.CONFLICT);
+            throw new DomainException(DomainErrorCode.CONFLICT, "Category with this name already exists");
         }
 
         Category category = new Category();
@@ -76,11 +77,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponseDTO updateCategory(Long id, CategoryRequestDTO request) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new GenericException("Category not found", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Category not found"));
 
         if (!category.getName().equals(request.getName()) && 
             categoryRepository.existsByNameAndCompanyId(request.getName(), request.getCompanyId())) {
-            throw new GenericException("Category with this name already exists", HttpStatus.CONFLICT);
+            throw new DomainException(DomainErrorCode.CONFLICT, "Category with this name already exists");
         }
 
         category.setName(request.getName());

@@ -3,7 +3,8 @@ package com.restaurante.bot.controller;
 import com.restaurante.bot.application.ports.incoming.ProductDiscountCrudUseCase;
 import com.restaurante.bot.dto.ProductDiscountDto;
 import com.restaurante.bot.dto.ProductDiscountSaveAndUpdateDto;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,6 @@ public class ProductDiscountController {
 
     @PostMapping("/create")
     public ResponseEntity<ProductDiscountDto> save(@RequestBody @Valid ProductDiscountSaveAndUpdateDto request) {
-        validateRequest(request);
         return ResponseEntity.ok(productDiscountCrudUseCase.save(request));
     }
 
@@ -50,7 +50,6 @@ public class ProductDiscountController {
     @PutMapping("/update/{id}")
     public ResponseEntity<ProductDiscountDto> update(@PathVariable Long id,
                                                      @RequestBody @Valid ProductDiscountSaveAndUpdateDto request) {
-        validateRequest(request);
         return ResponseEntity.ok(productDiscountCrudUseCase.update(id, request));
     }
 
@@ -66,42 +65,6 @@ public class ProductDiscountController {
         return ResponseEntity.ok(productDiscountCrudUseCase.getAll(filters, companyId));
     }
 
-    private void validateRequest(ProductDiscountSaveAndUpdateDto request) {
-        List<String> missingFields = new ArrayList<>();
-        List<String> invalidFields = new ArrayList<>();
+    
 
-        if (request.getProductId() == null) {
-            missingFields.add("productId");
-        } else if (request.getProductId() <= 0) {
-            invalidFields.add("productId");
-        }
-
-        if (request.getCompanyId() == null) {
-            missingFields.add("companyId");
-        } else if (request.getCompanyId() <= 0) {
-            invalidFields.add("companyId");
-        }
-
-        if (request.getDiscountAmount() == null) {
-            missingFields.add("discountAmount");
-        } else if (request.getDiscountAmount() <= 0) {
-            invalidFields.add("discountAmount");
-        }
-
-        if (request.getStartAt() == null) {
-            missingFields.add("startAt");
-        }
-
-        if (request.getEndAt() == null) {
-            missingFields.add("endAt");
-        }
-
-        if (!missingFields.isEmpty()) {
-            throw new GenericException("Campos obligatorios faltantes: " + String.join(", ", missingFields), HttpStatus.BAD_REQUEST);
-        }
-
-        if (!invalidFields.isEmpty()) {
-            throw new GenericException("Campos con valor invalido: " + String.join(", ", invalidFields), HttpStatus.BAD_REQUEST);
-        }
-    }
 }

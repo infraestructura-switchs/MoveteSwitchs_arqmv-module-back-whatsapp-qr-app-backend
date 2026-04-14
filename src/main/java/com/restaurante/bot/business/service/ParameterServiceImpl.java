@@ -3,7 +3,8 @@ package com.restaurante.bot.business.service;
 import com.restaurante.bot.business.interfaces.ParameterService;
 import com.restaurante.bot.dto.ParameterRequestDTO;
 import com.restaurante.bot.dto.ParameterResponseDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Parameter;
 import com.restaurante.bot.repository.ParameterRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,28 +37,28 @@ public class ParameterServiceImpl implements ParameterService, com.restaurante.b
     @Override
     public ParameterResponseDTO getParameterById(Long id) {
         Parameter parameter = parameterRepository.findById(id)
-                .orElseThrow(() -> new GenericException("Parameter not found", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Parameter not found"));
         return mapToResponseDTO(parameter);
     }
 
     @Override
     public ParameterResponseDTO getParameterByName(String name) {
         Parameter parameter = parameterRepository.findByName(name)
-                .orElseThrow(() -> new GenericException("Parameter not found", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Parameter not found"));
         return mapToResponseDTO(parameter);
     }
 
     @Override
     public ParameterResponseDTO getParameterByNameAndCompanyId(String name, Long companyId) {
         Parameter parameter = parameterRepository.findByNameAndCompanyId(name, companyId)
-                .orElseThrow(() -> new GenericException("Parameter not found", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Parameter not found"));
         return mapToResponseDTO(parameter);
     }
 
     @Override
     public ParameterResponseDTO createParameter(ParameterRequestDTO request) {
         if (parameterRepository.findByNameAndCompanyId(request.getName(), request.getCompanyId()).isPresent()) {
-            throw new GenericException("Parameter with this name already exists", HttpStatus.CONFLICT);
+            throw new DomainException(DomainErrorCode.CONFLICT, "Parameter with this name already exists");
         }
 
         Parameter parameter = new Parameter();
@@ -73,12 +74,12 @@ public class ParameterServiceImpl implements ParameterService, com.restaurante.b
     @Override
     public ParameterResponseDTO updateParameter(Long id, ParameterRequestDTO request) {
         Parameter parameter = parameterRepository.findById(id)
-                .orElseThrow(() -> new GenericException("Parameter not found", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Parameter not found"));
 
         // Check if name already exists for this company (excluding current parameter)
         if (!parameter.getName().equals(request.getName()) && 
             parameterRepository.findByNameAndCompanyId(request.getName(), request.getCompanyId()).isPresent()) {
-            throw new GenericException("Parameter with this name already exists", HttpStatus.CONFLICT);
+            throw new DomainException(DomainErrorCode.CONFLICT, "Parameter with this name already exists");
         }
 
         parameter.setName(request.getName());
@@ -93,7 +94,7 @@ public class ParameterServiceImpl implements ParameterService, com.restaurante.b
     @Override
     public void deleteParameter(Long id) {
         if (!parameterRepository.existsById(id)) {
-            throw new GenericException("Parameter not found", HttpStatus.NOT_FOUND);
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "Parameter not found");
         }
         parameterRepository.deleteById(id);
     }

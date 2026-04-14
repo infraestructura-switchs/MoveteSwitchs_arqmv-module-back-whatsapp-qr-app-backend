@@ -6,6 +6,8 @@ import com.restaurante.bot.business.interfaces.LoginService;
 import com.restaurante.bot.business.interfaces.LoginStrategy;
 import com.restaurante.bot.dto.*;
 import lombok.RequiredArgsConstructor;
+import com.restaurante.bot.util.StatusConstants;
+import com.restaurante.bot.util.SecurityConstants;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +48,7 @@ public class UserApplicationService implements UserUseCase {
         userEntity.setName(dto.getName());
         userEntity.setEmail(dto.getEmail());
         userEntity.setLogin(dto.getLogin());
-        userEntity.setStatus(com.restaurante.bot.util.Constants.ACTIVE_STATUS);
+        userEntity.setStatus(StatusConstants.ACTIVE_STATUS);
         // relationships
         // userEntity.setRol(...);
         // userEntity.setPosition(...);
@@ -58,7 +60,7 @@ public class UserApplicationService implements UserUseCase {
             String encoded = new com.restaurante.bot.util.Utils().bcryptEncryptor(dto.getPassword());
             userEntity.setPassword(encoded);
         } else {
-            String defaultPass = new com.restaurante.bot.util.Utils().bcryptEncryptor(com.restaurante.bot.util.Constants.DEFAULT_PASSWORD);
+            String defaultPass = new com.restaurante.bot.util.Utils().bcryptEncryptor(SecurityConstants.DEFAULT_PASSWORD);
             userEntity.setPassword(defaultPass);
         }
 
@@ -105,7 +107,7 @@ public class UserApplicationService implements UserUseCase {
     @Transactional
     public boolean delete(Long id) {
         return userRepo.findById(id).map(u -> {
-            u.setStatus(com.restaurante.bot.util.Constants.INACTIVE_STATUS);
+            u.setStatus(StatusConstants.INACTIVE_STATUS);
             userRepo.save(u);
             return true;
         }).orElse(false);
@@ -116,12 +118,12 @@ public class UserApplicationService implements UserUseCase {
         // transform filters to page request and delegate
         int page = Integer.parseInt(filters.getOrDefault("page", "0"));
         int size = Integer.parseInt(filters.getOrDefault("size", "5"));
-        String orders = filters.getOrDefault("orders", "ASC");
+        String orders = filters.getOrDefault("orders", com.restaurante.bot.util.SortConstants.ASC);
         String sortBy = filters.getOrDefault("sortBy", "userId");
         org.springframework.data.domain.Sort.Direction direction = org.springframework.data.domain.Sort.Direction.fromString(orders);
         org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(direction, sortBy);
         org.springframework.data.domain.Pageable pg = org.springframework.data.domain.PageRequest.of(page, size, sort);
-        return userRepo.findByStatus(filters.getOrDefault("status", com.restaurante.bot.util.Constants.ACTIVE_STATUS), pg)
+        return userRepo.findByStatus(filters.getOrDefault("status", StatusConstants.ACTIVE_STATUS), pg)
                 .map(this::mapUserToGetAllDto);
     }
 
@@ -136,7 +138,7 @@ public class UserApplicationService implements UserUseCase {
 
     @Override
     public List<GgpUserGetAllDto> getAllWithoutPage(Map<String, String> filters) {
-        List<com.restaurante.bot.model.User> users = userRepo.findByStatus(filters.getOrDefault("status", com.restaurante.bot.util.Constants.ACTIVE_STATUS));
+        List<com.restaurante.bot.model.User> users = userRepo.findByStatus(filters.getOrDefault("status", StatusConstants.ACTIVE_STATUS));
         return users.stream().map(this::mapUserToGetAllDto).toList();
     }
 

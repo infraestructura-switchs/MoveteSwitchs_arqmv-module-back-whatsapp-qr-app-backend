@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import com.restaurante.bot.util.StatusConstants;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class LandingTemplateApplicationService implements LandingTemplateUseCase
     public LandingTemplateRequest save(LandingTemplateRequest request) {
         LandingTemplate entity = new LandingTemplate();
         entity.setName(request.getName());
-        entity.setStatus(request.getStatus() == null ? "ACTIVE" : request.getStatus());
+        entity.setStatus(request.getStatus() == null ? StatusConstants.ACTIVE_STATUS : request.getStatus());
         LandingTemplate saved = repository.save(entity);
 
         return LandingTemplateRequest.builder()
@@ -48,7 +49,7 @@ public class LandingTemplateApplicationService implements LandingTemplateUseCase
     public Boolean delete(Long id) {
         if (repository.existsById(id)) {
             LandingTemplate lt = repository.findById(id).orElseThrow();
-            lt.setStatus("INACTIVE");
+            lt.setStatus(StatusConstants.INACTIVE_STATUS);
             repository.save(lt);
             return true;
         }
@@ -96,7 +97,7 @@ public class LandingTemplateApplicationService implements LandingTemplateUseCase
     public Page<LandingTemplateResponseDTO> getAll(Map<String, String> customQuery) {
         int page = Integer.parseInt(customQuery.getOrDefault("page", "0"));
         int size = Integer.parseInt(customQuery.getOrDefault("size", "10"));
-        String orders = customQuery.getOrDefault("orders", "ASC");
+        String orders = customQuery.getOrDefault("orders", com.restaurante.bot.util.SortConstants.ASC);
         String sortBy = customQuery.getOrDefault("sortBy", "landingTemplateId");
         return getAllPageLandingTemplate(page, size, orders, sortBy);
     }

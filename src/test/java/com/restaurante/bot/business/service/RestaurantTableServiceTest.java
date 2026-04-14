@@ -1,7 +1,8 @@
 package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.ChangeStatusTableDTO;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.model.RestaurantTable;
 import com.restaurante.bot.repository.CompanyRepository;
@@ -72,11 +73,11 @@ class RestaurantTableServiceTest {
         when(companyRepository.findByExternalCompanyId(any())).thenReturn(company);
         when(restaurantTableRepository.findByTableNumberAndCompanyId(10L, 56L)).thenReturn(null);
 
-        GenericException exception = assertThrows(
-                GenericException.class,
+        DomainException exception = assertThrows(
+                DomainException.class,
                 () -> restaurantTableService.changeStatusOcuped(request));
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(DomainErrorCode.INVALID_REQUEST, exception.getCode());
         assertEquals("Mesa no resgistrada en la base de datos", exception.getMessage());
         verify(restaurantTableRepository, never()).save(any(RestaurantTable.class));
         verify(notificationService, never()).sendNotificationToClient(any(), any(), any());

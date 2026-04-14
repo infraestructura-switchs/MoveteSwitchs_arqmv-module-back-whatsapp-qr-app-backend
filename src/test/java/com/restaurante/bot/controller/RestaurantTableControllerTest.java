@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,10 +58,13 @@ class RestaurantTableControllerTest {
 
     @Test
     void addTable_ShouldReturnBadRequest_WhenTableNumberIsNotPositive() throws Exception {
+        when(restaurantTableInterface.addTable(0L))
+            .thenThrow(new DomainException(DomainErrorCode.INVALID_REQUEST, "Campos con valor invalido: tableNumber"));
+
         mockMvc.perform(post("/api/back-whatsapp-qr-app/restauranttable/createTable")
-                .param("tableNumber", "0"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Campos con valor invalido: tableNumber"));
+            .param("tableNumber", "0"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Campos con valor invalido: tableNumber"));
     }
 
         @Test

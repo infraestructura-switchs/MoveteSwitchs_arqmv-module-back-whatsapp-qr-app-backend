@@ -1,7 +1,8 @@
 package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.WaiterCallRequest;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.application.ports.outgoing.RestaurantTableLookupPort;
 import com.restaurante.bot.application.ports.outgoing.WaiterCallRepositoryPort;
 import com.restaurante.bot.model.RestaurantTable;
@@ -94,9 +95,10 @@ class WaiterCallServiceTest {
         when(restaurantTableRepository.findByTableId(1)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(GenericException.class, () -> {
+        DomainException ex = assertThrows(DomainException.class, () -> {
             waiterCallService.createWaiterCall(mockRequest);
         });
+        assertEquals(DomainErrorCode.NOT_FOUND, ex.getCode());
         
         verify(restaurantTableRepository, times(1)).findByTableId(1);
         verify(waiterCallRepository, never()).save(any());

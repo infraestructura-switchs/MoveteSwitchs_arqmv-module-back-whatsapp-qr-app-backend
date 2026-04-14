@@ -72,10 +72,15 @@ class ProductoCrudControllerTest {
 
     @Test
     void createProduct_ShouldReturnBadRequest_WhenRequiredFieldsAreMissing() throws Exception {
+        when(productCrudUseCase.save(any(ProductSaveAndUpdateDto.class)))
+            .thenThrow(new com.restaurante.bot.domain.exception.DomainException(
+                com.restaurante.bot.domain.exception.DomainErrorCode.INVALID_REQUEST,
+                "Campos obligatorios faltantes: productName, price, companyId, categoryId, preparationTime"));
+
         mockMvc.perform(post("/api/back-whatsapp-qr-app/admin/product/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
-                .andExpect(status().isBadRequest())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{}"))
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: productName, price, companyId, categoryId, preparationTime"));
     }
 
@@ -113,10 +118,15 @@ class ProductoCrudControllerTest {
 
     @Test
     void updateProduct_ShouldReturnBadRequest_WhenRequiredFieldsAreMissing() throws Exception {
+        when(productCrudUseCase.update(any(Long.class), any(ProductSaveAndUpdateDto.class)))
+            .thenThrow(new com.restaurante.bot.domain.exception.DomainException(
+                com.restaurante.bot.domain.exception.DomainErrorCode.INVALID_REQUEST,
+                "Campos obligatorios faltantes: productName, price, companyId, categoryId, preparationTime"));
+
         mockMvc.perform(put("/api/back-whatsapp-qr-app/admin/product/update/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
-                .andExpect(status().isBadRequest())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{}"))
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value("Campos obligatorios faltantes: productName, price, companyId, categoryId, preparationTime"));
     }
 
@@ -128,11 +138,15 @@ class ProductoCrudControllerTest {
         request.setCompanyId(0L);
         request.setCategoryId(0L);
         request.setPreparationTime(0);
+        when(productCrudUseCase.update(any(Long.class), any(ProductSaveAndUpdateDto.class)))
+            .thenThrow(new com.restaurante.bot.domain.exception.DomainException(
+                com.restaurante.bot.domain.exception.DomainErrorCode.INVALID_REQUEST,
+                "Campos con valor invalido: price, companyId, categoryId, preparationTime"));
 
         mockMvc.perform(put("/api/back-whatsapp-qr-app/admin/product/update/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value("Campos con valor invalido: price, companyId, categoryId, preparationTime"));
     }
 
@@ -144,11 +158,15 @@ class ProductoCrudControllerTest {
         request.setCompanyId(0L);
         request.setCategoryId(0L);
         request.setPreparationTime(0);
+        when(productCrudUseCase.save(any(ProductSaveAndUpdateDto.class)))
+            .thenThrow(new com.restaurante.bot.domain.exception.DomainException(
+                com.restaurante.bot.domain.exception.DomainErrorCode.INVALID_REQUEST,
+                "Campos con valor invalido: price, companyId, categoryId, preparationTime"));
 
         mockMvc.perform(post("/api/back-whatsapp-qr-app/admin/product/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value("Campos con valor invalido: price, companyId, categoryId, preparationTime"));
     }
 

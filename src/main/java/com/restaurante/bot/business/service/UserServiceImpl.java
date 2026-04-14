@@ -5,8 +5,10 @@ import com.restaurante.bot.dto.*;
 import com.restaurante.bot.exception.CustomErrorException;
 import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.*;
-import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
+import com.restaurante.bot.util.SecurityConstants;
 import com.restaurante.bot.util.ObjectMapperUtils;
+import com.restaurante.bot.util.SearchDTOConverter;
 import com.restaurante.bot.util.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +81,7 @@ public class UserServiceImpl implements UserService {
         entityUserRepo.setName(userDto.getName());
         entityUserRepo.setEmail(userDto.getEmail());
         entityUserRepo.setLogin(userDto.getLogin());
-        entityUserRepo.setStatus(Constants.ACTIVE_STATUS);
+        entityUserRepo.setStatus(StatusConstants.ACTIVE_STATUS);
         entityUserRepo.setRol(ggpRolRepo);
         entityUserRepo.setPosition(ggpPositionRepo);
         entityUserRepo.setCompany(ggpCompanyRepo);
@@ -89,7 +91,7 @@ public class UserServiceImpl implements UserService {
             String encodedPassword = utils.bcryptEncryptor(userDto.getPassword());
             entityUserRepo.setPassword(encodedPassword);
         } else {
-            entityUserRepo.setPassword(utils.bcryptEncryptor(Constants.DEFAULT_PASSWORD));
+            entityUserRepo.setPassword(utils.bcryptEncryptor(SecurityConstants.DEFAULT_PASSWORD));
         }
 
         User newEntityUserRepo = iRepository.save(entityUserRepo);
@@ -158,7 +160,7 @@ public class UserServiceImpl implements UserService {
                 objectDtoVo = new UserDto();
                 BeanUtils.copyProperties(objectOptional.get(), objectDtoVo);
                 User objectTmp = objectOptional.get();
-                objectTmp.setStatus(Constants.INACTIVE_STATUS);
+                objectTmp.setStatus(StatusConstants.INACTIVE_STATUS);
                 iRepository.save(objectTmp);
                 return true;
             }
@@ -181,11 +183,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<GgpUserGetAllDto> getAll(Map<String, String> customQuery) {
-        String orders = "ASC";
+        String orders = com.restaurante.bot.util.SortConstants.ASC;
         String sortBy = "userId";
         int page = 0;
         int size = 5;
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE_STATUS;
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
         }
@@ -218,12 +220,12 @@ public class UserServiceImpl implements UserService {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pagingSort = PageRequest.of(page, size, sort);
 
-        return mapPageUserDto(iRepository.findByStatus(Constants.ACTIVE_STATUS, pagingSort), pagingSort);
+        return mapPageUserDto(iRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pagingSort), pagingSort);
     }
 
     @Override
     public List<GgpUserGetAllDto> getAllWithOutPage(Map<String, String> customQuery) {
-        String status = Constants.ACTIVE_STATUS;
+        String status = StatusConstants.ACTIVE_STATUS;
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
         }
@@ -250,79 +252,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<GgpUserGetAllDto> searchCustom(Map<String, String> customQuery) {
-        String orders = "ASC";
-        String sortBy = "userId";
-        int page = 0;
-        int size = 5;
-        String status = Constants.ACTIVE_STATUS;
-        Long id = null;
-        String name = null;
-        String email = null;
-        String login = null;
-        String companyName = null;
-        String positionDescription = null;
-        String areaDescription = null;
-        if (customQuery.containsKey("orders")) {
-            orders = customQuery.get("orders");
-        }
+        // Convert Map parameters to UserSearchDTO for type-safe access
+        UserSearchDTO searchRequest = SearchDTOConverter.toUserSearch(customQuery);
+        searchRequest.validate();
 
-        if (customQuery.containsKey("sortBy")) {
-            sortBy = customQuery.get("sortBy");
-        }
+        org.springframework.data.domain.Sort.Direction direction = 
+            org.springframework.data.domain.Sort.Direction.fromString(searchRequest.getOrders());
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(direction, searchRequest.getSortBy());
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            searchRequest.getPage(), 
+            searchRequest.getSize(), 
+            sort);
 
-        if (customQuery.containsKey("page")) {
-            page = Integer.parseInt(customQuery.get("page"));
-        }
-
-        if (customQuery.containsKey("size")) {
-            size = Integer.parseInt(customQuery.get("size"));
-        }
-
-        if (customQuery.containsKey("status")) {
-            status = customQuery.get("status");
-        }
-        if (customQuery.containsKey("userId")) {
-            // name = "%" + customQuery.get("name") + "%";
-            id = Long.valueOf(customQuery.get("userId"));
-        }
-        if (customQuery.containsKey("name")) {
-            // name = "%" + customQuery.get("name") + "%";
-            name = customQuery.get("name");
-        }
-
-        if (customQuery.containsKey("email")) {
-            // email = "%" + customQuery.get("email") + "%";
-            email = customQuery.get("email");
-        }
-
-        if (customQuery.containsKey("login")) {
-            // login = "%" + customQuery.get("login") + "%";
-            login = customQuery.get("login");
-        }
-
-        if (customQuery.containsKey("companyName")) {
-            // login = "%" + customQuery.get("companyName") + "%";
-            companyName = customQuery.get("companyName");
-        }
-
-        if (customQuery.containsKey("description")) {
-            // login = "%" + customQuery.get("positionDescription") + "%";
-            positionDescription = customQuery.get("description");
-        }
-
-        if (customQuery.containsKey("areaDescription")) {
-            // login = "%" + customQuery.get("positionDescription") + "%";
-            areaDescription = customQuery.get("areaDescription");
-        }
-
-        Sort.Direction direction = Sort.Direction.fromString(orders);
-        Sort sort = Sort.by(direction, sortBy);
-
-        Pageable pagingSort = PageRequest.of(page, size, sort);
-        return mapPageUserDto(iRepository
-                .findByUserIdOrNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrLoginContainingIgnoreCaseOrCompany_CompanyNameContainingIgnoreCaseOrPosition_DescriptionContainingIgnoreCaseOrArea_DescriptionContainingIgnoreCaseOrAndStatus(
-                        id, name, email, login, companyName, positionDescription, areaDescription, status, pagingSort),
-                pagingSort);
+        // Use the new refactored searchUsers() method from repository
+        return mapPageUserDto(
+            iRepository.searchUsers(
+                searchRequest.getUserId(),
+                searchRequest.getName(),
+                searchRequest.getEmail(),
+                searchRequest.getLogin(),
+                searchRequest.getCompanyName(),
+                searchRequest.getPositionDescription(),
+                searchRequest.getAreaDescription(),
+                searchRequest.getStatus(),
+                pageable),
+            pageable);
     }
 
     @Override
@@ -337,7 +291,7 @@ public class UserServiceImpl implements UserService {
 
         Random random = new Random();
         User entityUser = objectOptional.get();
-        String password = Constants.PASSWORD_DEFUULT_PREFIX + "+" + random.nextInt(10);
+        String password = SecurityConstants.PASSWORD_DEFAULT_PREFIX + "+" + random.nextInt(10);
         String encodedPassword = utils.bcryptEncryptor(password);
         entityUser.setPassword(encodedPassword);
 

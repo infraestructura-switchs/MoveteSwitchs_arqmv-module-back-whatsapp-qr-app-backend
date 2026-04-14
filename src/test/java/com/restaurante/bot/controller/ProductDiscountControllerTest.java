@@ -74,6 +74,11 @@ class ProductDiscountControllerTest {
 
     @Test
     void createDiscount_ShouldReturnBadRequest_WhenRequiredFieldsAreMissing() throws Exception {
+        when(productDiscountCrudUseCase.save(any(ProductDiscountSaveAndUpdateDto.class)))
+                .thenThrow(new com.restaurante.bot.domain.exception.DomainException(
+                        com.restaurante.bot.domain.exception.DomainErrorCode.INVALID_REQUEST,
+                        "Campos obligatorios faltantes: productId, companyId, discountAmount, startAt, endAt"));
+
         mockMvc.perform(post("/api/back-whatsapp-qr-app/admin/product-discount/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))

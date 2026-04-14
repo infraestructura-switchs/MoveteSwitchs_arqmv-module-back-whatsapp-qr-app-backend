@@ -15,7 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +38,13 @@ public class CityService implements CityInterface, CityUseCase {
     @Override
     public City get(Long id) {
         return cityRepository.findById(id)
-                .orElseThrow(() -> new GenericException("ciudad no encontrada", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "ciudad no encontrada"));
     }
 
     @Override
     public City update(Long id, City city) {
         City existing = cityRepository.findById(id)
-                .orElseThrow(() -> new GenericException("ciudad no encontrada", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "ciudad no encontrada"));
 
         if (city.getName() != null) existing.setName(city.getName());
         if (city.getStatus() != null) existing.setStatus(city.getStatus());

@@ -7,12 +7,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtUtilUser {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
@@ -52,12 +55,31 @@ public class JwtUtilUser {
     }
 
     public boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            Date expiration = extractExpiration(token);
+            if (expiration == null) {
+                log.warn("Token has no expiration date");
+                return true;  // Considerar como expirado por defecto
+            }
+            return expiration.before(new Date());
+        } catch (Exception e) {
+            log.warn("Error validating token expiration: {}", e.getMessage());
+            return true;  // Token expirado por defecto en caso de error
+        }
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            final String username = extractUsername(token);
+            if (username == null) {
+                log.warn("Token has no username");
+                return false;
+            }
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (Exception e) {
+            log.warn("Token validation failed: {}", e.getMessage());
+            return false;
+        }
     }
 
 }

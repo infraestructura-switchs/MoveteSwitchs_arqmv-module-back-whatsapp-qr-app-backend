@@ -8,7 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.restaurante.bot.exception.GenericException;
+import com.restaurante.bot.domain.exception.DomainException;
+import com.restaurante.bot.domain.exception.DomainErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,7 +55,6 @@ public class CompanyController {
             .apiKey(apiKey)
             .build();
 
-        validateCreateCompanyRequest(companyRequest);
         CompanyRequest savedCompany = companyUseCase.save(companyRequest, logo);
         return ResponseEntity.ok(savedCompany);
         }
@@ -88,7 +88,6 @@ public class CompanyController {
                                                  @RequestPart(value = "logo", required = false) MultipartFile logo) {
         log.info("Iniciando actualización de empresa con ID: {}", companyId);
         companyRequest.setCompanyId(companyId);
-        validateUpdateCompanyRequest(companyRequest);
         CompanyRequest updatedCompany = companyUseCase.update(companyRequest, logo);
         return ResponseEntity.ok(updatedCompany);
     }
@@ -104,49 +103,11 @@ public class CompanyController {
                 .apiKey(apiKey)
                 .build();
 
-        validateUpdateCompanyRequest(companyRequest);
         CompanyRequest updatedCompany = companyUseCase.update(companyRequest, logo);
         return ResponseEntity.ok(updatedCompany);
     }
 
-    private void validateCreateCompanyRequest(CompanyRequest companyRequest) {
-        List<String> missingFields = new ArrayList<>();
-
-        addMissingField(missingFields, "companyName", companyRequest.getNameCompany());
-        addMissingField(missingFields, "longitude", companyRequest.getLongitude());
-        addMissingField(missingFields, "latitude", companyRequest.getLatitude());
-        addMissingField(missingFields, "apiKey", companyRequest.getApiKey());
-
-        if (companyRequest.getBaseValue() == null) {
-            missingFields.add("baseValue");
-        }
-        if (companyRequest.getAdditionalValue() == null) {
-            missingFields.add("additionalValue");
-        }
-        if (companyRequest.getCityId() == null) {
-            missingFields.add("cityId");
-        }
-
-        throwIfMissingFields(missingFields);
-    }
-
-    private void validateUpdateCompanyRequest(CompanyRequest companyRequest) {
-        List<String> missingFields = new ArrayList<>();
-        addMissingField(missingFields, "apiKey", companyRequest.getApiKey());
-        throwIfMissingFields(missingFields);
-    }
-
-    private void addMissingField(List<String> missingFields, String fieldName, String value) {
-        if (value == null || value.trim().isEmpty()) {
-            missingFields.add(fieldName);
-        }
-    }
-
-    private void throwIfMissingFields(List<String> missingFields) {
-        if (!missingFields.isEmpty()) {
-            throw new GenericException("Campos obligatorios faltantes: " + String.join(", ", missingFields), HttpStatus.BAD_REQUEST);
-        }
-    }
+    
 
     @GetMapping("/get-all")
     public ResponseEntity<Page<CompanyResponseDTO>> getAll(@RequestParam Map<String, String> customQuery) {
@@ -156,7 +117,7 @@ public class CompanyController {
     @GetMapping
     public ResponseEntity<Page<CompanyResponseDTO>> getAll(@RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size,
-                                                           @RequestParam(defaultValue = "ASC") String orders,
+                                                           @RequestParam(defaultValue = com.restaurante.bot.util.SortConstants.ASC) String orders,
                                                            @RequestParam(defaultValue = "id") String sortBy) {
         return new ResponseEntity<>(companyUseCase.getAllPageCompany(page, size, orders, sortBy), HttpStatus.OK);
     }
