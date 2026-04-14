@@ -34,19 +34,23 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     @Override
     @Transactional
     public ProductDiscountDto save(ProductDiscountCreateDto productDiscountDto) {
-        Product product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
-        validateDiscountDates(productDiscountDto);
-        validateDiscountAmount(productDiscountDto.getDiscountAmount(), product.getPrice());
+        // productId es opcional
+        Product product = null;
+        if (productDiscountDto.getProductId() != null) {
+            product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
+            validateDiscountAmount(productDiscountDto.getDiscountAmount(), product.getPrice());
+        }
+        validateDiscountDates(productDiscountDto.getStartAt(), productDiscountDto.getEndAt());
 
-            ProductDiscount entity = ProductDiscount.builder()
-                .productId(productDiscountDto.getProductId())
-                .companyId(productDiscountDto.getCompanyId())
-                .description(productDiscountDto.getDescription())
-                .discountAmount(productDiscountDto.getDiscountAmount())
-                .startAt(productDiscountDto.getStartAt())
-                .endAt(productDiscountDto.getEndAt())
-                .status(resolveStatus(productDiscountDto.getStatus()))
-                .build();
+        ProductDiscount entity = ProductDiscount.builder()
+            .productId(productDiscountDto.getProductId())
+            .companyId(productDiscountDto.getCompanyId())
+            .description(productDiscountDto.getDescription())
+            .discountAmount(productDiscountDto.getDiscountAmount())
+            .startAt(productDiscountDto.getStartAt())
+            .endAt(productDiscountDto.getEndAt())
+            .status(resolveStatus(productDiscountDto.getStatus()))
+            .build();
 
         return productDiscountSupport.toDto(productDiscountRepository.save(entity));
     }
@@ -118,7 +122,11 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     }
 
     private void validateDiscountDates(ProductDiscountSaveAndUpdateDto dto) {
-        if (dto.getEndAt().isBefore(dto.getStartAt())) {
+        validateDiscountDates(dto.getStartAt(), dto.getEndAt());
+    }
+
+    private void validateDiscountDates(java.time.LocalDateTime startAt, java.time.LocalDateTime endAt) {
+        if (endAt.isBefore(startAt)) {
             throw new DomainException(DomainErrorCode.INVALID_REQUEST, "La vigencia del descuento es invalida: endAt debe ser mayor o igual a startAt");
         }
     }

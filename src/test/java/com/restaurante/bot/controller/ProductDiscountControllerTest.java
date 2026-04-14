@@ -3,7 +3,7 @@ package com.restaurante.bot.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurante.bot.application.ports.incoming.ProductDiscountCrudUseCase;
 import com.restaurante.bot.dto.ProductDiscountDto;
-import com.restaurante.bot.dto.ProductDiscountSaveAndUpdateDto;
+import com.restaurante.bot.dto.ProductDiscountCreateDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,7 +46,7 @@ class ProductDiscountControllerTest {
 
     @Test
     void createDiscount_ShouldReturnOk() throws Exception {
-        ProductDiscountSaveAndUpdateDto request = ProductDiscountSaveAndUpdateDto.builder()
+        ProductDiscountCreateDto request = ProductDiscountCreateDto.builder()
                 .productId(8L)
                 .companyId(273L)
                 .discountAmount(5000.0)
@@ -62,7 +62,7 @@ class ProductDiscountControllerTest {
                 .status("ACTIVE")
                 .build();
 
-        when(productDiscountCrudUseCase.save(any(ProductDiscountSaveAndUpdateDto.class))).thenReturn(response);
+        when(productDiscountCrudUseCase.save(any(ProductDiscountCreateDto.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/back-whatsapp-qr-app/admin/product-discount/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -74,7 +74,7 @@ class ProductDiscountControllerTest {
 
     @Test
     void createDiscount_ShouldReturnBadRequest_WhenRequiredFieldsAreMissing() throws Exception {
-        when(productDiscountCrudUseCase.save(any(ProductDiscountSaveAndUpdateDto.class)))
+        when(productDiscountCrudUseCase.save(any(ProductDiscountCreateDto.class)))
                 .thenThrow(new com.restaurante.bot.domain.exception.DomainException(
                         com.restaurante.bot.domain.exception.DomainErrorCode.INVALID_REQUEST,
                         "Campos obligatorios faltantes: productId, companyId, discountAmount, startAt, endAt"));
