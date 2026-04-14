@@ -76,7 +76,7 @@ class CompanyControllerTest {
             .andExpect(status().isServiceUnavailable())
             .andExpect(jsonPath("$.status").value(503))
             .andExpect(jsonPath("$.error").value("Service Unavailable"))
-            .andExpect(jsonPath("$.message").value("No se pudo conectar a la base de datos. Intente nuevamente más tarde."));
+            .andExpect(jsonPath("$.message").value("El servicio no está disponible en este momento. Intente nuevamente más tarde."));
     }
 
     // externalId invalid test removed: no longer applicable after refactor
