@@ -1,0 +1,79 @@
+﻿commit b3655020fee4be5ef625d045158f61f3a6d28cc7
+Author: C0576P10N105\LENOVO <spidermejo7@gmail.com>
+Date:   Tue Mar 3 22:48:43 2026 -0500
+
+    primer version
+
+diff --git a/src/main/java/com/restaurante/bot/model/Category.java b/src/main/java/com/restaurante/bot/model/Category.java
+index ab81c66..051936a 100644
+--- a/src/main/java/com/restaurante/bot/model/Category.java
++++ b/src/main/java/com/restaurante/bot/model/Category.java
+@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
+ public class Category {
+ 
+     @Id
+-    @SequenceGenerator(name = "CATEGORY-SEQ", sequenceName = "CATEGORY_SEQ", allocationSize = 1)
+-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CATEGORY-SEQ")
+     @Column(name = "category_id")
+     private Long categoryId;
+ 
+
+commit 6a84bb50a33dbd9a73c1fbde2af1fda511914884
+Author: infraestructura-switchs <infraestructura-switchs@hotmail.com>
+Date:   Tue Feb 17 21:08:13 2026 -0500
+
+    primera version (#1)
+    
+    Co-authored-by: C0576P10N105\LENOVO <spidermejo7@gmail.com>
+
+diff --git a/src/main/java/com/restaurante/bot/model/Category.java b/src/main/java/com/restaurante/bot/model/Category.java
+new file mode 100644
+index 0000000..ab81c66
+--- /dev/null
++++ b/src/main/java/com/restaurante/bot/model/Category.java
+@@ -0,0 +1,44 @@
++package com.restaurante.bot.model;
++
++import jakarta.persistence.*;
++import lombok.AllArgsConstructor;
++import lombok.Data;
++import lombok.NoArgsConstructor;
++import org.hibernate.annotations.CreationTimestamp;
++import org.hibernate.annotations.UpdateTimestamp;
++
++import java.time.LocalDateTime;
++
++@Entity
++@Data
++@NoArgsConstructor
++@AllArgsConstructor
++@Table(name = "category")
++public class Category {
++
++    @Id
++    @SequenceGenerator(name = "CATEGORY-SEQ", sequenceName = "CATEGORY_SEQ", allocationSize = 1)
++    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CATEGORY-SEQ")
++    @Column(name = "category_id")
++    private Long categoryId;
++
++    @Column(name = "name", nullable = false)
++    private String name;
++
++    @Column(name = "external_id")
++    private Long externalId;
++
++    @Column(name = "status", nullable = false)
++    private String status;
++
++    @Column(name = "company_id", nullable = false)
++    private Long companyId;
++
++    @CreationTimestamp
++    @Column(name = "created_at", updatable = false)
++    private LocalDateTime createdAt;
++
++    @UpdateTimestamp
++    @Column(name = "updated_at")
++    private LocalDateTime updatedAt;
++}
+\ No newline at end of file

@@ -68,6 +68,15 @@ if ([string]::IsNullOrWhiteSpace($oraclePassword)) {
     Write-Warning "ORACLE_DATASOURCE_PASSWORD is empty. Continuing with empty password."
 }
 
+$productsServiceUrl = [System.Environment]::GetEnvironmentVariable("PRODUCTS_SERVICE_URL", "Process")
+if ([string]::IsNullOrWhiteSpace($productsServiceUrl)) {
+    $productsServiceUrl = "https://gfvsgktksbutb3pdokevf6vhbi.apigateway.us-phoenix-1.oci.customer-oci.com/arq-prd-v3/"
+    [System.Environment]::SetEnvironmentVariable("PRODUCTS_SERVICE_URL", $productsServiceUrl, "Process")
+    Write-Host "PRODUCTS_SERVICE_URL not set. Using default: $productsServiceUrl"
+} else {
+    Write-Host "PRODUCTS_SERVICE_URL set to $productsServiceUrl"
+}
+
 if ($oracleUrl -notmatch '^jdbc:oracle:thin:@') {
     Write-Error "Invalid ORACLE_DATASOURCE_URL format. Expected it to start with 'jdbc:oracle:thin:@'. Current value: $oracleUrl"
     exit 1
