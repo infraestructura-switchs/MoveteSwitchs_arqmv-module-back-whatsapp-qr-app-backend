@@ -4,16 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurante.bot.api.dto.ProductDTO;
 import com.restaurante.bot.business.call.CallServiceHttp;
-import com.restaurante.bot.model.Category;
-import com.restaurante.bot.model.CategoryMapping;
-import com.restaurante.bot.model.GenericResponse;
-import com.restaurante.bot.model.ProductIntegration;
-import com.restaurante.bot.repository.CategoryMappingRepository;
-import com.restaurante.bot.repository.CategoryRepository;
-import com.restaurante.bot.repository.CompanyRepository;
-import com.restaurante.bot.repository.ProductIntegrationRepository;
-import com.restaurante.bot.repository.ProductRepository;
-import com.restaurante.bot.model.Product;
+import com.restaurante.bot.model.*;
+import com.restaurante.bot.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +27,7 @@ public class ProductIntegrationSyncService {
     private final ProductIntegrationRepository productIntegrationRepository;
     private final CategoryRepository categoryRepository;
     private final CategoryMappingRepository categoryMappingRepository;
+    private final CategoryIntegrationRepository categoryIntegrationRepository;
     private final ObjectMapper objectMapper;
     private final ProductRepository productRepository;
 
@@ -79,9 +72,11 @@ public class ProductIntegrationSyncService {
             return 0;
         }
 
+        Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
+
         int syncedCount = 0;
         for (ProductDTO productDTO : products) {
-            ProductIntegration integration = mapToProductIntegration(productDTO, externalCompanyId);
+            ProductIntegration integration = mapToProductIntegration(productDTO,company.getId(), externalCompanyId);
             integration = productIntegrationRepository.save(integration);
 
             Optional<Product> optionalProduct = productRepository.findByProductIntegrationId(integration.getProductIntegrationId());
@@ -98,7 +93,7 @@ public class ProductIntegrationSyncService {
                 newProduct.setOriginalPrice(integration.getOriginalPrice());
                 newProduct.setDescription(integration.getDescription());
                 newProduct.setCategoryId(integration.getCategoryId());
-                newProduct.setCompanyId(integration.getCompanyId());
+                newProduct.setCompanyId(company.getId());
                 newProduct.setStatus(StatusConstants.ACTIVE_STATUS);
                 newProduct.setImgProduct(integration.getImgProduct());
                 newProduct.setComments(integration.getComments());
@@ -115,13 +110,17 @@ public class ProductIntegrationSyncService {
         return syncedCount;
     }
 
-    private ProductIntegration mapToProductIntegration(ProductDTO productDTO, Long externalCompanyId) {
+    private ProductIntegration mapToProductIntegration(ProductDTO productDTO,Long companyId,
+                                                       Long externalCompanyId) {
         Integer arqProductId = Math.toIntExact(productDTO.getId());
         ProductIntegration integration = productIntegrationRepository
             .findByArqProductIdAndCompanyId(arqProductId, externalCompanyId)
             .orElse(new ProductIntegration());
 
-        Long categoryId = getOrCreateCategory(productDTO, externalCompanyId);
+        Long externalCategoryId = getOrCreateCategory(productDTO, companyId, externalCompanyId);
+
+        List<Category> categories = categoryRepository.findByCompanyIdAndExternalId(companyId, externalCategoryId);
+        Category category = categories.isEmpty() ? new Category() : categories.get(0);
 
         integration.setArqProductId(arqProductId);
         integration.setName(productDTO.getData().getDescripcion());
@@ -134,7 +133,7 @@ public class ProductIntegrationSyncService {
         integration.setCompanyId(externalCompanyId);
         integration.setStatus(StatusConstants.ACTIVE_STATUS);
         integration.setImgProduct(productDTO.getData().getImagenMenu());
-        integration.setCategoryId(categoryId);
+        integration.setCategoryId(category.getCategoryId());
         integration.setComments(serializeComments(productDTO));
         integration.setInformation(productDTO.getData().getInformacion());
         integration.setPreparationTime(productDTO.getData().getMinutosPreparacion() != null
@@ -177,38 +176,46 @@ public class ProductIntegrationSyncService {
         });
     }
 
-    private Long getOrCreateCategory(ProductDTO productDTO, Long externalCompanyId) {
+    private Long getOrCreateCategory(ProductDTO productDTO, Long companyId,
+                                     Long externalCompanyId) {
         String groupId = productDTO.getData().getGrupo().getIdGrupo();
         String groupDescription = productDTO.getData().getGrupo().getDescripcion().toUpperCase();
 
         Map<String, Long> companyMapping = dynamicCategoryMapping.computeIfAbsent(externalCompanyId, k -> new HashMap<>());
-        Long categoryId = companyMapping.get(groupId);
+        Long categoryIntegrationId = companyMapping.get(groupId);
 
-        if (categoryId == null) {
-            categoryId = companyMapping.get(groupDescription);
+        if (categoryIntegrationId == null) {
+            categoryIntegrationId = companyMapping.get(groupDescription);
         }
 
-        if (categoryId == null) {
-            Category category = new Category();
-            category.setName(groupDescription);
-            category.setExternalId(Long.parseLong(groupId));
-            category.setStatus(StatusConstants.ACTIVE_STATUS);
-            category.setCompanyId(externalCompanyId);
-            category = categoryRepository.save(category);
-            categoryId = category.getCategoryId();
+        if (categoryIntegrationId == null) {
+            CategoryIntegration categoryIntegrationDto = new CategoryIntegration();
+            categoryIntegrationDto.setName(groupDescription);
+            categoryIntegrationDto.setExternalId(Long.parseLong(groupId));
+            categoryIntegrationDto.setStatus(StatusConstants.ACTIVE_STATUS);
+            categoryIntegrationDto.setCompanyId(externalCompanyId);
+            CategoryIntegration categoryIntegration = categoryIntegrationRepository.save(categoryIntegrationDto);
+            categoryIntegrationId = categoryIntegration.getCategoryIntegrationId();
 
-            companyMapping.put(groupId, categoryId);
-            companyMapping.put(groupDescription, categoryId);
+            Category category = new Category();
+            category.setName(categoryIntegration.getName());
+            category.setExternalId(categoryIntegrationId);
+            category.setStatus(categoryIntegration.getStatus());
+            category.setCompanyId(companyId);
+            categoryRepository.save(category);
+
+            companyMapping.put(groupId, categoryIntegrationId);
+            companyMapping.put(groupDescription, categoryIntegrationId);
 
             CategoryMapping mapping = new CategoryMapping();
             mapping.setGroupId(Long.parseLong(groupId));
-            mapping.setCategoryId(categoryId);
+            mapping.setCategoryId(categoryIntegrationId);
             mapping.setCompanyId(externalCompanyId);
             mapping.setStatus(StatusConstants.ACTIVE_STATUS);
             categoryMappingRepository.save(mapping);
-            log.info("Nueva categoria creada para groupId {}: {}", groupId, categoryId);
+            log.info("Nueva categoria creada para groupId {}: {}", groupId, categoryIntegrationId);
         }
 
-        return categoryId;
+        return categoryIntegrationId;
     }
 }
