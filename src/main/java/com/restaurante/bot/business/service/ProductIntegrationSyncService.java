@@ -12,10 +12,13 @@ import com.restaurante.bot.repository.CategoryMappingRepository;
 import com.restaurante.bot.repository.CategoryRepository;
 import com.restaurante.bot.repository.CompanyRepository;
 import com.restaurante.bot.repository.ProductIntegrationRepository;
+import com.restaurante.bot.repository.ProductRepository;
+import com.restaurante.bot.model.Product;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +36,7 @@ public class ProductIntegrationSyncService {
     private final CategoryRepository categoryRepository;
     private final CategoryMappingRepository categoryMappingRepository;
     private final ObjectMapper objectMapper;
+    private final ProductRepository productRepository;
 
     private final Map<Long, Map<String, Long>> dynamicCategoryMapping = new HashMap<>();
 
@@ -78,7 +82,33 @@ public class ProductIntegrationSyncService {
         int syncedCount = 0;
         for (ProductDTO productDTO : products) {
             ProductIntegration integration = mapToProductIntegration(productDTO, externalCompanyId);
-            productIntegrationRepository.save(integration);
+            integration = productIntegrationRepository.save(integration);
+
+            Optional<Product> optionalProduct = productRepository.findByProductIntegrationId(integration.getProductIntegrationId());
+            if (optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                product.setName(integration.getName());
+                product.setPrice(integration.getPrice());
+                productRepository.save(product);
+            } else {
+                Product newProduct = new Product();
+                newProduct.setProductId(productDTO.getId());
+                newProduct.setName(integration.getName());
+                newProduct.setPrice(integration.getPrice());
+                newProduct.setOriginalPrice(integration.getOriginalPrice());
+                newProduct.setDescription(integration.getDescription());
+                newProduct.setCategoryId(integration.getCategoryId());
+                newProduct.setCompanyId(integration.getCompanyId());
+                newProduct.setStatus(StatusConstants.ACTIVE_STATUS);
+                newProduct.setImgProduct(integration.getImgProduct());
+                newProduct.setComments(integration.getComments());
+                newProduct.setInformation(integration.getInformation());
+                newProduct.setPreparationTime(integration.getPreparationTime());
+                newProduct.setProductIntegration(integration);
+                
+                productRepository.save(newProduct);
+            }
+
             syncedCount++;
         }
 

@@ -11,8 +11,9 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
   List<Product> findByCompanyIdOrderByNameAsc(Long companyId);
+
+  Optional<Product> findByProductIntegrationId(Long productIntegrationId);
 
   @Query("SELECT p FROM Product p WHERE p.productIntegration.arqProductId = :productId")
   Optional<Product> findByArqProductId(@Param("productId") Integer productId);

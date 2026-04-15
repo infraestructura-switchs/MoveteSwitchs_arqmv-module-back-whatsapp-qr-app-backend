@@ -34,12 +34,9 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     @Override
     @Transactional
     public ProductDiscountDto save(ProductDiscountCreateDto productDiscountDto) {
-        // productId es opcional
-        Product product = null;
-        if (productDiscountDto.getProductId() != null) {
-            product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
-            validateDiscountAmount(productDiscountDto.getDiscountAmount(), product.getPrice());
-        }
+        // productId es requerido y siempre se valida
+        Product product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
+        validateDiscountAmount(productDiscountDto.getDiscountAmount(), product.getPrice());
         validateDiscountDates(productDiscountDto.getStartAt(), productDiscountDto.getEndAt());
 
         ProductDiscount entity = ProductDiscount.builder()
