@@ -15,7 +15,6 @@ import com.restaurante.bot.util.JwtUtil;
 import com.restaurante.bot.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,10 +67,12 @@ public class LoginGGPServiceImpl implements LoginGGPService {
                 String sessionId = jwtUtilUser.generateSessionId();
                 objectDtoVo.setTokenDateExpired(new Date(System.currentTimeMillis() + EXPIRATION_TIME_LONG));
                 
-                // Safely retrieve company ID with error handling
+                // Safely retrieve company IDs with error handling
+                Long companyId = null;
                 Long externalCompanyId = null;
                 try {
                     if (objectOptional.get().getCompany() != null) {
+                        companyId = objectOptional.get().getCompany().getId();
                         externalCompanyId = objectOptional.get().getCompany().getExternalCompanyId();
                     }
                 } catch (jakarta.persistence.EntityNotFoundException e) {
@@ -79,17 +80,19 @@ public class LoginGGPServiceImpl implements LoginGGPService {
                         AuthenticationMessages.AUTHENTICATION_FAILED);
                 }
                 
-                if (externalCompanyId == null) {
+                if (companyId == null || externalCompanyId == null) {
                     throw new CustomErrorException(HttpStatus.UNAUTHORIZED, 
                         AuthenticationMessages.AUTHENTICATION_FAILED);
                 }
                 
                 token = jwtUtilUser.generateToken(
+                        companyId,
                         externalCompanyId,
                         objectOptional.get().getUserId(),
                         sessionId);
                 sessionRegistryService.registerSession(
                     sessionId,
+                    companyId,
                     externalCompanyId,
                     objectOptional.get().getUserId());
 

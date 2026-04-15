@@ -1,19 +1,14 @@
 package com.restaurante.bot.controller;
 
 import com.restaurante.bot.application.ports.incoming.SecurityUseCase;
-import com.restaurante.bot.dto.GenerateLinkIn;
-import com.restaurante.bot.dto.GenerateLinkResponseDTO;
-import com.restaurante.bot.dto.GenerateTokenRequestDTO;
-import com.restaurante.bot.dto.GenerateTokenResponseDTO;
-import com.restaurante.bot.dto.SessionValidationRequestDTO;
-import com.restaurante.bot.dto.SessionValidationResponseDTO;
+import com.restaurante.bot.dto.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
-import java.util.HashMap;
+
 import java.util.Map;
 
 /**

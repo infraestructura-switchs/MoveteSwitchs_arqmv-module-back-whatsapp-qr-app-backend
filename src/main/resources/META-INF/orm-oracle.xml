@@ -22,6 +22,15 @@
             </id>
         </attributes>
     </entity>
+    
+    <entity class="com.restaurante.bot.model.CategoryIntegration">
+        <attributes>
+            <id name="categoryIntegrationId">
+                <generated-value strategy="SEQUENCE" generator="category_integration_seq"/>
+                <sequence-generator name="category_integration_seq" sequence-name="category_integration_seq" allocation-size="1"/>
+            </id>
+        </attributes>
+    </entity>
 
     <entity class="com.restaurante.bot.model.CategoryMapping">
         <attributes>

@@ -86,13 +86,14 @@ public class SecurityApplicationService implements SecurityUseCase {
         
         String sessionId = jwtUtil.generateSessionId();
         String token = jwtUtil.generateToken(
+                company.getId(),
             externalCompanyId,
             generateTokenRequestDTO.getUserId(),
             sessionId
         );
         
         sessionRegistryService.registerSession(
-            sessionId,
+            sessionId, company.getId(),
             externalCompanyId,
             generateTokenRequestDTO.getUserId()
         );
@@ -137,13 +138,14 @@ public class SecurityApplicationService implements SecurityUseCase {
         }
         
         String token = jwtUtil.generateToken(
+            company.getId(),
             externalCompanyId,
             generateLinkIn.getUserId(),
             sessionId
         );
         
         sessionRegistryService.registerSession(
-            sessionId,
+            sessionId, company.getId(),
             externalCompanyId,
             generateLinkIn.getUserId()
         );

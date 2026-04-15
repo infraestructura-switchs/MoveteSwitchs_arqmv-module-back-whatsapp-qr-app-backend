@@ -2,11 +2,7 @@ package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.LoginIn;
 import com.restaurante.bot.dto.LoginOut;
-import com.restaurante.bot.model.Area;
-import com.restaurante.bot.model.Company;
-import com.restaurante.bot.model.Position;
-import com.restaurante.bot.model.Rol;
-import com.restaurante.bot.model.User;
+import com.restaurante.bot.model.*;
 import com.restaurante.bot.repository.UserRepository;
 import com.restaurante.bot.security.SessionRegistryService;
 import com.restaurante.bot.util.JwtUtil;
@@ -22,11 +18,9 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LoginGGPServiceImplTest {
@@ -73,7 +67,7 @@ class LoginGGPServiceImplTest {
         when(userRepository.findByLogin("admin")).thenReturn(Optional.of(user));
         when(utils.doPasswordsMatch("secret", "hashed-password")).thenReturn(true);
         when(jwtUtil.generateSessionId()).thenReturn(fixedSessionId);
-        when(jwtUtil.generateToken(eq(273L), eq(9L), eq(fixedSessionId)))
+        when(jwtUtil.generateToken(eq(4L), eq(273L), eq(9L), eq(fixedSessionId)))
                 .thenReturn("jwt-" + fixedSessionId);
 
         LoginOut response = loginGGPService.login(loginIn);
@@ -85,6 +79,6 @@ class LoginGGPServiceImplTest {
         assertTrue(SESSION_ID_PATTERN.matcher(response.getData().getSessionId()).matches());
         assertEquals("jwt-" + response.getData().getSessionId(), response.getData().getToken());
         assertEquals("******", response.getData().getPassword());
-                verify(sessionRegistryService).registerSession(eq(response.getData().getSessionId()), eq(273L), eq(9L));
+                verify(sessionRegistryService).registerSession(eq(response.getData().getSessionId()), eq(4L), eq(273L), eq(9L));
     }
 }

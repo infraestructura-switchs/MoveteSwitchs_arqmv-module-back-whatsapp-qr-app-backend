@@ -20,6 +20,14 @@
             </id>
         </attributes>
     </entity>
+    
+    <entity class="com.restaurante.bot.model.CategoryIntegration">
+        <attributes>
+            <id name="categoryIntegrationId">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+        </attributes>
+    </entity>
 
     <entity class="com.restaurante.bot.model.CategoryMapping">
         <attributes>

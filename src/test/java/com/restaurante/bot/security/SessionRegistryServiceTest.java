@@ -13,7 +13,7 @@ class SessionRegistryServiceTest {
 
     @Test
     void shouldRegisterAndInvalidateSession() {
-        sessionRegistryService.registerSession("session-1", 273L, 9L);
+        sessionRegistryService.registerSession("session-1", 1L, 273L, 9L);
 
         assertTrue(sessionRegistryService.isSessionActive("session-1"));
 
@@ -25,7 +25,7 @@ class SessionRegistryServiceTest {
     @Test
     void shouldExpireSessionBasedOnConfiguredTtl() throws Exception {
         SessionRegistryService shortLivedSessionRegistry = new SessionRegistryService(5L);
-        shortLivedSessionRegistry.registerSession("session-2", 273L, 9L);
+        shortLivedSessionRegistry.registerSession("session-2", 1L, 273L, 9L);
 
         Thread.sleep(20L);
 
