@@ -26,16 +26,17 @@ public class JwtUtil {
     private long EXPIRATION_TIME;
 
     // Genera un token con externalCompanyId como claim
-    public String generateToken(Long externalCompanyId, Long userId) {
-        return generateToken(externalCompanyId, userId, generateSessionId());
+    public String generateToken(Long companyId, Long externalCompanyId, Long userId) {
+        return generateToken(companyId, externalCompanyId, userId, generateSessionId());
     }
 
     public String generateSessionId() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public String generateToken(Long externalCompanyId, Long userId, String sessionId) {
+    public String generateToken(Long companyId, Long externalCompanyId, Long userId, String sessionId) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("companyId", companyId);
         claims.put("externalCompanyId", externalCompanyId);
         claims.put("userId", userId);
         claims.put("sessionId", sessionId);
