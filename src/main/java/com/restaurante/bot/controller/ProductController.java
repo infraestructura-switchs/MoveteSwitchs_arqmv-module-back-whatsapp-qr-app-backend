@@ -5,6 +5,7 @@ import com.restaurante.bot.dto.CategorizedProductsDTO;
 import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductUpdateDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +62,20 @@ public class ProductController {
             productsByCategory.put(category.getCategoryName(), category.getProducts())
         );
         return productsByCategory;
+    }
+
+    @GetMapping("/getProductByCompany/{externalCompanyId}/paged")
+    public ResponseEntity<Page<ProductDto>> getProductsByCompanyPaged(
+            @PathVariable("externalCompanyId") Long externalCompanyId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "ASC") String orders,
+            @RequestParam(defaultValue = "productId") String sortBy,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category) {
+        Page<ProductDto> result = productInterface.getProductsByCompanyPaged(
+                externalCompanyId, page, size, orders, sortBy, name, category);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PutMapping("/updateDescription")

@@ -439,6 +439,46 @@ public class ProductService implements ProductInterface, ProductUseCase {
             .toList();
     }
 
+    @Override
+    public org.springframework.data.domain.Page<ProductDto> getProductsByCompanyPaged(
+            Long externalCompanyId, int page, int size, String orders, String sortBy,
+            String name, String categoryName) {
+
+        Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
+        if (company == null) {
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no existe");
+        }
+        Long companyId = company.getId();
+
+        Long categoryId = null;
+        if (categoryName != null && !categoryName.isBlank()) {
+            categoryId = categoryRepository
+                .findByCompanyIdAndNameIgnoreCase(externalCompanyId, categoryName.trim())
+                    .map(Category::getCategoryId)
+                    .orElse(null);
+            if (categoryId == null) {
+                return org.springframework.data.domain.Page.empty();
+            }
+        }
+
+        String term = (name == null || name.isBlank()) ? null : name.trim();
+        Sort.Direction direction = Sort.Direction.fromString(orders == null ? "ASC" : orders.toUpperCase());
+        org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        org.springframework.data.domain.Page<Product> foundPage = productRepository.search(companyId, term, categoryId, pageable);
+
+        String imageByCompany = imageByCompanyId(externalCompanyId.intValue());
+        Map<Long, ProductDiscount> activeDiscounts = productDiscountSupport.findActiveDiscountsByProductIds(
+            companyId,
+            foundPage.getContent().stream().map(Product::getProductId).collect(Collectors.toList()));
+
+        List<ProductDto> content = foundPage.getContent().stream()
+            .map(product -> toDto(product, imageByCompany, activeDiscounts.get(product.getProductId())))
+            .collect(Collectors.toList());
+
+        return new org.springframework.data.domain.PageImpl<>(content, pageable, foundPage.getTotalElements());
+    }
+
     private Category mapToCategory(GroupDTO groupDTO, Long companyId) {
         Category category = new Category();
         category.setName(groupDTO.getDescripcion());
