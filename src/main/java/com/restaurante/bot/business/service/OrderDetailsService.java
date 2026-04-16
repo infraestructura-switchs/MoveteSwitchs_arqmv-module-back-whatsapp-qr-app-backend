@@ -140,8 +140,17 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
             transaction.setStatus(TransactionStatusConstants.ACTIVE);
             transaction.setCompanyId(companyId);
             Transaction newTransaction = transactionRepository.save(transaction);
-
+            transaction.setTransactionId(newTransaction.getTransactionId());
         }
+
+        Customer customer = findOrCreateCustomer(orderDetailsDTO.getPhone());
+
+        TransactionClient transactionClient = TransactionClient.builder()
+                .customerId(customer.getCustomer_id())
+                .transactionId(transaction.getTransactionId())
+                .build();
+
+        TransactionClient newTransactionClient = transactionClientRespository.save(transactionClient);
 
         return transaction;
     }
@@ -244,34 +253,41 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         RestaurantTable table = findTableByNumber(orderDetailsDTO.getRestaurantTable(), company.getId());
         log.info("saveOrder - table found, tableId={}, status={}", table.getTableId(), table.getStatus());
 
-        // Verifica si la mesa está disponible
-        if (table.getStatus() != null && table.getStatus() == TABLE_STATUS_AVAILABLE) {
-            log.info("saveOrder - table is available, proceeding with order creation");
+        // Verifica si la mesa está disponible para recibir pedidos (Libre=1, Ocupada=2, Solicitando=3)
+        Long currentStatus = table.getStatus();
+        if (currentStatus != null && (currentStatus == TABLE_STATUS_AVAILABLE || 
+                                     currentStatus == TABLE_STATUS_DEFAULT || 
+                                     currentStatus == 3)) {
+            
+            log.info("saveOrder - table is in valid state ({}), proceeding with order creation", currentStatus);
+
+            // Si la mesa estaba libre (1) o solicitando servicio (3), la pasamos a ocupada (2)
+            if (currentStatus == TABLE_STATUS_DEFAULT || currentStatus == 3) {
+                table.setStatus((long) TABLE_STATUS_AVAILABLE);
+                restaurantTableRepository.save(table);
+                log.info("saveOrder - table status updated from {} to {}", currentStatus, TABLE_STATUS_AVAILABLE);
+            }
 
             // Guarda la orden
             CustomerOrder setOrder = saveCustomerOrder(orderDetailsDTO.getTotal(), orderDetailsDTO.getPhone(),
                     company.getId());
             log.info("saveOrder - customer order created, orderId={}", setOrder.getOrderId());
-
-            // Guarda los productos de la orden
+            
+            // ... resto del código ...
             saveOrderProducts(orderDetailsDTO.getItems(), setOrder.getOrderId(), company.getId());
             log.info("saveOrder - order products saved, orderId={}, itemsCount={}",
                     setOrder.getOrderId(), orderDetailsDTO.getItems().size());
 
-            // Crea o recupera la transacción
             Transaction transaction = createTransaction(orderDetailsDTO, table, company.getId());
             log.info("saveOrder - transaction resolved, transactionId={}", transaction.getTransactionId());
 
-            // Crea la relación entre orden y transacción
             OrderTransaction orderTransaction = createOrderTransaction(setOrder.getOrderId(),
                     transaction.getTransactionId(), company.getId());
                 log.debug("saveOrder - orderTransaction created, orderTransactionId={}", orderTransaction.getOrderTransactionId());
 
-            // Actualiza el total de la transacción
             updateTransactionTotal(transaction, company.getId());
             log.debug("saveOrder - transaction total updated, transactionId={}", transaction.getTransactionId());
 
-            // Guarda el historial de la transacción
             saveTransactionHistory(transaction);
             log.debug("saveOrder - transaction history saved, transactionId={}", transaction.getTransactionId());
 
