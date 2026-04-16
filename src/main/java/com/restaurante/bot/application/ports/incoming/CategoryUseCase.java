@@ -27,4 +27,5 @@ public interface CategoryUseCase {
     List<CategoryResponseDTO> getCategoriesByCompanyIdAndStatus(Long companyId, String status);
     List<CategoryResponseDTO> getCategoriesByParameterId(Long parameterId);
     List<CategoryResponseDTO> getCategoriesByCompanyIdAndParameterId(Long companyId, Long parameterId);
+    List<CategoryResponseDTO> getCategoriesByExternalCompanyId(Long externalCompanyId);
 }

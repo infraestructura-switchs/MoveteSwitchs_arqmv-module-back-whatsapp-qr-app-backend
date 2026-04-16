@@ -7,6 +7,8 @@ import com.restaurante.bot.dto.CategoryResponseDTO;
 import com.restaurante.bot.domain.exception.DomainException;
 import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Category;
+import com.restaurante.bot.model.Company;
+import com.restaurante.bot.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 @RequiredArgsConstructor
 public class CategoryApplicationService implements CategoryUseCase {
     private final CategoryRepositoryPort categoryRepo;
+    private final CompanyRepository companyRepository;
 
     @Override
     public List<CategoryResponseDTO> getAllCategories() {
@@ -152,6 +155,17 @@ public class CategoryApplicationService implements CategoryUseCase {
     @Override
     public List<CategoryResponseDTO> getCategoriesByCompanyIdAndParameterId(Long companyId, Long parameterId) {
         return categoryRepo.findByCompanyIdAndExternalId(companyId, parameterId).stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CategoryResponseDTO> getCategoriesByExternalCompanyId(Long externalCompanyId) {
+        Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
+        if (company == null) {
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no existe");
+        }
+        return categoryRepo.findByCompanyId(company.getId()).stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
