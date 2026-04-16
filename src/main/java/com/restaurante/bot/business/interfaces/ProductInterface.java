@@ -6,6 +6,7 @@ import com.restaurante.bot.dto.ProductDto;
 import com.restaurante.bot.dto.ProductResponseDTO;
 import com.restaurante.bot.dto.ProductUpdateDTO;
 import com.restaurante.bot.model.GenericResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -23,5 +24,9 @@ public interface ProductInterface {
     List<ProductDto> searchProducts(Long externalCompanyId, String name, String categoryName);
 
     List<ProductDto> listByPrice(Long externalCompanyId, String categoryName, String sort,String name);
+
+    Page<ProductDto> getProductsByCompanyPaged(Long externalCompanyId, int page, int size,
+                                               String orders, String sortBy,
+                                               String name, String categoryName);
 
 }

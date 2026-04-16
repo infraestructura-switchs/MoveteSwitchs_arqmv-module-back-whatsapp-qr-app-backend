@@ -9,10 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
+import java.util.List;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -95,6 +100,111 @@ class ProductControllerTest {
 
         return CategorizedProductsDTO.builder()
                 .categories(Collections.singletonList(category))
+                .build();
+    }
+
+    // ---------------------------------------------------------------
+    // Tests for GET /getProductByCompany/{externalCompanyId}/paged
+    // ---------------------------------------------------------------
+
+    @Test
+    void getProductsByCompanyPaged_DefaultParams_ShouldReturnPage() throws Exception {
+        ProductDto product = sampleProduct();
+        Page<ProductDto> page = new PageImpl<>(List.of(product), PageRequest.of(0, 10), 1);
+
+        when(productUseCase.getProductsByCompanyPaged(eq(42L), eq(0), eq(10),
+                eq("ASC"), eq("productId"), isNull(), isNull()))
+                .thenReturn(page);
+
+        mockMvc.perform(get("/api/back-whatsapp-qr-app/product/getProductByCompany/42/paged"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].productName").value("Muzzarella"))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(10));
+    }
+
+    @Test
+    void getProductsByCompanyPaged_CustomPageAndSize_ShouldPassParamsToService() throws Exception {
+        Page<ProductDto> page = new PageImpl<>(List.of(sampleProduct()), PageRequest.of(1, 5), 6);
+
+        when(productUseCase.getProductsByCompanyPaged(eq(42L), eq(1), eq(5),
+                eq("ASC"), eq("productId"), isNull(), isNull()))
+                .thenReturn(page);
+
+        mockMvc.perform(get("/api/back-whatsapp-qr-app/product/getProductByCompany/42/paged")
+                        .param("page", "1")
+                        .param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.number").value(1))
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalElements").value(6));
+    }
+
+    @Test
+    void getProductsByCompanyPaged_WithNameFilter_ShouldPassNameToService() throws Exception {
+        Page<ProductDto> page = new PageImpl<>(List.of(sampleProduct()), PageRequest.of(0, 10), 1);
+
+        when(productUseCase.getProductsByCompanyPaged(eq(42L), eq(0), eq(10),
+                eq("ASC"), eq("productId"), eq("Muzz"), isNull()))
+                .thenReturn(page);
+
+        mockMvc.perform(get("/api/back-whatsapp-qr-app/product/getProductByCompany/42/paged")
+                        .param("name", "Muzz"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].productName").value("Muzzarella"));
+    }
+
+    @Test
+    void getProductsByCompanyPaged_WithCategoryFilter_ShouldPassCategoryToService() throws Exception {
+        Page<ProductDto> page = new PageImpl<>(List.of(sampleProduct()), PageRequest.of(0, 10), 1);
+
+        when(productUseCase.getProductsByCompanyPaged(eq(42L), eq(0), eq(10),
+                eq("ASC"), eq("productId"), isNull(), eq("PIZZAS")))
+                .thenReturn(page);
+
+        mockMvc.perform(get("/api/back-whatsapp-qr-app/product/getProductByCompany/42/paged")
+                        .param("category", "PIZZAS"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].productName").value("Muzzarella"));
+    }
+
+    @Test
+    void getProductsByCompanyPaged_EmptyResult_ShouldReturnEmptyPage() throws Exception {
+        Page<ProductDto> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
+
+        when(productUseCase.getProductsByCompanyPaged(eq(99L), eq(0), eq(10),
+                eq("ASC"), eq("productId"), isNull(), isNull()))
+                .thenReturn(emptyPage);
+
+        mockMvc.perform(get("/api/back-whatsapp-qr-app/product/getProductByCompany/99/paged"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    @Test
+    void getProductsByCompanyPaged_DescOrder_ShouldPassOrderToService() throws Exception {
+        Page<ProductDto> page = new PageImpl<>(List.of(sampleProduct()), PageRequest.of(0, 10), 1);
+
+        when(productUseCase.getProductsByCompanyPaged(eq(42L), eq(0), eq(10),
+                eq("DESC"), eq("price"), isNull(), isNull()))
+                .thenReturn(page);
+
+        mockMvc.perform(get("/api/back-whatsapp-qr-app/product/getProductByCompany/42/paged")
+                        .param("orders", "DESC")
+                        .param("sortBy", "price"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].productName").value("Muzzarella"));
+    }
+
+    private ProductDto sampleProduct() {
+        return ProductDto.builder()
+                .id(1L)
+                .productName("Muzzarella")
+                .price(1200.0)
+                .comments(Collections.emptyList())
                 .build();
     }
 }
