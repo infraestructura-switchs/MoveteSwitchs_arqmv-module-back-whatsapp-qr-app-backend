@@ -51,19 +51,17 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
 	 * Get order products by table ID
 	 */
 	@Query("SELECT o.orderId, p.productId, p.name, op.quantity, p.price, (op.quantity * p.price), o.total " +
-			"FROM OrderTransaction ot JOIN Transaction t ON ot.transactionId = t.transactionId " +
-			"JOIN CustomerOrder o ON ot.orderId = o.orderId " +
-			"JOIN OrderProduct op ON o.orderId = op.orderId " +
-			"JOIN Product p ON op.productId = p.productId " +
-			"WHERE t.tableId = :tableId")
+			"FROM OrderTransaction ot, Transaction t, CustomerOrder o, OrderProduct op, Product p " +
+			"WHERE ot.transactionId = t.transactionId AND ot.orderId = o.orderId AND o.orderId = op.orderId " +
+			"AND op.productId = p.productId AND t.tableId = :tableId")
 	List<Object[]> findOrderProductsByTable(@Param("tableId") int tableId);
 
 	/**
 	 * Get orders by phone number
 	 */
 	@Query("SELECT c.phone, p.productId, p.name, op.quantity, p.price, co.total " +
-			"FROM Customer c, Transaction t, OrderTransaction ot, CustomerOrder co, OrderProduct op, Product p " +
-			"WHERE c.customer_id = t.customerId " +
+			"FROM Customer c, Transaction t, TransactionClient tc, OrderTransaction ot, CustomerOrder co, OrderProduct op, Product p " +
+			"WHERE tc.transactionId = t.transactionId AND tc.customerId = c.customer_id " +
 			"AND ot.transactionId = t.transactionId " +
 			"AND co.orderId = ot.orderId " +
 			"AND op.orderId = co.orderId " +
@@ -75,8 +73,8 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
 	 * Get orders by table number
 	 */
 	@Query("SELECT c.phone, p.productId, p.name, op.quantity, p.price, co.total " +
-			"FROM Customer c, Transaction t, OrderTransaction ot, CustomerOrder co, OrderProduct op, Product p, RestaurantTable r " +
-			"WHERE c.customer_id = t.customerId " +
+			"FROM Customer c, Transaction t, TransactionClient tc, OrderTransaction ot, CustomerOrder co, OrderProduct op, Product p, RestaurantTable r " +
+			"WHERE tc.transactionId = t.transactionId AND tc.customerId = c.customer_id " +
 			"AND ot.transactionId = t.transactionId " +
 			"AND co.orderId = ot.orderId " +
 			"AND op.orderId = co.orderId " +
@@ -93,59 +91,63 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
 	/**
 	 * Get all orders grouped by table with status and products
 	 */
-	@Query("SELECT rt.tableNumber, COALESCE(ts.description, 'Unknown'), COALESCE(SUM(t.transactionTotal), 0), " +
+	@Query("SELECT rt.tableNumber, COALESCE(ts.description, 'Unknown'), COALESCE(t.transactionTotal, 0.0), " +
 			"o.orderId, p.productId, p.name, op.quantity, p.price, (op.quantity * p.price), t.transactionId, o.date, o.status " +
-			"FROM RestaurantTable rt LEFT JOIN Transaction t ON rt.tableId = t.tableId " +
-			"LEFT JOIN TransactionStatus ts ON t.status = ts.transactionStatusId " +
-			"LEFT JOIN OrderTransaction ot ON t.transactionId = ot.transactionId " +
-			"LEFT JOIN CustomerOrder o ON ot.orderId = o.orderId " +
-			"LEFT JOIN OrderProduct op ON o.orderId = op.orderId " +
-			"LEFT JOIN Product p ON op.productId = p.productId " +
-			"WHERE o.status IN (" + ORDER_STATUS_CONFIRMED + ", " + ORDER_STATUS_SENT + ", " + ORDER_STATUS_CONFIRMED_ARQ + ") " +
+			"FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p " +
+			"WHERE rt.tableId = t.tableId " +
+			"AND t.status = ts.transactionStatusId " +
+			"AND t.transactionId = ot.transactionId " +
+			"AND ot.orderId = o.orderId " +
+			"AND o.orderId = op.orderId " +
+			"AND op.productId = p.productId " +
+			"AND o.status IN (" + ORDER_STATUS_CONFIRMED + ", " + ORDER_STATUS_SENT + ", " + ORDER_STATUS_CONFIRMED_ARQ + ") " +
 			"AND t.status = " + TRANSACTION_STATUS_ACTIVE)
 	List<Object[]> findAllOrdersWithTableJPQL();
 
 	/**
 	 * Get all sent orders grouped by table
 	 */
-	@Query("SELECT rt.tableNumber, ts.description, COALESCE(SUM(t.transactionTotal), 0), " +
+	@Query("SELECT rt.tableNumber, ts.description, COALESCE(t.transactionTotal, 0.0), " +
 			"o.orderId, p.productId, p.name, op.quantity, p.price, (op.quantity * p.price), t.transactionId, o.date " +
-			"FROM RestaurantTable rt LEFT JOIN Transaction t ON rt.tableId = t.tableId " +
-			"LEFT JOIN TransactionStatus ts ON t.status = ts.transactionStatusId " +
-			"LEFT JOIN OrderTransaction ot ON t.transactionId = ot.transactionId " +
-			"LEFT JOIN CustomerOrder o ON ot.orderId = o.orderId " +
-			"LEFT JOIN OrderProduct op ON o.orderId = op.orderId " +
-			"LEFT JOIN Product p ON op.productId = p.productId " +
-			"WHERE o.status = " + ORDER_STATUS_SENT + " AND t.status = " + TRANSACTION_STATUS_ACTIVE)
+			"FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p " +
+			"WHERE rt.tableId = t.tableId " +
+			"AND t.status = ts.transactionStatusId " +
+			"AND t.transactionId = ot.transactionId " +
+			"AND ot.orderId = o.orderId " +
+			"AND o.orderId = op.orderId " +
+			"AND op.productId = p.productId " +
+			"AND o.status = " + ORDER_STATUS_SENT + " AND t.status = " + TRANSACTION_STATUS_ACTIVE)
 	List<Object[]> findAllSentOrdersGroupedByMesa();
 
 	/**
 	 * Get sent or confirmed orders by table number
 	 */
-	@Query("SELECT rt.tableNumber, ts.description, COALESCE(SUM(t.transactionTotal), 0), " +
+	@Query("SELECT rt.tableNumber, ts.description, COALESCE(t.transactionTotal, 0.0), " +
 			"o.orderId, p.productId, p.name, op.quantity, p.price, (op.quantity * p.price), o.total, t.transactionId, o.date " +
-			"FROM RestaurantTable rt LEFT JOIN Transaction t ON rt.tableId = t.tableId " +
-			"LEFT JOIN TransactionStatus ts ON t.status = ts.transactionStatusId " +
-			"LEFT JOIN OrderTransaction ot ON t.transactionId = ot.transactionId " +
-			"LEFT JOIN CustomerOrder o ON ot.orderId = o.orderId " +
-			"LEFT JOIN OrderProduct op ON o.orderId = op.orderId " +
-			"LEFT JOIN Product p ON op.productId = p.productId " +
-			"WHERE (" + CONDITION_ORDER_SENT_OR_CONFIRMED_ARQ + ") AND rt.tableNumber = :tableNumber AND t.status = " + TRANSACTION_STATUS_ACTIVE)
+			"FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p " +
+			"WHERE rt.tableId = t.tableId " +
+			"AND t.status = ts.transactionStatusId " +
+			"AND t.transactionId = ot.transactionId " +
+			"AND ot.orderId = o.orderId " +
+			"AND o.orderId = op.orderId " +
+			"AND op.productId = p.productId " +
+			"AND (" + CONDITION_ORDER_SENT_OR_CONFIRMED_ARQ + ") AND rt.tableNumber = :tableNumber AND t.status = " + TRANSACTION_STATUS_ACTIVE)
 	List<Object[]> findAllOrdersEnviadasJPQL(@Param("tableNumber") Long tableNumber);
 
 	/**
 	 * Get pending orders by table, phone and company
 	 */
-	@Query("SELECT rt.tableNumber, ts.description, COALESCE(SUM(t.transactionTotal), 0), " +
+	@Query("SELECT rt.tableNumber, ts.description, COALESCE(t.transactionTotal, 0.0), " +
 			"o.orderId, p.productId, p.name, op.quantity, p.price, (op.quantity * p.price), o.total, t.transactionId, o.date " +
-			"FROM RestaurantTable rt LEFT JOIN Transaction t ON rt.tableId = t.tableId " +
-			"LEFT JOIN TransactionStatus ts ON t.status = ts.transactionStatusId " +
-			"LEFT JOIN OrderTransaction ot ON t.transactionId = ot.transactionId " +
-			"LEFT JOIN CustomerOrder o ON ot.orderId = o.orderId " +
-			"LEFT JOIN OrderProduct op ON o.orderId = op.orderId " +
-			"LEFT JOIN Product p ON op.productId = p.productId " +
-			"LEFT JOIN Customer c ON c.customer_id = o.customerId " +
-			"WHERE o.status = " + ORDER_STATUS_PENDING + " AND rt.tableNumber = :tableNumber " +
+			"FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p, Customer c " +
+			"WHERE rt.tableId = t.tableId " +
+			"AND t.status = ts.transactionStatusId " +
+			"AND t.transactionId = ot.transactionId " +
+			"AND ot.orderId = o.orderId " +
+			"AND o.orderId = op.orderId " +
+			"AND op.productId = p.productId " +
+			"AND c.customer_id = o.customerId " +
+			"AND o.status = " + ORDER_STATUS_PENDING + " AND rt.tableNumber = :tableNumber " +
 			"AND t.status = " + TRANSACTION_STATUS_ACTIVE + " AND c.phone = :phoneNumber AND o.companyId = :companyId")
 	List<Object[]> findAllOrdersNotConfirmJPQLQuery(@Param("tableNumber") Long tableNumber,
 			@Param("companyId") Long companyId, @Param("phoneNumber") String phoneNumber);
@@ -153,16 +155,17 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
 	/**
 	 * Get confirmed orders by table, phone and company
 	 */
-	@Query("SELECT rt.tableNumber, ts.description, COALESCE(SUM(t.transactionTotal), 0), " +
+	@Query("SELECT rt.tableNumber, ts.description, COALESCE(t.transactionTotal, 0.0), " +
 			"o.orderId, p.productId, p.name, op.quantity, p.price, (op.quantity * p.price), o.total, t.transactionId, o.date " +
-			"FROM RestaurantTable rt LEFT JOIN Transaction t ON rt.tableId = t.tableId " +
-			"LEFT JOIN TransactionStatus ts ON t.status = ts.transactionStatusId " +
-			"LEFT JOIN OrderTransaction ot ON t.transactionId = ot.transactionId " +
-			"LEFT JOIN CustomerOrder o ON ot.orderId = o.orderId " +
-			"LEFT JOIN OrderProduct op ON o.orderId = op.orderId " +
-			"LEFT JOIN Product p ON op.productId = p.productId " +
-			"LEFT JOIN Customer c ON c.customer_id = o.customerId " +
-			"WHERE " + CONDITION_ORDER_CONFIRMED_OR_SENT + " AND rt.tableNumber = :tableNumber " +
+			"FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p, Customer c " +
+			"WHERE rt.tableId = t.tableId " +
+			"AND t.status = ts.transactionStatusId " +
+			"AND t.transactionId = ot.transactionId " +
+			"AND ot.orderId = o.orderId " +
+			"AND o.orderId = op.orderId " +
+			"AND op.productId = p.productId " +
+			"AND c.customer_id = o.customerId " +
+			"AND " + CONDITION_ORDER_CONFIRMED_OR_SENT + " AND rt.tableNumber = :tableNumber " +
 			"AND t.status = " + TRANSACTION_STATUS_ACTIVE + " AND c.phone = :phoneNumber AND o.companyId = :companyId")
 	List<Object[]> findAllOrdersConfirmJPQLQuery(@Param("tableNumber") Long tableNumber,
 			@Param("phoneNumber") String phoneNumber, @Param("companyId") Long companyId);
@@ -172,7 +175,8 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
 	 */
 	@Query("SELECT rt.tableNumber, o.orderId, null, p.name, op.quantity, p.price, op.commentProduct, o.date " +
 			"FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p " +
-			"WHERE rt.tableId = t.tableId AND t.status = ts.transactionStatusId " +
+			"WHERE rt.tableId = t.tableId " +
+			"AND t.status = ts.transactionStatusId " +
 			"AND ot.transactionId = t.transactionId AND o.orderId = ot.orderId " +
 			"AND op.orderId = o.orderId AND p.productId = op.productId " +
 			"AND " + CONDITION_ORDER_CONFIRMED_OR_SENT + " AND t.status = " + TRANSACTION_STATUS_ACTIVE)

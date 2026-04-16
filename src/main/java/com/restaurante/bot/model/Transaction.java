@@ -34,7 +34,5 @@ public class Transaction {
     @Column(name = "company_id")
     private Long companyId;
 
-    @Column(name = "customer_id")
-    private Long customerId;
 
 }
