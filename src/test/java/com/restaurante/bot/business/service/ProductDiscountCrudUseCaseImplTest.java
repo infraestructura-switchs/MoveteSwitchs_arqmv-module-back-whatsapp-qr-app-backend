@@ -2,6 +2,7 @@ package com.restaurante.bot.business.service;
 
 import com.restaurante.bot.dto.ProductDiscountDto;
 import com.restaurante.bot.dto.ProductDiscountCreateDto;
+import com.restaurante.bot.dto.ProductDiscountSaveAndUpdateDto;
 import com.restaurante.bot.domain.exception.DomainException;
 import com.restaurante.bot.domain.exception.DomainErrorCode;
 import com.restaurante.bot.model.Product;
@@ -13,14 +14,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,8 +52,6 @@ class ProductDiscountCrudUseCaseImplTest {
                 .companyId(273L)
                 .description("Promo almuerzo")
                 .discountAmount(5000.0)
-                .startAt(LocalDateTime.of(2026, 3, 18, 10, 0))
-                .endAt(LocalDateTime.of(2026, 3, 18, 18, 0))
                 .build();
 
         ProductDiscount saved = ProductDiscount.builder()
@@ -60,8 +60,8 @@ class ProductDiscountCrudUseCaseImplTest {
                 .companyId(273L)
                 .description("Promo almuerzo")
                 .discountAmount(5000.0)
-                .startAt(request.getStartAt())
-                .endAt(request.getEndAt())
+                .startAt(java.time.LocalDateTime.now())
+                .endAt(java.time.LocalDateTime.now().plusYears(10))
                 .status("ACTIVE")
                 .build();
 
@@ -79,6 +79,12 @@ class ProductDiscountCrudUseCaseImplTest {
 
         ProductDiscountDto result = productDiscountCrudUseCase.save(request);
 
+        verify(productDiscountRepository).save(argThat(entity ->
+                entity.getStartAt() != null
+                        && entity.getEndAt() != null
+                        && !entity.getEndAt().isBefore(entity.getStartAt())
+                        && "ACTIVE".equals(entity.getStatus())));
+
         assertEquals(1L, result.getId());
         assertEquals(5000.0, result.getDiscountAmount());
         assertEquals("ACTIVE", result.getStatus());
@@ -94,9 +100,8 @@ class ProductDiscountCrudUseCaseImplTest {
         ProductDiscountCreateDto request = ProductDiscountCreateDto.builder()
                 .productId(8L)
                 .companyId(273L)
+                .description("Promo")
                 .discountAmount(5000.0)
-                .startAt(LocalDateTime.of(2026, 3, 18, 10, 0))
-                .endAt(LocalDateTime.of(2026, 3, 18, 18, 0))
                 .build();
 
         when(productRepository.findById(8L)).thenReturn(Optional.of(product));
@@ -106,4 +111,55 @@ class ProductDiscountCrudUseCaseImplTest {
         assertEquals(DomainErrorCode.INVALID_REQUEST, exception.getCode());
         assertEquals("El descuento no puede ser mayor al precio base del producto", exception.getMessage());
     }
+
+        @Test
+        void update_ShouldBuildDatesInBackend_WhenStatusIsInactive() {
+                Product product = new Product();
+                product.setProductId(8L);
+                product.setCompanyId(273L);
+                product.setPrice(25000.0);
+
+                ProductDiscount existing = ProductDiscount.builder()
+                                .productDiscountId(1L)
+                                .productId(8L)
+                                .companyId(273L)
+                                .description("Promo inicial")
+                                .discountAmount(4000.0)
+                                .startAt(java.time.LocalDateTime.now().minusDays(2))
+                                .endAt(java.time.LocalDateTime.now().plusDays(2))
+                                .status("ACTIVE")
+                                .build();
+
+                ProductDiscountSaveAndUpdateDto request = ProductDiscountSaveAndUpdateDto.builder()
+                                .productId(8L)
+                                .companyId(273L)
+                                .description("Promo actualizada")
+                                .discountAmount(3000.0)
+                                .status("INACTIVE")
+                                .build();
+
+                when(productDiscountRepository.findByProductDiscountIdAndCompanyId(1L, 273L)).thenReturn(Optional.of(existing));
+                when(productRepository.findById(8L)).thenReturn(Optional.of(product));
+                when(productDiscountRepository.save(any(ProductDiscount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(productDiscountSupport.toDto(any(ProductDiscount.class))).thenAnswer(invocation -> {
+                        ProductDiscount discount = invocation.getArgument(0);
+                        return ProductDiscountDto.builder()
+                                        .id(discount.getProductDiscountId())
+                                        .productId(discount.getProductId())
+                                        .companyId(discount.getCompanyId())
+                                        .description(discount.getDescription())
+                                        .discountAmount(discount.getDiscountAmount())
+                                        .startAt(discount.getStartAt())
+                                        .endAt(discount.getEndAt())
+                                        .status(discount.getStatus())
+                                        .build();
+                });
+
+                ProductDiscountDto result = productDiscountCrudUseCase.update(1L, request);
+
+                assertEquals("INACTIVE", result.getStatus());
+                assertNotNull(result.getStartAt());
+                assertNotNull(result.getEndAt());
+                assertEquals(result.getStartAt(), result.getEndAt());
+        }
 }

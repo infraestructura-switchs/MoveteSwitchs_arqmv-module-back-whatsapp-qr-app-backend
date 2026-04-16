@@ -16,10 +16,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -37,16 +37,18 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
         // productId es requerido y siempre se valida
         Product product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
         validateDiscountAmount(productDiscountDto.getDiscountAmount(), product.getPrice());
-        validateDiscountDates(productDiscountDto.getStartAt(), productDiscountDto.getEndAt());
+
+        LocalDateTime startAt = LocalDateTime.now();
+        LocalDateTime endAt = startAt.plusYears(10);
 
         ProductDiscount entity = ProductDiscount.builder()
             .productId(productDiscountDto.getProductId())
             .companyId(productDiscountDto.getCompanyId())
             .description(productDiscountDto.getDescription())
             .discountAmount(productDiscountDto.getDiscountAmount())
-            .startAt(productDiscountDto.getStartAt())
-            .endAt(productDiscountDto.getEndAt())
-            .status(resolveStatus(productDiscountDto.getStatus()))
+            .startAt(startAt)
+            .endAt(endAt)
+            .status(StatusConstants.ACTIVE_STATUS)
             .build();
 
         return productDiscountSupport.toDto(productDiscountRepository.save(entity));
@@ -66,16 +68,20 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
             .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Descuento no encontrado"));
 
         Product product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
-        validateDiscountDates(productDiscountDto);
         validateDiscountAmount(productDiscountDto.getDiscountAmount(), product.getPrice());
+        String resolvedStatus = resolveStatus(productDiscountDto.getStatus());
+        LocalDateTime startAt = LocalDateTime.now();
+        LocalDateTime endAt = StatusConstants.INACTIVE_STATUS.equals(resolvedStatus)
+            ? startAt
+            : startAt.plusYears(10);
 
         existingDiscount.setProductId(productDiscountDto.getProductId());
         existingDiscount.setCompanyId(productDiscountDto.getCompanyId());
         existingDiscount.setDescription(productDiscountDto.getDescription());
         existingDiscount.setDiscountAmount(productDiscountDto.getDiscountAmount());
-        existingDiscount.setStartAt(productDiscountDto.getStartAt());
-        existingDiscount.setEndAt(productDiscountDto.getEndAt());
-        existingDiscount.setStatus(resolveStatus(productDiscountDto.getStatus()));
+        existingDiscount.setStartAt(startAt);
+        existingDiscount.setEndAt(endAt);
+        existingDiscount.setStatus(resolvedStatus);
 
         return productDiscountSupport.toDto(productDiscountRepository.save(existingDiscount));
     }
@@ -118,16 +124,6 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
         return product;
     }
 
-    private void validateDiscountDates(ProductDiscountSaveAndUpdateDto dto) {
-        validateDiscountDates(dto.getStartAt(), dto.getEndAt());
-    }
-
-    private void validateDiscountDates(java.time.LocalDateTime startAt, java.time.LocalDateTime endAt) {
-        if (endAt.isBefore(startAt)) {
-            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "La vigencia del descuento es invalida: endAt debe ser mayor o igual a startAt");
-        }
-    }
-
     private void validateDiscountAmount(Double discountAmount, Double productPrice) {
         if (productPrice == null || productPrice <= 0) {
             throw new DomainException(DomainErrorCode.INVALID_REQUEST, "El producto debe tener un precio base valido para aplicar descuento");
@@ -139,6 +135,10 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     }
 
     private String resolveStatus(String status) {
-        return status == null || status.isBlank() ? StatusConstants.ACTIVE_STATUS : status.trim().toUpperCase();
+        String resolved = status == null ? "" : status.trim().toUpperCase();
+        if (!StatusConstants.ACTIVE_STATUS.equals(resolved) && !StatusConstants.INACTIVE_STATUS.equals(resolved)) {
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "status debe ser ACTIVE o INACTIVE");
+        }
+        return resolved;
     }
 }
