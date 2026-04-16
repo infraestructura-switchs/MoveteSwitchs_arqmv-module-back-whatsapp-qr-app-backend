@@ -45,6 +45,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             log.debug("Token extracted: {}", token);  // Verifica token
 
             try {
+                // Defensive check: A JWT must have exactly 2 dots
+                long dotCount = token.chars().filter(ch -> ch == '.').count();
+                if (dotCount != 2) {
+                    log.warn("Malformed token structure: found {} dots (expected 2). Token prefix: {}", 
+                             dotCount, token.length() > 10 ? token.substring(0, 10) : token);
+                    sendUnauthorizedError(response, "Invalid token structure");
+                    return;
+                }
+
                 Claims claims = jwtUtil.extractAllClaims(token);
                 log.debug("Claims extracted: {}", claims);
 
@@ -112,10 +121,29 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, errorMsg);
                 return;
-            } catch (UnsupportedJwtException | MalformedJwtException e) {
-                log.error("Token validation error: {}", e.getMessage(), e);
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                String errorMsg = "Token invalid";
+            } catch (SignatureException e) {
+                log.warn("Invalid token signature: {}", e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                String errorMsg = "Invalid token signature";
+                if (messageService != null) {
+                    errorMsg = messageService.getMessage("token.invalid");
+                }
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, errorMsg);
+                return;
+            } catch (MalformedJwtException e) {
+                log.warn("Malformed token: {}. Token prefix: {}...", e.getMessage(), 
+                         token.length() > 20 ? token.substring(0, 20) : token);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                String errorMsg = "Malformed token";
+                if (messageService != null) {
+                    errorMsg = messageService.getMessage("token.invalid");
+                }
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, errorMsg);
+                return;
+            } catch (UnsupportedJwtException e) {
+                log.warn("Unsupported token: {}", e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                String errorMsg = "Unsupported token";
                 if (messageService != null) {
                     errorMsg = messageService.getMessage("token.invalid");
                 }
