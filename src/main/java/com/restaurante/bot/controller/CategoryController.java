@@ -31,6 +31,11 @@ public class CategoryController {
         return ResponseEntity.ok(categoryUseCase.getCategoriesByCompanyId(companyId));
     }
 
+    @GetMapping("/external-company/{externalCompanyId}")
+    public ResponseEntity<List<CategoryResponseDTO>> getCategoriesByExternalCompanyId(@PathVariable Long externalCompanyId) {
+        return ResponseEntity.ok(categoryUseCase.getCategoriesByExternalCompanyId(externalCompanyId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryUseCase.getCategoryById(id));
