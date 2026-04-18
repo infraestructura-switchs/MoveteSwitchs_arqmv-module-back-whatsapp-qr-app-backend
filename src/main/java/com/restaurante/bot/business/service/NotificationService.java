@@ -12,6 +12,7 @@ import com.restaurante.bot.business.service.notification.NotificationPublisher;
 import com.restaurante.bot.model.Subscription;
 import com.restaurante.bot.model.User;
 import com.restaurante.bot.repository.SubscriptionRepository;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService implements NotificationInterface, NotificationUseCase, NotificationObserver {
 
     private final SubscriptionRepository subscriptionRepository;
@@ -80,9 +82,12 @@ public class NotificationService implements NotificationInterface, NotificationU
 
         try {
             FirebaseMessaging.getInstance().send(message);
-            System.out.println("Notificación enviada a: " + token);
+            log.info("Notificacion enviada a token {}", token);
         } catch (FirebaseMessagingException e) {
-            System.err.println("Error enviando notificación: " + e.getMessage());
+            log.warn("Error enviando notificacion (FirebaseMessagingException): {}", e.getMessage());
+        } catch (RuntimeException e) {
+            // Avoid breaking business operations when Firebase is not initialized or fails at runtime.
+            log.error("Error inesperado enviando notificacion push: {}", e.getMessage(), e);
         }
     }
 

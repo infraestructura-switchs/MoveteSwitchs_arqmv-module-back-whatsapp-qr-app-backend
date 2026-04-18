@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: back-whatsapp-qr-app-deployment
+  labels:
+    app: back-whatsapp-qr-app
+  namespace: ${K8S_NS}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: back-whatsapp-qr-app
+  template:
+    metadata:
+      labels:
+        app: back-whatsapp-qr-app
+    spec:
+      containers:
+        - name: back-whatsapp-qr-app
+          image: phx.ocir.io/arqcloudoci/arqmv-registry:arqmv-module-back-whatsapp-qr-app-backend-0.097
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: JAVA_OPTIONS
+              value: "-Xmx1020M"
+          envFrom:
+            - secretRef:
+              name: secret-back-whatsapp-qr-app
+            - configMapRef:
+                name: config-back-whatsapp-qr-app
+          volumeMounts:
+            - name: ${K8S_FS_VOLUME}
+              mountPath: /apl/arq-file
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 6
+            failureThreshold: 3
+      volumes:
+        - name: ${K8S_FS_VOLUME}
+          persistentVolumeClaim:
+            claimName: ${K8S_FS_CLAIM}
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: back-whatsapp-qr-app
+  name: service-back-whatsapp-qr-app
+  namespace: ${K8S_NS}
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: back-whatsapp-qr-app
+  type: ClusterIP

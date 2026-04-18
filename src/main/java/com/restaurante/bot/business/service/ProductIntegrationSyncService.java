@@ -79,7 +79,7 @@ public class ProductIntegrationSyncService {
             ProductIntegration integration = mapToProductIntegration(productDTO,company.getId(), externalCompanyId);
             integration = productIntegrationRepository.save(integration);
 
-            Optional<Product> optionalProduct = productRepository.findByProductIntegrationId(integration.getProductIntegrationId());
+            Optional<Product> optionalProduct = productRepository.findByProductIntegration_ProductIntegrationId(integration.getProductIntegrationId());
             if (optionalProduct.isPresent()) {
                 Product product = optionalProduct.get();
                 product.setName(integration.getName());
@@ -112,7 +112,9 @@ public class ProductIntegrationSyncService {
 
     private ProductIntegration mapToProductIntegration(ProductDTO productDTO,Long companyId,
                                                        Long externalCompanyId) {
+
         Integer arqProductId = Math.toIntExact(productDTO.getId());
+        String softRestaurantId = productDTO.getIdProducto();
         ProductIntegration integration = productIntegrationRepository
             .findByArqProductIdAndCompanyId(arqProductId, externalCompanyId)
             .orElse(new ProductIntegration());
@@ -122,25 +124,26 @@ public class ProductIntegrationSyncService {
         List<Category> categories = categoryRepository.findByCompanyIdAndExternalId(companyId, externalCategoryId);
         Category category = categories.isEmpty() ? new Category() : categories.get(0);
 
-        integration.setArqProductId(arqProductId);
-        integration.setName(productDTO.getData().getDescripcion());
-        integration.setPrice(productDTO.getData().getPrecio());
-        integration.setOriginalPrice(productDTO.getData().getPrecioSinImpuestos() != null
-            ? productDTO.getData().getPrecioSinImpuestos()
-            : productDTO.getData().getPrecio());
-        integration.setDescription(productDTO.getData().getDescripcion());
-        integration.setGroupId(parseGroupId(productDTO));
-        integration.setCompanyId(externalCompanyId);
-        integration.setStatus(StatusConstants.ACTIVE_STATUS);
-        integration.setImgProduct(productDTO.getData().getImagenMenu());
-        integration.setCategoryId(category.getCategoryId());
-        integration.setComments(serializeComments(productDTO));
-        integration.setInformation(productDTO.getData().getInformacion());
-        integration.setPreparationTime(productDTO.getData().getMinutosPreparacion() != null
-            ? Math.toIntExact(Math.round(productDTO.getData().getMinutosPreparacion()))
-            : 0);
-
-        return integration;
+        return integration.toBuilder()
+            .arqProductId(arqProductId)
+            .name(productDTO.getData().getDescripcion())
+            .price(productDTO.getData().getPrecio())
+            .originalPrice(productDTO.getData().getPrecioSinImpuestos() != null
+                ? productDTO.getData().getPrecioSinImpuestos()
+                : productDTO.getData().getPrecio())
+            .description(productDTO.getData().getDescripcion())
+            .groupId(parseGroupId(productDTO))
+            .companyId(externalCompanyId)
+            .status(StatusConstants.ACTIVE_STATUS)
+            .imgProduct(productDTO.getData().getImagenMenu())
+            .categoryId(category.getCategoryId())
+            .comments(serializeComments(productDTO))
+            .information(productDTO.getData().getInformacion())
+            .preparationTime(productDTO.getData().getMinutosPreparacion() != null
+                ? Math.toIntExact(Math.round(productDTO.getData().getMinutosPreparacion()))
+                : 0)
+            .softRestaurantId(softRestaurantId)
+            .build();
     }
 
     private String serializeComments(ProductDTO productDTO) {

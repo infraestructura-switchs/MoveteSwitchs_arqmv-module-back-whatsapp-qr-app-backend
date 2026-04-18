@@ -25,7 +25,7 @@ public interface OrderInterface {
 
     List<OrderResponseDTO> confirmedOreders(Long tableNumber, String phoneNumber);
 
-    List<CompanyArqDTO> getOrdersArq(Long companyId);
+    List<CompanyArqDTO> getOrdersArq(Long externalCompanyId);
 
     GenericResponse confirmOrdersArq(ConfirmOrderArq request);
 }

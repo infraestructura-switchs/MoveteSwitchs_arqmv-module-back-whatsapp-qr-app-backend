@@ -735,8 +735,9 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
     }
 
     @Override
-    public List<CompanyArqDTO> getOrdersArq(Long companyId) {
-        List<Object[]> results = orderTransactionRepository.findCompanyData(companyId);
+    public List<CompanyArqDTO> getOrdersArq(Long externalCompanyId) {
+        Company company = companyRepository.findByExternalCompanyId(externalCompanyId);
+        List<Object[]> results = orderTransactionRepository.findCompanyData(company.getId());
 
         // Agrupar los resultados por table_number y mapear a ArticuloDTO
         Map<String, List<ArticuloDTO>> articulosPorMesa = results.stream()
@@ -756,7 +757,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         // Crear una lista de CompanyArqDTO, una por cada table_number
         List<CompanyArqDTO> companyArqDTOs = articulosPorMesa.entrySet().stream()
                 .map(entry -> new CompanyArqDTO(
-                        companyId.intValue(), // companyId
+                        externalCompanyId.intValue(), // companyId
                         0.0, // descuentoGeneral
                         entry.getValue() // Lista de ArticuloDTO para este table_number
                 ))

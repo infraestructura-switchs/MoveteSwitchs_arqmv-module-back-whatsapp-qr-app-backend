@@ -180,6 +180,11 @@ public class RestaurantTableService implements RestaurantTableInterface {
             return;
         }
 
-        notificationService.sendNotificationToClient(subscription.getToken(), title, body);
+        try {
+            notificationService.sendNotificationToClient(subscription.getToken(), title, body);
+        } catch (Exception e) {
+            // Notification errors must not break core table status transitions.
+            log.error("Notification failed for company {} and user {}: {}", companyId, user.getUserId(), e.getMessage(), e);
+        }
     }
 }

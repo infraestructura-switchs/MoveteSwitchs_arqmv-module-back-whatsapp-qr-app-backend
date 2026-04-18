@@ -150,6 +150,33 @@ class ProductServiceTest {
         verifyNoInteractions(callServiceHttp);
     }
 
+    @Test
+    void getProductsSfotRestaurantByCompanyId_ShouldIgnoreProductsWithNullCategoryId() {
+        Long companyId = 1L;
+        Product productWithoutCategory = new Product();
+        productWithoutCategory.setProductId(2L);
+        productWithoutCategory.setName("Sin Categoria");
+        productWithoutCategory.setPrice(2000.0);
+        productWithoutCategory.setDescription("");
+        productWithoutCategory.setStatus("ACTIVO");
+        productWithoutCategory.setImgProduct("sin-categoria.jpg");
+        productWithoutCategory.setCategoryId(null);
+        productWithoutCategory.setCompanyId(companyId);
+
+        when(categoryRepository.findByCompanyId(companyId)).thenReturn(Arrays.asList(bebidasCategory));
+        when(productRepository.findByCompanyIdOrderByNameAsc(companyId)).thenReturn(Arrays.asList(productWithoutCategory));
+        when(companyRepository.existsByExternalCompanyId(companyId)).thenReturn(true);
+        when(productDiscountSupport.findActiveDiscountsByProductIds(eq(companyId), anyList())).thenReturn(java.util.Collections.emptyMap());
+        when(productDiscountSupport.summarize(2000.0, null))
+            .thenReturn(new ProductDiscountSupport.ProductPriceSummary(2000.0, 2000.0, 0.0));
+
+        CategorizedProductsDTO result = productService.getProductsSfotRestaurantByCompanyId(companyId);
+
+        assertNotNull(result);
+        assertNotNull(result.getCategories());
+        assertTrue(result.getCategories().isEmpty());
+    }
+
         @Test
         void getProductsSfotRestaurantByCompanyId_ShouldExposeDiscountedValues() {
         Long companyId = 1L;
