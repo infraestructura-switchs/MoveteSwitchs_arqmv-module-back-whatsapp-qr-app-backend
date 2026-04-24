@@ -156,11 +156,11 @@ public class UserServiceImpl implements UserService {
         try {
             Optional<User> objectOptional = iRepository.findById(id);
             UserDto objectDtoVo = null;
-            if (objectOptional.isPresent()) {
+            if (objectOptional.isPresent() && isNotDeleted(objectOptional.get())) {
                 objectDtoVo = new UserDto();
                 BeanUtils.copyProperties(objectOptional.get(), objectDtoVo);
                 User objectTmp = objectOptional.get();
-                objectTmp.setStatus(StatusConstants.INACTIVE_STATUS);
+                objectTmp.setStatus(StatusConstants.DELETED_STATUS);
                 iRepository.save(objectTmp);
                 return true;
             }
@@ -174,7 +174,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto get(long id) {
         Optional<User> objectOptional = iRepository.findById(id);
-        if (objectOptional.isPresent()) {
+        if (objectOptional.isPresent() && isNotDeleted(objectOptional.get())) {
             return mapUserDto(objectOptional.get());
         } else {
             throw new CustomErrorException(HttpStatus.BAD_REQUEST, "Objecto No existe");
@@ -211,7 +211,7 @@ public class UserServiceImpl implements UserService {
         Sort sort = Sort.by(direction, sortBy);
 
         Pageable pagingSort = PageRequest.of(page, size, sort);
-        return mapPageUserDto(iRepository.findByStatus(status, pagingSort), pagingSort);
+        return mapPageUserDto(iRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS, pagingSort), pagingSort);
     }
 
     @Override
@@ -220,7 +220,7 @@ public class UserServiceImpl implements UserService {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pagingSort = PageRequest.of(page, size, sort);
 
-        return mapPageUserDto(iRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pagingSort), pagingSort);
+        return mapPageUserDto(iRepository.findByStatusAndStatusNot(StatusConstants.ACTIVE_STATUS, StatusConstants.DELETED_STATUS, pagingSort), pagingSort);
     }
 
     @Override
@@ -230,7 +230,7 @@ public class UserServiceImpl implements UserService {
             status = customQuery.get("status");
         }
 
-        return iRepository.findByStatus(status).stream()
+        return iRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS).stream()
                 .map(objects -> GgpUserGetAllDto.builder()
                         .userId(objects.getUserId())
                         .name(objects.getName())
@@ -395,5 +395,10 @@ public class UserServiceImpl implements UserService {
                         .map(this::mapUserToGetAllDto)
                         .toList(),
                 pagingSort, totalElements);
+    }
+
+    private boolean isNotDeleted(User user) {
+        return user == null || user.getStatus() == null
+                || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(user.getStatus());
     }
 }

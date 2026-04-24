@@ -45,7 +45,9 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
 
     @Override
     public List<CompanyRequest> getAllCompany() {
-        List<Company> companies = companyRepository.findByStatus(StatusConstants.ACTIVE_STATUS);
+        List<Company> companies = companyRepository.findByStatusAndStatusNot(
+            StatusConstants.ACTIVE_STATUS,
+            StatusConstants.DELETED_STATUS);
         return companies.stream().map(c -> {
             CompanyRequest dto = new CompanyRequest();
             dto.setCompanyId(c.getId());
@@ -68,7 +70,10 @@ public class CompanyRepositoryAdapter implements CompanyRepositoryPort {
 
     @Override
     public Page<CompanyResponseDTO> getAllPageCompany(Pageable pageable) {
-        Page<Company> page = companyRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pageable);
+        Page<Company> page = companyRepository.findByStatusAndStatusNot(
+            StatusConstants.ACTIVE_STATUS,
+            StatusConstants.DELETED_STATUS,
+            pageable);
         Set<Long> cityIds = page.getContent().stream()
                 .map(Company::getCityId)
                 .filter(java.util.Objects::nonNull)

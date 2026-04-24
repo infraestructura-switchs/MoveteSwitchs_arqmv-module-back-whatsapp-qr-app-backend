@@ -67,9 +67,9 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
     @Transactional
     public boolean delete(Long rolId) {
         Optional<Rol> rolOptional = rolRepository.findById(rolId);
-        if (rolOptional.isPresent()) {
+        if (rolOptional.isPresent() && isNotDeleted(rolOptional.get())) {
             Rol Rol = rolOptional.get();
-            Rol.setStatus(StatusConstants.INACTIVE_STATUS);
+            Rol.setStatus(StatusConstants.DELETED_STATUS);
             rolRepository.save(Rol);
             return true;
         }
@@ -79,7 +79,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
     @Override
     public RolDto get(long id) {
         Optional<Rol> rolOptional = rolRepository.findById(id);
-        if (rolOptional.isPresent()) {
+        if (rolOptional.isPresent() && isNotDeleted(rolOptional.get())) {
             return mapRolDto(rolOptional.get());
         } else {
             throw new CustomErrorException(HttpStatus.BAD_REQUEST, "El rol no existe");
@@ -113,7 +113,7 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        return mapPageRolDto(rolRepository.findByStatus(status, pagingSort), pagingSort);
+        return mapPageRolDto(rolRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS, pagingSort), pagingSort);
     }
 
     @Override
@@ -121,13 +121,13 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        return mapPageRolDto(rolRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pagingSort), pagingSort);
+        return mapPageRolDto(rolRepository.findByStatusAndStatusNot(StatusConstants.ACTIVE_STATUS, StatusConstants.DELETED_STATUS, pagingSort), pagingSort);
     }
 
     @Override
     public List<RolGetAllDto> getAllWithOutPage() {
 
-        return rolRepository.findByStatus(StatusConstants.ACTIVE_STATUS).stream()
+        return rolRepository.findByStatusAndStatusNot(StatusConstants.ACTIVE_STATUS, StatusConstants.DELETED_STATUS).stream()
                 .map(rol -> RolGetAllDto.builder()
                         .id(rol.getRolId())
                         .name(rol.getName())
@@ -174,5 +174,10 @@ public class RolServiceImpl implements RolInterface, RolUseCase {
                                 .build())
                         .collect(Collectors.toList()),
                 pagingSort, totalElements);
+    }
+
+    private boolean isNotDeleted(Rol rol) {
+        return rol == null || rol.getStatus() == null
+            || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(rol.getStatus());
     }
 }

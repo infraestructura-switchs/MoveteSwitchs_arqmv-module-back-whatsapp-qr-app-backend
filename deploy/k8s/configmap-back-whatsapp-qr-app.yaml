@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-back-whatsapp-qr-app
+  namespace: ${K8S_NS}
+data:
+  SPRING_PROFILES_ACTIVE: "prod-oracle"
+  DB_TYPE: "oracle"
+
+  LANDING_PAGE_URL: "https://qr-movete.is.arqbs.com"
+  BACKEND_URL: "https://qr-movete.is.arqbs.com"
+
+  # Keep only one URL by environment. This value points to production.
+  PRODUCTS_SERVICE_URL: "https://gfvsgktksbutb3pdokevf6vhbi.apigateway.us-phoenix-1.oci.customer-oci.com/arq-prd-v3/"
+
+  ORACLE_DATASOURCE_URL: "jdbc:oracle:thin:@//arqsmallpldbs01-public-phx.infra.arqbs.com:1621/CDBSMALL_ARQSMALLPLDBS01_PDBMOVETE.paas.oracle.com"
+  ORACLE_DATASOURCE_USERNAME: "APPMOVING"
+
+  # Optional test target if your app still reads these keys.
+  ORACLE_DATASOURCE_URL_TEST: "jdbc:oracle:thin:@//129.153.214.148:1521/pdbeedev2.eesubnet.eevcn.oraclevcn.com"
+  ORACLE_DATASOURCE_USERNAME_TEST: "APPMOVPRD"
+
+  SESSION_ID_EXPIRATION_MS: "3600000"

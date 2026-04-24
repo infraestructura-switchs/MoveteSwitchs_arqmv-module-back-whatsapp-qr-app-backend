@@ -9,6 +9,7 @@ import com.restaurante.bot.model.Product;
 import com.restaurante.bot.model.ProductDiscount;
 import com.restaurante.bot.repository.ProductDiscountRepository;
 import com.restaurante.bot.repository.ProductRepository;
+import com.restaurante.bot.util.StatusConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -138,7 +139,7 @@ class ProductDiscountCrudUseCaseImplTest {
                                 .status("INACTIVE")
                                 .build();
 
-                when(productDiscountRepository.findByProductDiscountIdAndCompanyId(1L, 273L)).thenReturn(Optional.of(existing));
+                when(productDiscountRepository.findByProductDiscountIdAndCompanyIdAndNotDeleted(1L, 273L)).thenReturn(Optional.of(existing));
                 when(productRepository.findById(8L)).thenReturn(Optional.of(product));
                 when(productDiscountRepository.save(any(ProductDiscount.class))).thenAnswer(invocation -> invocation.getArgument(0));
                 when(productDiscountSupport.toDto(any(ProductDiscount.class))).thenAnswer(invocation -> {
@@ -162,4 +163,23 @@ class ProductDiscountCrudUseCaseImplTest {
                 assertNotNull(result.getEndAt());
                 assertEquals(result.getStartAt(), result.getEndAt());
         }
+
+    @Test
+    void delete_ShouldMarkDiscountAsDeleted_WhenDiscountExists() {
+        ProductDiscount existing = ProductDiscount.builder()
+                .productDiscountId(1L)
+                .companyId(273L)
+                .status(StatusConstants.ACTIVE_STATUS)
+                .build();
+
+        when(productDiscountRepository.findByProductDiscountIdAndCompanyIdAndNotDeleted(1L, 273L))
+                .thenReturn(Optional.of(existing));
+        when(productDiscountRepository.save(any(ProductDiscount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        boolean deleted = productDiscountCrudUseCase.delete(1L, 273L);
+
+        assertEquals(true, deleted);
+        verify(productDiscountRepository).save(argThat(discount ->
+                StatusConstants.DELETED_STATUS.equals(discount.getStatus())));
+    }
 }

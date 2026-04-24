@@ -38,7 +38,10 @@ public class LandingTemplateRepositoryAdapter implements LandingTemplateReposito
 
     @Override
     public List<LandingTemplateRequest> getAllLandingTemplate() {
-        return landingTemplateRepository.findByStatus(StatusConstants.ACTIVE_STATUS).stream()
+        return landingTemplateRepository.findByStatusAndStatusNot(
+                StatusConstants.ACTIVE_STATUS,
+                StatusConstants.DELETED_STATUS)
+            .stream()
                 .map(l -> LandingTemplateRequest.builder()
                         .landingTemplateId(l.getLandingTemplateId())
                         .name(l.getName())
@@ -49,7 +52,10 @@ public class LandingTemplateRepositoryAdapter implements LandingTemplateReposito
 
     @Override
     public Page<LandingTemplateResponseDTO> getAllPageLandingTemplate(Pageable pageable) {
-        Page<LandingTemplate> page = landingTemplateRepository.findByStatus(StatusConstants.ACTIVE_STATUS, pageable);
+        Page<LandingTemplate> page = landingTemplateRepository.findByStatusAndStatusNot(
+            StatusConstants.ACTIVE_STATUS,
+            StatusConstants.DELETED_STATUS,
+            pageable);
         List<LandingTemplateResponseDTO> content = page.getContent().stream()
                 .map(l -> LandingTemplateResponseDTO.builder()
                         .landingTemplateId(l.getLandingTemplateId())

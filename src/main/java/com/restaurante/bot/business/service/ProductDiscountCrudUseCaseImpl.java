@@ -20,8 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +59,7 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
 
     @Override
     public ProductDiscountDto get(Long id, Long companyId) {
-        ProductDiscount discount = productDiscountRepository.findByProductDiscountIdAndCompanyId(id, companyId)
+        ProductDiscount discount = productDiscountRepository.findByProductDiscountIdAndCompanyIdAndNotDeleted(id, companyId)
             .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Descuento no encontrado"));
         return productDiscountSupport.toDto(discount);
     }
@@ -64,7 +67,7 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     @Override
     @Transactional
     public ProductDiscountDto update(Long id, ProductDiscountSaveAndUpdateDto productDiscountDto) {
-        ProductDiscount existingDiscount = productDiscountRepository.findByProductDiscountIdAndCompanyId(id, productDiscountDto.getCompanyId())
+        ProductDiscount existingDiscount = productDiscountRepository.findByProductDiscountIdAndCompanyIdAndNotDeleted(id, productDiscountDto.getCompanyId())
             .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Descuento no encontrado"));
 
         Product product = validateProduct(productDiscountDto.getProductId(), productDiscountDto.getCompanyId());
@@ -89,9 +92,9 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
     @Override
     @Transactional
     public boolean delete(Long id, Long companyId) {
-        return productDiscountRepository.findByProductDiscountIdAndCompanyId(id, companyId)
+        return productDiscountRepository.findByProductDiscountIdAndCompanyIdAndNotDeleted(id, companyId)
                 .map(discount -> {
-                    discount.setStatus(StatusConstants.INACTIVE_STATUS);
+                    discount.setStatus(StatusConstants.DELETED_STATUS);
                     productDiscountRepository.save(discount);
                     return true;
                 })
@@ -107,8 +110,20 @@ public class ProductDiscountCrudUseCaseImpl implements ProductDiscountCrudUseCas
 
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductDiscount> found = productDiscountRepository.findByFilters(companyId, productId, status, pageable);
+
+        Set<Long> productIds = found.getContent().stream()
+            .map(ProductDiscount::getProductId)
+            .filter(id -> id != null)
+            .collect(Collectors.toSet());
+
+        Map<Long, String> productNamesById = productIds.isEmpty()
+            ? Collections.emptyMap()
+            : productRepository.findAllById(productIds).stream()
+                .filter(product -> companyId == null || companyId.equals(product.getCompanyId()))
+                .collect(Collectors.toMap(Product::getProductId, Product::getName, (left, right) -> left));
+
         List<ProductDiscountDto> content = found.getContent().stream()
-                .map(productDiscountSupport::toDto)
+            .map(discount -> productDiscountSupport.toDto(discount, productNamesById.get(discount.getProductId())))
                 .toList();
         return new PageImpl<>(content, pageable, found.getTotalElements());
     }

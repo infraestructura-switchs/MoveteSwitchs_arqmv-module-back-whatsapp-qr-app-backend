@@ -13,7 +13,13 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
         // Return entities; mapping to DTOs happens in adapter/service layer
         List<Company> findByStatus(String status);
 
+        List<Company> findByStatusAndStatusNot(String status, String excludedStatus);
+
         Page<Company> findByStatus(String status, Pageable pageable);
+
+        Page<Company> findByStatusAndStatusNot(String status, String excludedStatus, Pageable pageable);
+
+        java.util.Optional<Company> findByIdAndStatusNot(Long id, String excludedStatus);
 
         Boolean existsByExternalCompanyId(Long externalCompanyId);
 

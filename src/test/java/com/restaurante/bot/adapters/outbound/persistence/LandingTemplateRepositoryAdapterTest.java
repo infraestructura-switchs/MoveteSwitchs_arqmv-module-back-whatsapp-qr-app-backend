@@ -50,12 +50,12 @@ class LandingTemplateRepositoryAdapterTest {
         landingTemplate.setStatus("ACTIVE");
         Page<LandingTemplate> page = new PageImpl<>(List.of(landingTemplate));
 
-        when(landingTemplateRepository.findByStatus("ACTIVE")).thenReturn(List.of(landingTemplate));
-        when(landingTemplateRepository.findByStatus(eq("ACTIVE"), any(Pageable.class))).thenReturn(page);
+        when(landingTemplateRepository.findByStatusAndStatusNot("ACTIVE", "DELETED")).thenReturn(List.of(landingTemplate));
+        when(landingTemplateRepository.findByStatusAndStatusNot(eq("ACTIVE"), eq("DELETED"), any(Pageable.class))).thenReturn(page);
 
         assertEquals(1, adapter.getAllLandingTemplate().size());
         assertEquals(1, adapter.getAllPageLandingTemplate(Pageable.unpaged()).getTotalElements());
-        verify(landingTemplateRepository).findByStatus("ACTIVE");
-        verify(landingTemplateRepository).findByStatus(eq("ACTIVE"), any(Pageable.class));
+        verify(landingTemplateRepository).findByStatusAndStatusNot("ACTIVE", "DELETED");
+        verify(landingTemplateRepository).findByStatusAndStatusNot(eq("ACTIVE"), eq("DELETED"), any(Pageable.class));
     }
 }

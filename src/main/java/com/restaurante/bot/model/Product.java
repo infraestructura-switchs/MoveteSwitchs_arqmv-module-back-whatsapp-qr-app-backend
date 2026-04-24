@@ -53,11 +53,8 @@ public class Product {
     @Column(name = "PREPARATION_TIME")
     private Integer preparationTime;
 
-    @Column(name = "product_integration_id", insertable = false, updatable = false)
-    private Long productIntegrationId;
-
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_integration_id", referencedColumnName = "product_integration_id")
+    @JoinColumn(name = "product_integration_id", referencedColumnName = "product_integration_id", unique = true)
     private ProductIntegration productIntegration;
 
     public Integer getArqProductId() {

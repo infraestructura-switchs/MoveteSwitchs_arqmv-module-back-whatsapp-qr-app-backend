@@ -23,10 +23,14 @@ public interface RolRepository extends JpaRepository<Rol, Long> {
 
 	List<Rol> findByStatus(String status);
 
+	List<Rol> findByStatusAndStatusNot(String status, String excludedStatus);
+
 	/**
 	 * Search Rol with pagination and current status
 	 */
 	Page<Rol> findByStatus(String status, Pageable pageable);
+
+	Page<Rol> findByStatusAndStatusNot(String status, String excludedStatus, Pageable pageable);
 
 	/**
 	 * Search Rol by ID and/or name with status filter
@@ -38,7 +42,8 @@ public interface RolRepository extends JpaRepository<Rol, Long> {
 	@Query("SELECT r FROM Rol r " +
 			"WHERE (:rolId IS NULL OR r.rolId = :rolId) " +
 			"AND (:name IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-			"AND r.status = 'ACTIVE'")
+			"AND r.status = 'ACTIVE' " +
+			"AND (r.status IS NULL OR UPPER(r.status) <> 'DELETED')")
 	Page<Rol> findByIdOrNameContainingIgnoreCaseAndStatus(
 			@Param("rolId") Long rolId,
 			@Param("name") String name,

@@ -18,7 +18,9 @@ public interface UserRepositoryPort {
     User save(User user);
     boolean existsById(Long id);
     Page<User> findByStatus(String status, Pageable pageable);
+    Page<User> findByStatusAndStatusNot(String status, String excludedStatus, Pageable pageable);
     List<User> findByStatus(String status);
+    List<User> findByStatusAndStatusNot(String status, String excludedStatus);
 
     Page<User> customSearch(Map<String,String> filters, Pageable pageable);
     Page<User> findByEmailOrLoginAndIdNotIn(String email, String login, Collection<Long> excludedIds,

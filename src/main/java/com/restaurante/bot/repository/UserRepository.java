@@ -35,7 +35,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Page<User> findByStatus(String status, Pageable pageable);
 
+	Page<User> findByStatusAndStatusNot(String status, String excludedStatus, Pageable pageable);
+
 	List<User> findByStatus(String status);
+
+	List<User> findByStatusAndStatusNot(String status, String excludedStatus);
 
 	@Query("SELECT u FROM User u WHERE u.company.id = :companyId")
 	User findUserByCompany(@Param("companyId") Long companyId);
@@ -64,7 +68,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 			"AND (:companyName IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :companyName, '%'))) " +
 			"AND (:positionDescription IS NULL OR LOWER(p.description) LIKE LOWER(CONCAT('%', :positionDescription, '%'))) " +
 			"AND (:areaDescription IS NULL OR LOWER(a.description) LIKE LOWER(CONCAT('%', :areaDescription, '%'))) " +
-			"AND (:status IS NULL OR u.status = :status)")
+			"AND (:status IS NULL OR u.status = :status) " +
+			"AND (u.status IS NULL OR UPPER(u.status) <> 'DELETED')")
 	Page<User> searchUsers(
 			@Param("userId") Long userId,
 			@Param("name") String name,

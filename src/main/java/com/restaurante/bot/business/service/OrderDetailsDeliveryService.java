@@ -167,7 +167,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
 
         User user = userRepository.findUserByCompany(company.getId());
 
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
+        Subscription subscription = subscriptionRepository.findFirstByUserIdOrderByIdDesc(user.getUserId());
 
         OrderDetailDelivery orderDetailDelivery = orderRepository.findByOrderTransactionDeliveryId(orderDetailsDeliveryDTO.getOrderTransactionDeliveryId());
         orderDetailDelivery.setMethod(orderDetailsDeliveryDTO.getMethod());
@@ -243,7 +243,7 @@ public class OrderDetailsDeliveryService implements IOrderDetailBusiness, OrderD
     public Boolean delete(Long id) {
         if (orderRepository.existsById(id)) {
             OrderDetailDelivery orderDetail = orderRepository.findById(id).get();
-            orderDetail.setStatus("INACTIVE");
+            orderDetail.setStatus(StatusConstants.DELETED_STATUS);
             orderRepository.save(orderDetail);
             return true;
         } else {

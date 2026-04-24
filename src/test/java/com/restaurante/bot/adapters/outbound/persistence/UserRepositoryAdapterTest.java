@@ -45,8 +45,8 @@ class UserRepositoryAdapterTest {
         User u = new User();
         Page<User> page = new PageImpl<>(List.of(u));
 
-        when(userRepository.findByStatus("ACTIVE", Pageable.unpaged())).thenReturn(page);
-        when(userRepository.findByStatus("ACTIVE")).thenReturn(List.of(u));
+        when(userRepository.findByStatusAndStatusNot("ACTIVE", "DELETED", Pageable.unpaged())).thenReturn(page);
+        when(userRepository.findByStatusAndStatusNot("ACTIVE", "DELETED")).thenReturn(List.of(u));
         when(userRepository.findByUserIdOrNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrLoginContainingIgnoreCaseOrCompany_CompanyNameContainingIgnoreCaseOrPosition_DescriptionContainingIgnoreCaseOrArea_DescriptionContainingIgnoreCaseOrAndStatus(
                 any(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), any(Pageable.class)
         )).thenReturn(page);

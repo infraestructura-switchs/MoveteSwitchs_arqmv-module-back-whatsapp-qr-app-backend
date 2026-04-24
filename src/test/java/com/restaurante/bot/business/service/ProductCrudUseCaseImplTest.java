@@ -106,7 +106,7 @@ class ProductCrudUseCaseImplTest {
         updatedProduct.setCompanyId(273L);
         updatedProduct.setInformation("valor anterior");
 
-        when(productRepository.findById(649L)).thenReturn(Optional.of(existingProduct));
+        when(productRepository.findByIdAndNotDeleted(649L)).thenReturn(Optional.of(existingProduct));
         when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
         when(productCommentRepository.findByProductId(any())).thenReturn(java.util.Collections.emptyList());
         when(productDiscountSupport.findActiveDiscount(273L, 649L)).thenReturn(null);
@@ -139,7 +139,7 @@ class ProductCrudUseCaseImplTest {
                 .status("ACTIVE")
                 .build();
 
-        when(productRepository.findById(649L)).thenReturn(Optional.of(existingProduct));
+        when(productRepository.findByIdAndNotDeleted(649L)).thenReturn(Optional.of(existingProduct));
         when(productCommentRepository.findByProductId(any())).thenReturn(java.util.Collections.emptyList());
         when(productDiscountSupport.findActiveDiscount(273L, 649L)).thenReturn(activeDiscount);
         when(productDiscountSupport.summarize(34000.0, activeDiscount))

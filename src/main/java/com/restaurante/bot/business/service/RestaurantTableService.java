@@ -174,12 +174,17 @@ public class RestaurantTableService implements RestaurantTableInterface {
             return;
         }
 
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
+        Subscription subscription = subscriptionRepository.findFirstByUserIdOrderByIdDesc(user.getUserId());
         if (subscription == null || subscription.getToken() == null) {
             log.warn("No subscription/token found for user {} - skipping notification", user.getUserId());
             return;
         }
 
-        notificationService.sendNotificationToClient(subscription.getToken(), title, body);
+        try {
+            notificationService.sendNotificationToClient(subscription.getToken(), title, body);
+        } catch (Exception e) {
+            // Notification errors must not break core table status transitions.
+            log.error("Notification failed for company {} and user {}: {}", companyId, user.getUserId(), e.getMessage(), e);
+        }
     }
 }

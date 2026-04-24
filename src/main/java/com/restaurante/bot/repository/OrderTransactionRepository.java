@@ -173,13 +173,16 @@ public interface OrderTransactionRepository extends JpaRepository<OrderTransacti
 	/**
 	 * Get company data for orders
 	 */
-	@Query("SELECT rt.tableNumber, o.orderId, null, p.name, op.quantity, p.price, op.commentProduct, o.date " +
-			"FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p " +
+	@Query("SELECT rt.tableNumber, o.orderId, pi.softRestaurantId, p.name, op.quantity, p.price, op.commentProduct, o.date " +
+			"FROM RestaurantTable rt, Transaction t, TransactionStatus ts, OrderTransaction ot, CustomerOrder o, OrderProduct op, Product p, " +
+			" ProductIntegration pi " +
 			"WHERE rt.tableId = t.tableId " +
 			"AND t.status = ts.transactionStatusId " +
 			"AND ot.transactionId = t.transactionId AND o.orderId = ot.orderId " +
 			"AND op.orderId = o.orderId AND p.productId = op.productId " +
-			"AND " + CONDITION_ORDER_CONFIRMED_OR_SENT + " AND t.status = " + TRANSACTION_STATUS_ACTIVE)
+			"AND p.productIntegration.productIntegrationId = pi.productIntegrationId " +
+			"AND " + CONDITION_ORDER_CONFIRMED_OR_SENT + " AND t.status = " + TRANSACTION_STATUS_ACTIVE + " " +
+			"AND o.companyId = :companyId")
 	List<Object[]> findCompanyData(@Param("companyId") Long companyId);
 
 	// ========== Default Methods for backward compatibility ==========

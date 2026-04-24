@@ -2,8 +2,11 @@ package com.restaurante.bot.business.service;
 
 import com.cloudinary.Cloudinary;
 import com.restaurante.bot.dto.CompanyRequest;
+import com.restaurante.bot.domain.exception.DomainException;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.repository.CompanyRepository;
+import com.restaurante.bot.repository.CityRepository;
+import com.restaurante.bot.util.StatusConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +34,9 @@ class CompanyServiceTest {
     @Mock
     private Cloudinary cloudinary;
 
+    @Mock
+    private CityRepository cityRepository;
+
     @InjectMocks
     private CompanyService companyService;
     private Company mockCompany;
@@ -53,7 +59,7 @@ class CompanyServiceTest {
     void getAllCompany_ShouldReturnCompanyList() {
         // Given
         List<Company> mockCompanies = Arrays.asList(mockCompany);
-        when(companyRepository.findByStatus("ACTIVE")).thenReturn(mockCompanies);
+        when(companyRepository.findByStatusAndStatusNot(StatusConstants.ACTIVE_STATUS, StatusConstants.DELETED_STATUS)).thenReturn(mockCompanies);
 
         // When
         List<CompanyRequest> result = companyService.getAllCompany();
@@ -63,7 +69,7 @@ class CompanyServiceTest {
         assertEquals(1, result.size());
         assertEquals("Test Company", result.get(0).getNameCompany());
         
-        verify(companyRepository, times(1)).findByStatus("ACTIVE");
+        verify(companyRepository, times(1)).findByStatusAndStatusNot(StatusConstants.ACTIVE_STATUS, StatusConstants.DELETED_STATUS);
     }
 
     @Test
@@ -91,11 +97,10 @@ class CompanyServiceTest {
     }
 
     @Test
-    void delete_ShouldSetStatusInactive_WhenCompanyExists() {
+    void delete_ShouldSetStatusDeleted_WhenCompanyExists() {
         // Given
         Long companyId = 1L;
-        when(companyRepository.existsById(companyId)).thenReturn(true);
-        when(companyRepository.findById(companyId)).thenReturn(java.util.Optional.of(mockCompany));
+        when(companyRepository.findByIdAndStatusNot(companyId, StatusConstants.DELETED_STATUS)).thenReturn(java.util.Optional.of(mockCompany));
         when(companyRepository.save(any(Company.class))).thenReturn(mockCompany);
 
         // When
@@ -103,10 +108,9 @@ class CompanyServiceTest {
 
         // Then
         assertTrue(result);
-        assertEquals("INACTIVE", mockCompany.getStatus());
+        assertEquals(StatusConstants.DELETED_STATUS, mockCompany.getStatus());
         
-        verify(companyRepository, times(1)).existsById(companyId);
-        verify(companyRepository, times(1)).findById(companyId);
+        verify(companyRepository, times(1)).findByIdAndStatusNot(companyId, StatusConstants.DELETED_STATUS);
         verify(companyRepository, times(1)).save(mockCompany);
     }
 
@@ -114,15 +118,14 @@ class CompanyServiceTest {
     void delete_ShouldThrowException_WhenCompanyNotFound() {
         // Given
         Long companyId = 999L;
-        when(companyRepository.existsById(companyId)).thenReturn(false);
+        when(companyRepository.findByIdAndStatusNot(companyId, StatusConstants.DELETED_STATUS)).thenReturn(java.util.Optional.empty());
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(DomainException.class, () -> {
             companyService.delete(companyId);
         });
         
-        verify(companyRepository, times(1)).existsById(companyId);
-        verify(companyRepository, never()).findById(any());
+        verify(companyRepository, times(1)).findByIdAndStatusNot(companyId, StatusConstants.DELETED_STATUS);
         verify(companyRepository, never()).save(any());
     }
 }

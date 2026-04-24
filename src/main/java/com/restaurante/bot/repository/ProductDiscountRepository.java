@@ -20,6 +20,7 @@ public interface ProductDiscountRepository extends JpaRepository<ProductDiscount
         WHERE d.companyId = :companyId
           AND (:productId IS NULL OR d.productId = :productId)
           AND (:status IS NULL OR UPPER(d.status) = UPPER(:status))
+          AND (d.status IS NULL OR UPPER(d.status) <> 'DELETED')
         ORDER BY d.productId ASC, d.startAt DESC, d.productDiscountId DESC
         """)
     Page<ProductDiscount> findByFilters(
@@ -59,4 +60,15 @@ public interface ProductDiscountRepository extends JpaRepository<ProductDiscount
             @Param("currentTime") LocalDateTime currentTime);
 
     Optional<ProductDiscount> findByProductDiscountIdAndCompanyId(Long productDiscountId, Long companyId);
+
+    @Query("""
+        SELECT d
+        FROM ProductDiscount d
+        WHERE d.productDiscountId = :productDiscountId
+          AND d.companyId = :companyId
+          AND (d.status IS NULL OR UPPER(d.status) <> 'DELETED')
+        """)
+    Optional<ProductDiscount> findByProductDiscountIdAndCompanyIdAndNotDeleted(
+            @Param("productDiscountId") Long productDiscountId,
+            @Param("companyId") Long companyId);
 }

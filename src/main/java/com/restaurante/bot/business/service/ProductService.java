@@ -155,9 +155,21 @@ public class ProductService implements ProductInterface, ProductUseCase {
             companyId,
             products.stream().map(Product::getProductId).collect(Collectors.toList()));
 
-        Map<Long, List<ProductDto>> categorizedProductMap = products.stream()
+        List<ProductDto> productDtos = products.stream()
             .map(product -> toDto(product, imageByCompany, activeDiscounts.get(product.getProductId())))
-                .collect(Collectors.groupingBy(ProductDto::getCategoryId));
+            .collect(Collectors.toList());
+
+        long productsWithoutCategory = productDtos.stream()
+            .filter(productDto -> productDto.getCategoryId() == null)
+            .count();
+        if (productsWithoutCategory > 0) {
+            log.warn("getProductsSfotRestaurantByCompanyId - se omiten {} productos sin categoryId para companyId={}",
+                productsWithoutCategory, companyId);
+        }
+
+        Map<Long, List<ProductDto>> categorizedProductMap = productDtos.stream()
+            .filter(productDto -> productDto.getCategoryId() != null)
+            .collect(Collectors.groupingBy(ProductDto::getCategoryId));
 
         CategorizedProductsDTO categorizedProductsDTO = new CategorizedProductsDTO();
 

@@ -114,7 +114,7 @@ class OrderDetailsServiceTest {
         when(companyRepository.existsByExternalCompanyId(326L)).thenReturn(true);
         when(companyRepository.findByExternalCompanyId(326L)).thenReturn(company);
         when(userRepository.findUserByCompany(45L)).thenReturn(user);
-        when(subscriptionRepository.findByUserId(100L)).thenReturn(null);
+        when(subscriptionRepository.findFirstByUserIdOrderByIdDesc(100L)).thenReturn(null);
         when(transactionRepository.getTransactionIdsByPhoneNumber("3001234567", 1L, 45L)).thenReturn(List.of(77L));
         when(customerOrderRepository.findByTransactionIdsAndStatusNoConfirm(List.of(77L))).thenReturn(List.of(pendingOrder));
 
@@ -150,7 +150,7 @@ class OrderDetailsServiceTest {
         when(companyRepository.existsByExternalCompanyId(326L)).thenReturn(true);
         when(companyRepository.findByExternalCompanyId(326L)).thenReturn(company);
         when(userRepository.findUserByCompany(45L)).thenReturn(user);
-        when(subscriptionRepository.findByUserId(100L)).thenReturn(null);
+        when(subscriptionRepository.findFirstByUserIdOrderByIdDesc(100L)).thenReturn(null);
         when(transactionRepository.getTransactionIdsByPhoneNumber("3001234567", 1L, 45L)).thenReturn(List.of(77L));
         when(customerOrderRepository.findByTransactionIdsAndStatusNoConfirm(List.of(77L))).thenReturn(List.of(pendingOrder));
         when(transactionRepository.findByTransactionId(77L)).thenReturn(tx);
