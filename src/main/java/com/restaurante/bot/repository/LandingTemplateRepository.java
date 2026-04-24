@@ -10,5 +10,11 @@ public interface LandingTemplateRepository extends JpaRepository<LandingTemplate
 
     List<LandingTemplate> findByStatus(String status);
 
+    List<LandingTemplate> findByStatusAndStatusNot(String status, String excludedStatus);
+
     Page<LandingTemplate> findByStatus(String status, Pageable pageable);
+
+    Page<LandingTemplate> findByStatusAndStatusNot(String status, String excludedStatus, Pageable pageable);
+
+    java.util.Optional<LandingTemplate> findByLandingTemplateIdAndStatusNot(Long landingTemplateId, String excludedStatus);
 }

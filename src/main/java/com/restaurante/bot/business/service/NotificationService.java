@@ -34,7 +34,7 @@ public class NotificationService implements NotificationInterface, NotificationU
 
     // Crear o actualizar suscripción con token
     public Subscription createOrUpdateSubscription(Long userId, String token) {
-        Subscription sub = subscriptionRepository.findByUserId(userId);
+        Subscription sub = subscriptionRepository.findFirstByUserIdOrderByIdDesc(userId);
         if (sub == null) {
             sub = new Subscription();
             sub.setUserId(userId);
@@ -45,7 +45,7 @@ public class NotificationService implements NotificationInterface, NotificationU
 
     // Habilitar/deshabilitar notificaciones para appointments
     public Subscription toggleAppointmentNotification(Long userId, boolean enabled) {
-        Subscription sub = subscriptionRepository.findByUserId(userId);
+        Subscription sub = subscriptionRepository.findFirstByUserIdOrderByIdDesc(userId);
         if (sub == null) {
             throw new RuntimeException("No subscription found");
         }
@@ -55,7 +55,7 @@ public class NotificationService implements NotificationInterface, NotificationU
 
     // Similar para journals
     public Subscription toggleJournalNotification(Long userId, boolean enabled) {
-        Subscription sub = subscriptionRepository.findByUserId(userId);
+        Subscription sub = subscriptionRepository.findFirstByUserIdOrderByIdDesc(userId);
         if (sub == null) {
             throw new RuntimeException("No subscription found");
         }
@@ -65,7 +65,7 @@ public class NotificationService implements NotificationInterface, NotificationU
 
     // Obtener suscripción por usuario
     public Subscription getSubscription(Long userId) {
-        return subscriptionRepository.findByUserId(userId);
+        return subscriptionRepository.findFirstByUserIdOrderByIdDesc(userId);
     }
 
     // Método para enviar notificación a un token específico

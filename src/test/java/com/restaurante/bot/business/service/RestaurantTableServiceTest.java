@@ -145,7 +145,7 @@ class RestaurantTableServiceTest {
         when(companyRepository.findByExternalCompanyId(any())).thenReturn(company);
         when(restaurantTableRepository.findByTableNumberAndCompanyId(10L, 56L)).thenReturn(table);
         when(userRepository.findUserByCompany(56L)).thenReturn(user);
-        when(subscriptionRepository.findByUserId(99L)).thenReturn(subscription);
+        when(subscriptionRepository.findFirstByUserIdOrderByIdDesc(99L)).thenReturn(subscription);
         when(restaurantTableRepository.save(table)).thenReturn(table);
         doThrow(new RuntimeException("firebase not initialized"))
                 .when(notificationService).sendNotificationToClient(any(), any(), any());

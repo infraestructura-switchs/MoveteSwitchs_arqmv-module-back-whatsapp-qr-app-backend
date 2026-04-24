@@ -64,6 +64,10 @@ public class ProductDiscountSupport {
     }
 
     public ProductDiscountDto toDto(ProductDiscount discount) {
+        return toDto(discount, null);
+    }
+
+    public ProductDiscountDto toDto(ProductDiscount discount, String productName) {
         if (discount == null) {
             return null;
         }
@@ -77,6 +81,7 @@ public class ProductDiscountSupport {
         return ProductDiscountDto.builder()
                 .id(discount.getProductDiscountId())
                 .productId(discount.getProductId())
+                .productName(productName)
                 .companyId(discount.getCompanyId())
                 .description(discount.getDescription())
                 .discountAmount(discount.getDiscountAmount())

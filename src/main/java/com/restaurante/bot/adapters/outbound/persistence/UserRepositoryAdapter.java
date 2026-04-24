@@ -3,6 +3,7 @@ package com.restaurante.bot.adapters.outbound.persistence;
 import com.restaurante.bot.application.ports.outgoing.UserRepositoryPort;
 import com.restaurante.bot.model.User;
 import com.restaurante.bot.repository.UserRepository;
+import com.restaurante.bot.util.StatusConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,12 +51,22 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
     @Override
     public Page<User> findByStatus(String status, Pageable pageable) {
-        return userRepository.findByStatus(status, pageable);
+        return userRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS, pageable);
+    }
+
+    @Override
+    public Page<User> findByStatusAndStatusNot(String status, String excludedStatus, Pageable pageable) {
+        return userRepository.findByStatusAndStatusNot(status, excludedStatus, pageable);
     }
 
     @Override
     public List<User> findByStatus(String status) {
-        return userRepository.findByStatus(status);
+        return userRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS);
+    }
+
+    @Override
+    public List<User> findByStatusAndStatusNot(String status, String excludedStatus) {
+        return userRepository.findByStatusAndStatusNot(status, excludedStatus);
     }
 
     @Override

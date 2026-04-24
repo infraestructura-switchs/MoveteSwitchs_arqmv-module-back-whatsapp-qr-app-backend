@@ -74,6 +74,12 @@ dependencies {
     testRuntimeOnly 'com.h2database:h2'
 }
 
+bootJar {
+    layered {
+        enabled = true
+    }
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }
@@ -85,6 +91,13 @@ springBoot {
 // Keep delombok available for tooling/docs, but compile from canonical sources.
 tasks.named('compileJava') {
     options.encoding = 'UTF-8'
+    // Avoid stale/missing class outputs restored from cache in some IDE build runs.
+    outputs.cacheIf { false }
+}
+
+tasks.named('compileTestJava') {
+    // Keep test compilation deterministic relative to freshly compiled main classes.
+    outputs.cacheIf { false }
 }
 
 // Ensure we only produce one executable JAR and with a predictable name for Docker

@@ -174,7 +174,7 @@ public class RestaurantTableService implements RestaurantTableInterface {
             return;
         }
 
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
+        Subscription subscription = subscriptionRepository.findFirstByUserIdOrderByIdDesc(user.getUserId());
         if (subscription == null || subscription.getToken() == null) {
             log.warn("No subscription/token found for user {} - skipping notification", user.getUserId());
             return;

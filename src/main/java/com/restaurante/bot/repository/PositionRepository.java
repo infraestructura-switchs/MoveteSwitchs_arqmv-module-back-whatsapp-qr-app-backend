@@ -23,7 +23,11 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
 
 	List<Position> findByStatus(String status);
 
+	List<Position> findByStatusAndStatusNot(String status, String excludedStatus);
+
 	Page<Position> findByStatus(String status, Pageable pageable);
+
+	Page<Position> findByStatusAndStatusNot(String status, String excludedStatus, Pageable pageable);
 
 	/**
 	 * Search Position by ID, description and status
@@ -36,11 +40,13 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
 	@Query(value = "SELECT p FROM Position p " +
 			"WHERE (:id IS NULL OR p.positionId = CAST(:id AS LONG)) " +
 			"AND (:description IS NULL OR LOWER(p.description) LIKE LOWER(CONCAT('%', :description, '%'))) " +
-			"AND (:status IS NULL OR p.status = :status)",
+			"AND (:status IS NULL OR p.status = :status) " +
+			"AND (p.status IS NULL OR UPPER(p.status) <> 'DELETED')",
 		countQuery = "SELECT COUNT(p) FROM Position p " +
 			"WHERE (:id IS NULL OR p.positionId = CAST(:id AS LONG)) " +
 			"AND (:description IS NULL OR LOWER(p.description) LIKE LOWER(CONCAT('%', :description, '%'))) " +
-			"AND (:status IS NULL OR p.status = :status)")
+			"AND (:status IS NULL OR p.status = :status) " +
+			"AND (p.status IS NULL OR UPPER(p.status) <> 'DELETED')")
 	Page<Position> findByIdOrDescriptionContainingIgnoreCaseAndStatus(
 			@Param("id") String id,
 			@Param("description") String description,

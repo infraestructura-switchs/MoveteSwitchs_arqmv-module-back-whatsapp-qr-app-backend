@@ -19,12 +19,17 @@ public interface AreaRepository extends JpaRepository<Area, Long> {
 
     List<Area> findByStatus(String status);
 
+       List<Area> findByStatusAndStatusNot(String status, String excludedStatus);
+
     Page<Area> findByStatus(String status, Pageable pageable);
+
+       Page<Area> findByStatusAndStatusNot(String status, String excludedStatus, Pageable pageable);
 
     @Query("SELECT a FROM Area a " +
            "WHERE (:areaId IS NULL OR a.areaId = :areaId) " +
            "AND (:description IS NULL OR LOWER(a.description) LIKE LOWER(CONCAT('%', :description, '%'))) " +
-           "AND (:status IS NULL OR a.status = :status)")
+           "AND (:status IS NULL OR a.status = :status) " +
+           "AND (a.status IS NULL OR UPPER(a.status) <> 'DELETED')")
     Page<Area> findByIdOrDescriptionContainingIgnoreCaseAndStatus(
             @Param("areaId") Long areaId,
             @Param("description") String description,

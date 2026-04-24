@@ -7,6 +7,7 @@ import com.restaurante.bot.model.Position;
 import com.restaurante.bot.repository.PositionRepository;
 import com.restaurante.bot.business.interfaces.IPositionService;
 import com.restaurante.bot.util.Constants;
+import com.restaurante.bot.util.StatusConstants;
 import com.restaurante.bot.util.SearchDTOConverter;
 import com.restaurante.bot.dto.PositionSearchDTO;
 import com.restaurante.bot.exception.CustomErrorException;
@@ -64,9 +65,9 @@ public class PositionServiceImpl implements IPositionService, PositionUseCase {
     @Transactional
     public boolean delete(Long positionId) {
         Optional<Position> positionOptional = positionRepository.findById(positionId);
-        if (positionOptional.isPresent()) {
+        if (positionOptional.isPresent() && isNotDeleted(positionOptional.get())) {
             Position entityPosition = positionOptional.get();
-            entityPosition.setStatus(Constants.INACTIVE_STATUS);
+            entityPosition.setStatus(StatusConstants.DELETED_STATUS);
             positionRepository.save(entityPosition);
             return true;
         }
@@ -76,7 +77,7 @@ public class PositionServiceImpl implements IPositionService, PositionUseCase {
     @Override
     public PositionDto get(Long positionId) {
         Optional<Position> positionOptional = positionRepository.findById(positionId);
-        if (positionOptional.isPresent()) {
+        if (positionOptional.isPresent() && isNotDeleted(positionOptional.get())) {
             return mapPositionDto(positionOptional.get());
         } else {
             throw new CustomErrorException(HttpStatus.BAD_REQUEST, "La posición no existe");
@@ -107,14 +108,14 @@ public class PositionServiceImpl implements IPositionService, PositionUseCase {
         }
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        return mapPagePositionDto(positionRepository.findByStatus(status, pagingSort), pagingSort);
+        return mapPagePositionDto(positionRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS, pagingSort), pagingSort);
     }
 
     @Override
     public Page<PositionGetAllDto> getAll(int page, int size, String orders, String sortBy) {
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        return mapPagePositionDto(positionRepository.findByStatus(Constants.ACTIVE_STATUS, pagingSort), pagingSort);
+        return mapPagePositionDto(positionRepository.findByStatusAndStatusNot(Constants.ACTIVE_STATUS, StatusConstants.DELETED_STATUS, pagingSort), pagingSort);
     }
 
     @Override
@@ -123,7 +124,7 @@ public class PositionServiceImpl implements IPositionService, PositionUseCase {
         if (customQuery.containsKey("status")) {
             status = customQuery.get("status");
         }
-        return positionRepository.findByStatus(status).stream()
+        return positionRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS).stream()
                 .map(position -> PositionGetAllDto.builder()
                         .id(position.getPositionId())
                         .description(position.getDescription())
@@ -172,4 +173,9 @@ public class PositionServiceImpl implements IPositionService, PositionUseCase {
                         .collect(Collectors.toList()),
                 pagingSort, totalElements);
     }
+
+            private boolean isNotDeleted(Position position) {
+                return position == null || position.getStatus() == null
+                    || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(position.getStatus());
+            }
 }

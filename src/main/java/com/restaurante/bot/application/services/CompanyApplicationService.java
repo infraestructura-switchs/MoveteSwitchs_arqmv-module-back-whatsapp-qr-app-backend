@@ -93,20 +93,19 @@ public class CompanyApplicationService implements CompanyUseCase {
     @Override
     @Transactional
     public Boolean delete(Long id) {
-        if (companyRepo.existsById(id)) {
-            Company company = companyRepo.findById(id).orElseThrow();
-            company.setStatus(StatusConstants.INACTIVE_STATUS);
-            companyRepo.save(company);
-            return true;
-        } else {
-            throw new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no fue encontrada por el id " + id);
-        }
+        Company company = companyRepo.findById(id)
+                .filter(this::isNotDeleted)
+                .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no fue encontrada por el id " + id));
+        company.setStatus(StatusConstants.DELETED_STATUS);
+        companyRepo.save(company);
+        return true;
     }
 
     @Override
     @Transactional
     public CompanyRequest update(CompanyRequest companyRequest, MultipartFile logoFile) {
         Company company = companyRepo.findById(companyRequest.getCompanyId())
+            .filter(this::isNotDeleted)
             .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Empresa con ID " + companyRequest.getCompanyId() + " no existe"));
 
         // update fields if present
@@ -179,6 +178,7 @@ public class CompanyApplicationService implements CompanyUseCase {
     @Override
     public CompanyRequest get(Long id) {
         Company company = companyRepo.findById(id)
+            .filter(this::isNotDeleted)
             .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Empresa no encontrada con id " + id));
         return CompanyRequest.builder()
                 .companyId(company.getId())
@@ -244,5 +244,10 @@ public class CompanyApplicationService implements CompanyUseCase {
                 .id(city.getId())
                 .name(city.getName())
                 .build();
+    }
+
+    private boolean isNotDeleted(Company company) {
+        return company == null || company.getStatus() == null
+                || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(company.getStatus());
     }
 }

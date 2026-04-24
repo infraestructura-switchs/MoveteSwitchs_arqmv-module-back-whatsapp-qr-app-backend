@@ -30,7 +30,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
           )
         )
         AND (:categoryId IS NULL OR p.categoryId = :categoryId)
-        AND (p.status IS NULL OR UPPER(p.status) <> 'INACTIVE')
+        AND (p.status IS NULL OR (UPPER(p.status) <> 'INACTIVE' AND UPPER(p.status) <> 'DELETED'))
       ORDER BY
         CASE
           WHEN :name IS NULL THEN 3
@@ -41,7 +41,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         END,
         p.name ASC
       """,
-      countQuery = "SELECT COUNT(p) FROM Product p WHERE p.companyId = :companyId AND (:name IS NULL OR (LOWER(p.name) LIKE LOWER(CONCAT(:name, '%')) OR LOWER(p.name) LIKE LOWER(CONCAT('%', CONCAT(:name, '%'))) OR LOWER(p.description) LIKE LOWER(CONCAT('%', CONCAT(:name, '%'))))) AND (:categoryId IS NULL OR p.categoryId = :categoryId) AND (p.status IS NULL OR UPPER(p.status) <> 'INACTIVE')"
+        countQuery = "SELECT COUNT(p) FROM Product p WHERE p.companyId = :companyId AND (:name IS NULL OR (LOWER(p.name) LIKE LOWER(CONCAT(:name, '%')) OR LOWER(p.name) LIKE LOWER(CONCAT('%', CONCAT(:name, '%'))) OR LOWER(p.description) LIKE LOWER(CONCAT('%', CONCAT(:name, '%'))))) AND (:categoryId IS NULL OR p.categoryId = :categoryId) AND (p.status IS NULL OR (UPPER(p.status) <> 'INACTIVE' AND UPPER(p.status) <> 'DELETED'))"
   )
   org.springframework.data.domain.Page<Product> search(
       @Param("companyId") Long companyId,
@@ -62,9 +62,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
               OR LOWER(p.description) LIKE LOWER(CONCAT('%', CONCAT(:name, '%')))
             )
           )
-          AND (p.status IS NULL OR UPPER(p.status) <> 'INACTIVE')
+            AND (p.status IS NULL OR (UPPER(p.status) <> 'INACTIVE' AND UPPER(p.status) <> 'DELETED'))
       """,
-      countQuery = "SELECT COUNT(p) FROM Product p WHERE p.companyId = :companyId AND (:categoryId IS NULL OR p.categoryId = :categoryId) AND (:name IS NULL OR (LOWER(p.name) LIKE LOWER(CONCAT(:name, '%')) OR LOWER(p.name) LIKE LOWER(CONCAT('%', CONCAT(:name, '%'))) OR LOWER(p.description) LIKE LOWER(CONCAT('%', CONCAT(:name, '%'))))) AND (p.status IS NULL OR UPPER(p.status) <> 'INACTIVE')"
+          countQuery = "SELECT COUNT(p) FROM Product p WHERE p.companyId = :companyId AND (:categoryId IS NULL OR p.categoryId = :categoryId) AND (:name IS NULL OR (LOWER(p.name) LIKE LOWER(CONCAT(:name, '%')) OR LOWER(p.name) LIKE LOWER(CONCAT('%', CONCAT(:name, '%'))) OR LOWER(p.description) LIKE LOWER(CONCAT('%', CONCAT(:name, '%'))))) AND (p.status IS NULL OR (UPPER(p.status) <> 'INACTIVE' AND UPPER(p.status) <> 'DELETED'))"
   )
     org.springframework.data.domain.Page<Product> findAllByCompanyAndCategoryAndNameOrderByPrice(
       @Param("companyId") Long companyId,
@@ -85,5 +85,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Pageable pageable = PageRequest.of(0, 1000);
     return findAllByCompanyAndCategoryAndNameOrderByPrice(companyId, categoryId, name, pageable).getContent();
   }
+
+  @Query("SELECT p FROM Product p WHERE p.productId = :id AND (p.status IS NULL OR UPPER(p.status) <> 'DELETED')")
+  Optional<Product> findByIdAndNotDeleted(@Param("id") Long id);
 
 }

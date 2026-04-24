@@ -66,9 +66,9 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
     @Transactional
     public boolean delete(Long areaId) {
         Optional<Area> areaOptional = areaRepository.findById(areaId);
-        if (areaOptional.isPresent()) {
+        if (areaOptional.isPresent() && isNotDeleted(areaOptional.get())) {
             Area entityArea = areaOptional.get();
-            entityArea.setStatus(StatusConstants.INACTIVE);
+            entityArea.setStatus(StatusConstants.DELETED_STATUS);
             areaRepository.save(entityArea);
             return true;
         }
@@ -78,7 +78,7 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
     @Override
     public AreaDto get(Long areaId) {
         Optional<Area> areaOptional = areaRepository.findById(areaId);
-        if (areaOptional.isPresent()) {
+        if (areaOptional.isPresent() && isNotDeleted(areaOptional.get())) {
             return mapAreaDto(areaOptional.get());
         } else {
             throw new CustomErrorException(HttpStatus.BAD_REQUEST, "El área no existe");
@@ -112,7 +112,7 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        return mapPageAreaDto(areaRepository.findByStatus(status, pagingSort), pagingSort);
+        return mapPageAreaDto(areaRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS, pagingSort), pagingSort);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Pageable pagingSort = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        return mapPageAreaDto(areaRepository.findByStatus(StatusConstants.ACTIVE, pagingSort), pagingSort);
+        return mapPageAreaDto(areaRepository.findByStatusAndStatusNot(StatusConstants.ACTIVE, StatusConstants.DELETED_STATUS, pagingSort), pagingSort);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
             status = customQuery.get("status");
         }
 
-        return areaRepository.findByStatus(status).stream()
+        return areaRepository.findByStatusAndStatusNot(status, StatusConstants.DELETED_STATUS).stream()
                 .map(area -> AreaGetAllDto.builder()
                         .id(area.getAreaId())
                         .description(area.getDescription())
@@ -179,4 +179,9 @@ public class AreaServiceImpl implements IAreaService, com.restaurante.bot.applic
                                 .build())
                         .collect(Collectors.toList()), pagingSort, totalElements);
     }
+
+            private boolean isNotDeleted(Area area) {
+                return area == null || area.getStatus() == null
+                    || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(area.getStatus());
+            }
 }

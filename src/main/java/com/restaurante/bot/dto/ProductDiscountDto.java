@@ -15,6 +15,7 @@ public class ProductDiscountDto {
 
     private Long id;
     private Long productId;
+    private String productName;
     private Long companyId;
     private String description;
     private Double discountAmount;

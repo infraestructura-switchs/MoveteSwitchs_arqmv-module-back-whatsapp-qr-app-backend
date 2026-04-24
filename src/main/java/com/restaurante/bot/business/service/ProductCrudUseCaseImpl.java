@@ -74,7 +74,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
 
     @Override
     public ProductDto get(Long id) {
-        Optional<Product> opt = productRepository.findById(id);
+        Optional<Product> opt = productRepository.findByIdAndNotDeleted(id);
         if (opt.isPresent()) return mapToDto(opt.get());
         throw new DomainException(DomainErrorCode.NOT_FOUND, "Producto no encontrado");
     }
@@ -83,7 +83,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     @Transactional
     public ProductDto update(Long productId, ProductSaveAndUpdateDto productDto) {
         validateProductDtoForUpdate(productDto);
-        Optional<Product> opt = productRepository.findById(productId);
+        Optional<Product> opt = productRepository.findByIdAndNotDeleted(productId);
         if (!opt.isPresent()) throw new DomainException(DomainErrorCode.NOT_FOUND, "Producto no existe");
         Product entity = opt.get();
         if (productDto.getProductName() != null) entity.setName(productDto.getProductName());
@@ -173,10 +173,10 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
     @Override
     @Transactional
     public boolean delete(Long id) {
-        Optional<Product> opt = productRepository.findById(id);
+        Optional<Product> opt = productRepository.findByIdAndNotDeleted(id);
         if (opt.isPresent()) {
             Product p = opt.get();
-            p.setStatus(StatusConstants.INACTIVE_STATUS);
+            p.setStatus(StatusConstants.DELETED_STATUS);
             productRepository.save(p);
             return true;
         }
@@ -208,6 +208,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         int total = (int) entityPage.getTotalElements();
         Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), resolvedCompanyId);
         List<ProductGetAllDto> list = entityPage.getContent().stream()
+            .filter(this::isNotDeleted)
             .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.toList());
         return new PageImpl<>(list, pagingSort, total);
@@ -232,6 +233,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         int total = (int) entityPage.getTotalElements();
         Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(entityPage.getContent(), resolvedCompanyId);
         List<ProductGetAllDto> list = entityPage.getContent().stream()
+            .filter(this::isNotDeleted)
             .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                 .collect(Collectors.toList());
         return new PageImpl<>(list, pagingSort, total);
@@ -249,6 +251,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
             org.springframework.data.domain.Page<Product> found = productRepository.search(resolvedCompanyId, null, null, pageable);
             String finalStatus = status;
             return found.getContent().stream()
+                .filter(this::isNotDeleted)
                 .filter(p -> finalStatus == null || finalStatus.equals(p.getStatus()))
                 .map(product -> mapToGetAllDto(product, productDiscountSupport.findActiveDiscount(product.getCompanyId(), product.getProductId())))
                 .collect(Collectors.toList());
@@ -258,6 +261,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
         org.springframework.data.domain.Page<Product> all = productRepository.findAll(pageableAll);
         String finalStatus1 = status;
         return all.getContent().stream()
+            .filter(this::isNotDeleted)
             .filter(p -> finalStatus1 == null || finalStatus1.equals(p.getStatus()))
             .map(product -> mapToGetAllDto(product, productDiscountSupport.findActiveDiscount(product.getCompanyId(), product.getProductId())))
             .collect(Collectors.toList());
@@ -286,6 +290,7 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
             org.springframework.data.domain.Page<Product> foundPage = productRepository.search(resolvedCompanyId, name, categoryId, pageable);
             Map<Long, ProductDiscount> activeDiscounts = resolveActiveDiscounts(foundPage.getContent(), resolvedCompanyId);
             java.util.List<ProductGetAllDto> content = foundPage.getContent().stream()
+                    .filter(this::isNotDeleted)
                     .map(product -> mapToGetAllDto(product, activeDiscounts.get(product.getProductId())))
                     .collect(Collectors.toList());
             return new PageImpl<>(content, pageable, foundPage.getTotalElements());
@@ -472,6 +477,11 @@ public class ProductCrudUseCaseImpl implements ProductCrudUseCase {
             }
         }
         return null;
+    }
+
+    private boolean isNotDeleted(Product product) {
+        return product == null || product.getStatus() == null
+            || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(product.getStatus());
     }
 
 }

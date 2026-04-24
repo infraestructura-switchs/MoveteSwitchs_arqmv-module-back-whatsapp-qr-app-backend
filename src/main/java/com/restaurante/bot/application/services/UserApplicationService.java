@@ -99,6 +99,7 @@ public class UserApplicationService implements UserUseCase {
     @Override
     public UserDto get(Long id) {
         return userRepo.findById(id)
+                .filter(this::isNotDeleted)
                 .map(this::mapUserDto)
                 .orElseThrow(() -> new IllegalStateException("Objecto No existe"));
     }
@@ -106,8 +107,8 @@ public class UserApplicationService implements UserUseCase {
     @Override
     @Transactional
     public boolean delete(Long id) {
-        return userRepo.findById(id).map(u -> {
-            u.setStatus(StatusConstants.INACTIVE_STATUS);
+        return userRepo.findById(id).filter(this::isNotDeleted).map(u -> {
+            u.setStatus(StatusConstants.DELETED_STATUS);
             userRepo.save(u);
             return true;
         }).orElse(false);
@@ -123,7 +124,10 @@ public class UserApplicationService implements UserUseCase {
         org.springframework.data.domain.Sort.Direction direction = org.springframework.data.domain.Sort.Direction.fromString(orders);
         org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(direction, sortBy);
         org.springframework.data.domain.Pageable pg = org.springframework.data.domain.PageRequest.of(page, size, sort);
-        return userRepo.findByStatus(filters.getOrDefault("status", StatusConstants.ACTIVE_STATUS), pg)
+        return userRepo.findByStatusAndStatusNot(
+                filters.getOrDefault("status", StatusConstants.ACTIVE_STATUS),
+                StatusConstants.DELETED_STATUS,
+                pg)
                 .map(this::mapUserToGetAllDto);
     }
 
@@ -138,7 +142,9 @@ public class UserApplicationService implements UserUseCase {
 
     @Override
     public List<GgpUserGetAllDto> getAllWithoutPage(Map<String, String> filters) {
-        List<com.restaurante.bot.model.User> users = userRepo.findByStatus(filters.getOrDefault("status", StatusConstants.ACTIVE_STATUS));
+        List<com.restaurante.bot.model.User> users = userRepo.findByStatusAndStatusNot(
+                filters.getOrDefault("status", StatusConstants.ACTIVE_STATUS),
+                StatusConstants.DELETED_STATUS);
         return users.stream().map(this::mapUserToGetAllDto).toList();
     }
 
@@ -217,5 +223,10 @@ public class UserApplicationService implements UserUseCase {
                 .description(area.getDescription())
                 .status(area.getStatus())
                 .build();
+    }
+
+    private boolean isNotDeleted(com.restaurante.bot.model.User user) {
+        return user == null || user.getStatus() == null
+                || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(user.getStatus());
     }
 }

@@ -551,7 +551,7 @@ public class OrderDetailsService implements OrderInterface, OrderUseCase {
         }
         Subscription subscription = null;
         if (user != null) {
-            subscription = subscriptionRepository.findByUserId(user.getUserId());
+            subscription = subscriptionRepository.findFirstByUserIdOrderByIdDesc(user.getUserId());
             if (subscription == null) {
                 log.warn("confirmationOrder - suscripción no encontrada para userId={}", user.getUserId());
             }

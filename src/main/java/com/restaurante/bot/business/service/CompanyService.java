@@ -12,6 +12,7 @@ import com.restaurante.bot.model.Company;
 import com.restaurante.bot.model.City;
 import com.restaurante.bot.repository.CityRepository;
 import com.restaurante.bot.repository.CompanyRepository;
+import com.restaurante.bot.util.StatusConstants;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,7 +79,7 @@ public class CompanyService implements CompanyInterface {
 
     @Override
     public List<CompanyRequest> getAllCompany() {
-        return companyRepository.findByStatus("ACTIVE").stream()
+        return companyRepository.findByStatusAndStatusNot(StatusConstants.ACTIVE_STATUS, StatusConstants.DELETED_STATUS).stream()
             .map(company -> CompanyRequest.builder()
                 .companyId(company.getId())
                 .nameCompany(company.getName())
@@ -99,14 +100,11 @@ public class CompanyService implements CompanyInterface {
 
     @Override
     public Boolean delete(Long id) {
-        if (companyRepository.existsById(id)) {
-            Company company = companyRepository.findById(id).get();
-            company.setStatus("INACTIVE");
-            companyRepository.save(company);
-            return true;
-        } else {
-            throw new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no fue encontrada por el id " + id);
-        }
+        Company company = companyRepository.findByIdAndStatusNot(id, StatusConstants.DELETED_STATUS)
+                .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "La compañia no fue encontrada por el id " + id));
+        company.setStatus(StatusConstants.DELETED_STATUS);
+        companyRepository.save(company);
+        return true;
     }
 
     @Override
@@ -115,6 +113,7 @@ public class CompanyService implements CompanyInterface {
         log.info("Actualizando empresa con ID: {}", companyRequest.getCompanyId());
 
         Company company = companyRepository.findById(companyRequest.getCompanyId())
+            .filter(this::isNotDeleted)
             .orElseThrow(() -> new DomainException(DomainErrorCode.NOT_FOUND, "Empresa con ID " + companyRequest.getCompanyId() + " no existe"));
 
         // Actualizar solo si el valor no es null
@@ -173,7 +172,10 @@ public class CompanyService implements CompanyInterface {
         Sort.Direction direction = Sort.Direction.fromString(orders);
         Sort sort = Sort.by(direction, sortBy);
         Pageable pagingSort = PageRequest.of(page, size, sort);
-        Page<Company> companies = companyRepository.findByStatus("ACTIVE", pagingSort);
+        Page<Company> companies = companyRepository.findByStatusAndStatusNot(
+            StatusConstants.ACTIVE_STATUS,
+            StatusConstants.DELETED_STATUS,
+            pagingSort);
         List<CompanyResponseDTO> content = companies.getContent().stream().map(company -> CompanyResponseDTO.builder()
                 .id(company.getId())
                 .companyName(company.getName())
@@ -208,6 +210,11 @@ public class CompanyService implements CompanyInterface {
                 .id(city.getId())
                 .name(city.getName())
                 .build();
+    }
+
+    private boolean isNotDeleted(Company company) {
+        return company == null || company.getStatus() == null
+                || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(company.getStatus());
     }
 
 }

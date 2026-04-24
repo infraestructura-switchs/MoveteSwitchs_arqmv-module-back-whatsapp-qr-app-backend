@@ -67,8 +67,20 @@ public class AdminRestaurantTableService implements AdminRestaurantTableInterfac
 
     @Override
     public RestaurantTable changeStatusOcuped(AdminChangeStatusTableDTO adminChangeStatusTableDTO) {
+        if (adminChangeStatusTableDTO == null) {
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Payload requerido");
+        }
+
+        if (adminChangeStatusTableDTO.getCompanyId() == null || adminChangeStatusTableDTO.getCompanyId() <= 0) {
+            throw new DomainException(DomainErrorCode.INVALID_REQUEST, "Campos con valor invalido: companyId");
+        }
+
         validateTableNumber(adminChangeStatusTableDTO.getTableNumber());
         Company company = companyRepository.findFirstByIdOrderById(adminChangeStatusTableDTO.getCompanyId());
+        if (company == null) {
+            throw new DomainException(DomainErrorCode.NOT_FOUND, "Compañia no registrada en la base de datos");
+        }
+
         RestaurantTable table = getTableByCompanyOrThrow(adminChangeStatusTableDTO.getTableNumber(), company.getId());
         table.setStatus(2L);
 
@@ -172,7 +184,7 @@ public class AdminRestaurantTableService implements AdminRestaurantTableInterfac
             return;
         }
 
-        Subscription subscription = subscriptionRepository.findByUserId(user.getUserId());
+        Subscription subscription = subscriptionRepository.findFirstByUserIdOrderByIdDesc(user.getUserId());
         if (subscription == null || subscription.getToken() == null) {
             log.warn("No subscription/token found for user {} - skipping notification", user.getUserId());
             return;

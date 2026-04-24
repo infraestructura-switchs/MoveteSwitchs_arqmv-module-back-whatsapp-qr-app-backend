@@ -47,19 +47,19 @@ public class LandingTemplateApplicationService implements LandingTemplateUseCase
     @Override
     @Transactional
     public Boolean delete(Long id) {
-        if (repository.existsById(id)) {
-            LandingTemplate lt = repository.findById(id).orElseThrow();
-            lt.setStatus(StatusConstants.INACTIVE_STATUS);
-            repository.save(lt);
-            return true;
-        }
-        throw new RuntimeException("LandingTemplate no encontrada con id " + id);
+        LandingTemplate lt = repository.findById(id)
+                .filter(this::isNotDeleted)
+                .orElseThrow(() -> new RuntimeException("LandingTemplate no encontrada con id " + id));
+        lt.setStatus(StatusConstants.DELETED_STATUS);
+        repository.save(lt);
+        return true;
     }
 
     @Override
     @Transactional
     public LandingTemplateRequest update(LandingTemplateRequest request) {
         LandingTemplate lt = repository.findById(request.getLandingTemplateId())
+                .filter(this::isNotDeleted)
                 .orElseThrow(() -> new RuntimeException("LandingTemplate con ID " + request.getLandingTemplateId() + " no existe"));
 
         if (request.getName() != null) lt.setName(request.getName());
@@ -85,7 +85,9 @@ public class LandingTemplateApplicationService implements LandingTemplateUseCase
 
     @Override
     public LandingTemplateRequest get(Long id) {
-        LandingTemplate lt = repository.findById(id).orElseThrow(() -> new RuntimeException("LandingTemplate no encontrada con id " + id));
+        LandingTemplate lt = repository.findById(id)
+            .filter(this::isNotDeleted)
+            .orElseThrow(() -> new RuntimeException("LandingTemplate no encontrada con id " + id));
         return LandingTemplateRequest.builder()
                 .landingTemplateId(lt.getLandingTemplateId())
                 .name(lt.getName())
@@ -115,5 +117,10 @@ public class LandingTemplateApplicationService implements LandingTemplateUseCase
     @Override
     public Page<LandingTemplateResponseDTO> searchCustom(Map<String, String> customQuery) {
         return getAll(customQuery);
+    }
+
+    private boolean isNotDeleted(LandingTemplate landingTemplate) {
+        return landingTemplate == null || landingTemplate.getStatus() == null
+                || !StatusConstants.DELETED_STATUS.equalsIgnoreCase(landingTemplate.getStatus());
     }
 }

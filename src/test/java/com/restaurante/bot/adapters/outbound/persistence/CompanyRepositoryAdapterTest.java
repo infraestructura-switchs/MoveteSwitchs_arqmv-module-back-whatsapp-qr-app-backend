@@ -3,6 +3,7 @@ package com.restaurante.bot.adapters.outbound.persistence;
 import com.restaurante.bot.model.Company;
 import com.restaurante.bot.dto.CompanyRequest;
 import com.restaurante.bot.dto.CompanyResponseDTO;
+import com.restaurante.bot.repository.CityRepository;
 import com.restaurante.bot.repository.CompanyRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,9 @@ class CompanyRepositoryAdapterTest {
 
     @Mock
     private CompanyRepository companyRepository;
+
+    @Mock
+    private CityRepository cityRepository;
 
     @InjectMocks
     private CompanyRepositoryAdapter adapter;
@@ -79,12 +83,12 @@ class CompanyRepositoryAdapterTest {
         c2.setStatus("ACTIVE");
         List<Company> list = Arrays.asList(c1, c2);
 
-        when(companyRepository.findByStatus("ACTIVE")).thenReturn(list);
+        when(companyRepository.findByStatusAndStatusNot("ACTIVE", "DELETED")).thenReturn(list);
 
         List<CompanyRequest> result = adapter.getAllCompany();
 
         assertEquals(2, result.size());
-        verify(companyRepository).findByStatus("ACTIVE");
+        verify(companyRepository).findByStatusAndStatusNot("ACTIVE", "DELETED");
     }
 
     @Test
@@ -95,11 +99,11 @@ class CompanyRepositoryAdapterTest {
         c1.setStatus("ACTIVE");
         Page<Company> page = new PageImpl<>(List.of(c1));
 
-        when(companyRepository.findByStatus(eq("ACTIVE"), any(Pageable.class))).thenReturn(page);
+        when(companyRepository.findByStatusAndStatusNot(eq("ACTIVE"), eq("DELETED"), any(Pageable.class))).thenReturn(page);
 
         Page<CompanyResponseDTO> result = adapter.getAllPageCompany(Pageable.unpaged());
 
         assertEquals(1, result.getTotalElements());
-        verify(companyRepository).findByStatus(eq("ACTIVE"), any(Pageable.class));
+        verify(companyRepository).findByStatusAndStatusNot(eq("ACTIVE"), eq("DELETED"), any(Pageable.class));
     }
 }
